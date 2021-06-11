@@ -934,9 +934,14 @@ void IntUART(void) interrupt 4 using 1
 			//if(g_UartCommand.Buffer[_UART_CMD_INDEX6_]==0x99)
 					if(g_UartCommand.Buffer[_UART_CMD_INDEX7_]==wtemp)
 					{
-				gbUartDetected = TRUE; // command  buffer recieve ok
+						gbUartDetected = TRUE; // command  buffer recieve ok
 			//	sPutChar('G');
-				  checksumtemp = 0;
+				  		checksumtemp = 0;
+					}
+					else		//checksum error
+					{
+						gbUartDetected = FALSE;
+						checksumtemp = 0;
 					}
 				g_UartCommand.Index = 0; // reset index of command buffer
 			}	 

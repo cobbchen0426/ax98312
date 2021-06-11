@@ -44,7 +44,7 @@
 //	static code UCHAR ucVersionText[]={16,'V',VERSION+'0','.',(REVERSION>>4)+'0',(REVERSION&0x0F)+'0',' ',DATE};	
 //cobb m	code UCHAR ucVersionText[]={20,"F/W Ver: P6121-V1.00"};	//V2.00  "};				// (at \App\OSD\OSDView.c) -> OSDShowMainMenu() -> 	OSDAPI_ShowIndentString(...)
 
-	code UCHAR ucVersionText[]={23,"F/W Ver: P6151-SB-V1.01"};	//V2.00  "};				// (at \App\OSD\OSDView.c) -> OSDShowMainMenu() -> 	OSDAPI_ShowIndentString(...)
+	code UCHAR ucVersionText[]={23,"F/W Ver: P6151-SB-V1.02"};	//V2.00  "};				// (at \App\OSD\OSDView.c) -> OSDShowMainMenu() -> 	OSDAPI_ShowIndentString(...)
 #endif
 		
 //============== CHIU
