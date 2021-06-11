@@ -1,0 +1,240 @@
+C51 COMPILER V8.02   GAMMAAPI                                                              08/07/2015 16:22:30 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE GAMMAAPI
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\GammaAPI.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\GammaAPI.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\
+                    -User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\N
+                    -VT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\GammaAPI.lst)
+                    - OBJECT(.\Bin\ADS\AXI\104N\GammaAPI.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          
+  30          //******************************************************************************
+  31          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          /*!
+  34           * Write red gamma through index port.
+  35           */
+  36          //#define GMAPI_LoadRGM320(p) WriteScalerIndexPort(GAMMA_TBL_RED|BIT2, 0, 256, p)
+  37          /*!
+  38           * Write green gamma through index port.
+  39           */
+  40          //#define GMAPI_LoadGGM320(p) WriteScalerIndexPort(GAMMA_TBL_GREEN|BIT2, 0, 256, p)
+  41          /*!
+  42           * Write blue gamma through index port.
+  43           */
+  44          //#define GMAPI_LoadBGM320(p) WriteScalerIndexPort(GAMMA_TBL_BLUE|BIT2, 0, 256, p)
+  45          //-----------------------------------------------------------------------------
+  46          /*!
+  47           * Write red gamma through index port.
+  48           */
+  49          #define GMAPI_LoadRGM320(p) WriteScalerIndexPort(GAMMA_TBL_RED|BIT2, 0, 320, p)
+  50          /*!
+  51           * Write green gamma through index port.
+  52           */
+C51 COMPILER V8.02   GAMMAAPI                                                              08/07/2015 16:22:30 PAGE 2   
+
+  53          #define GMAPI_LoadGGM320(p) WriteScalerIndexPort(GAMMA_TBL_GREEN|BIT2, 0, 320, p)
+  54          /*!
+  55           * Write blue gamma through index port.
+  56           */
+  57          #define GMAPI_LoadBGM320(p) WriteScalerIndexPort(GAMMA_TBL_BLUE|BIT2, 0, 320, p)
+  58          
+  59          //******************************************************************************
+  60          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  61          //******************************************************************************
+  62          
+  63          //******************************************************************************
+  64          // F U N C T I O N   B O D Y S
+  65          //******************************************************************************
+  66          
+  67          /**************************************************************************//**
+  68           * Turn on gamma.
+  69           ******************************************************************************/
+  70          void GMAPI_EnableGamma(void)
+  71          {
+  72   1       SC_GAMMA_CTRL |= BIT7; 
+  73   1      }
+  74          
+  75          /**************************************************************************//**
+  76           * Turn off gamma.
+  77           ******************************************************************************/
+  78          void GMAPI_DisableGamma(void)
+  79          {
+  80   1      #if ENABLE_10TO12_GAMMA == ON
+                  SC_GAMMA_CTRL |= BIT6;
+                  SC_GAMMA_CTRL &= ~BIT7;
+              #elif ENABLE_10TO10_GAMMA == ON
+                  SC_GAMMA_CTRL &= ~(BIT7|BIT6);
+              #else
+  86   1          // XXX Need to check other scalers.
+  87   1          SC_GAMMA_CTRL &= ~(BIT7|BIT6);
+  88   1      #endif
+  89   1      }
+  90          
+  91          #if ENABLE_10TO10_GAMMA == ON
+              /**************************************************************************//**
+               * Extend 320-bytes gamma to 1280-bytes gamma and write it to scaler.
+               * @param pgamma Pointer to the 320-bytes gamma table.
+               * @param channel One of GAMMA_TBL_RED, GAMMA_TBL_GREEN and GAMMA_TBL_BLUE.
+               ******************************************************************************/
+              void GMAPI_LoadSingleTable320To1280(UCHAR *pgamma, UCHAR channel)
+              {
+                  USHRT i, j, k, addr;
+                  USHRT start, end, now[4];
+              
+                  SC_INDEX_CTRL = (channel) | BIT2;
+                  SC_INDEX_ADDR_LO = 0;
+                  SC_INDEX_ADDR_HI = 0;
+              
+                  start = 0;
+                  for (i = 0; i < 256; i += 4) 
+                      {
+                              addr = i * 5 / 4;
+                      for (j = 0; j < 4; j++) 
+                              {
+                                      end = (pgamma[addr + 1 + j] << 2) + (((pgamma[addr]) >> (j * 2)) & 0x03);
+                                       for (k = 0; k < 4; k++) 
+                                               {
+C51 COMPILER V8.02   GAMMAAPI                                                              08/07/2015 16:22:30 PAGE 3   
+
+                                                      now[k] = (end * k + (4 - k) * start) >> 2;
+                                              }
+              
+                          if ((i != 0) || (j != 0)) 
+                              {
+                              SC_INDEX_DATA = (UCHAR)((now[0] & 0x03) + ((now[1] & 0x03) << 2) + ((now[2] & 0x03) << 4) 
+             -+ ((now[3] & 0x03) << 6));
+                              SC_INDEX_DATA = (UCHAR)(now[0] >> 2);
+                              SC_INDEX_DATA = (UCHAR)(now[1] >> 2);
+                              SC_INDEX_DATA = (UCHAR)(now[2] >> 2);
+                              SC_INDEX_DATA = (UCHAR)(now[3] >> 2);
+                            }
+              
+                                      start = end;
+                               ResetWDTimer();
+                              }
+                  }
+                  end = (end - now[0]) + end;
+                  if (end > 1024)
+                      end = 1024;
+                  for (k = 0; k < 4; k++) {
+                      now[k] = (end * k + (4 - k) * start) >> 2;
+                  }
+                  SC_INDEX_DATA = ((now[0] & 0x03) + ((now[1] & 0x03) << 2) + ((now[2] & 0x03) << 4) + ((now[3] & 0x03) 
+             -<< 6));
+                  SC_INDEX_DATA = (UCHAR) (now[0] >> 2);
+                  SC_INDEX_DATA = (UCHAR) (now[1] >> 2);
+                  SC_INDEX_DATA = (UCHAR) (now[2] >> 2);
+                  SC_INDEX_DATA = (UCHAR) (now[3] >> 2);
+                  ResetWDTimer();
+              }
+              #endif
+ 145          
+ 146          #if ENABLE_GAMMA == ON
+ 147          /**************************************************************************//**
+ 148           * Write R/G/B 320-bytes gamma tables to scaler.
+ 149           * @param pgamma Pointer to the R/G/B 320-bytes gamma table.
+ 150           ******************************************************************************/
+ 151          void GMAPI_LoadGamma320(Gamma320 *pgamma)
+ 152          {
+ 153   1          GMAPI_DisableGamma();
+ 154   1          Sleep(50); // 24Hz is around 41ms
+ 155   1      #if ENABLE_10TO12_GAMMA == ON
+              #elif ENABLE_10TO10_GAMMA == ON
+                  GMAPI_LoadSingleTable320To1280(pgamma->ucRGamma, GAMMA_TBL_RED);
+                  GMAPI_LoadSingleTable320To1280(pgamma->ucGGamma, GAMMA_TBL_GREEN);
+                  GMAPI_LoadSingleTable320To1280(pgamma->ucBGamma, GAMMA_TBL_BLUE);
+              #else
+ 161   1          GMAPI_LoadRGM320(pgamma->ucRGamma);
+ 162   1          GMAPI_LoadGGM320(pgamma->ucGGamma);
+ 163   1          GMAPI_LoadBGM320(pgamma->ucBGamma);
+ 164   1      #endif
+ 165   1      }
+ 166          
+ 167          #endif
+ 168          
+ 169          #if ENABLE_PRE_REV_GAMMA == ON
+              void GMAPI_EnablePreGamma(void)
+              {
+                SC_GAMMA_CTRL |= BIT0;                                        
+              
+              }
+C51 COMPILER V8.02   GAMMAAPI                                                              08/07/2015 16:22:30 PAGE 4   
+
+              
+              void GMAPI_DisablePreGamma(void)
+              {
+                  SC_GAMMA_CTRL &= ~BIT0;
+              }
+              
+              void GMAPI_LoadPreGamma16bit(USHRT lv, UCHAR *pregamma)
+              {
+                  GMAPI_DisablePreGamma();
+                  GMAPI_DisableRevGamma();
+                  Sleep(50);
+                  WriteScalerIndexPort(PREGAMMA_TBL_RGB|BIT2, 0, (lv<<1), pregamma);
+              }
+              
+              void GMAPI_EnableRevGamma(void)
+              {
+                  SC_GAMMA_CTRL |= BIT2;
+              }
+              
+              void GMAPI_DisableRevGamma(void)
+              {
+                  SC_GAMMA_CTRL &= ~BIT2;
+              }
+              
+              void GMAPI_LoadRevGamma16bit(USHRT lv, UCHAR *revgamma)
+              {
+                  GMAPI_DisablePreGamma();
+                  GMAPI_DisableRevGamma();
+                  Sleep(50);
+                  WriteScalerIndexPort(REVGAMMA_TBL_RGB|BIT2, 0, (lv<<1), revgamma);
+              }
+              #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    118    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6       3
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

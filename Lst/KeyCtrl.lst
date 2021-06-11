@@ -1,0 +1,549 @@
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE KEYCTRL
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\KeyCtrl.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\KeyCtrl.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\U
+                    -ser;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NV
+                    -T\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\KeyCtrl.lst) O
+                    -BJECT(.\Bin\ADS\AXI\104N\KeyCtrl.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          typedef enum _KEY_STATE_ {
+  18              KEY_NML_STATE,
+  19              KEY_REPEAT_STATE,
+  20              KEY_HOLD_STATE,
+  21              KEY_MULTIFUNC_STATE,
+  22              KEY_LOCK_STATE
+  23          } KeyState;
+  24          
+  25          #define KeyGetRepeatStatus(idx) ((usKeyRepeatFlags >> idx) & BIT0)
+  26          #define KeySetRepeatStatus(idx) (usKeyRepeatFlags |= (BIT0 << idx))
+  27          #define KeyClrRepeatStatus(idx) (usKeyRepeatFlags &= ~((USHRT)BIT0 << idx))
+  28          #define KeySetAllRepeatStatus() (usKeyRepeatFlags = 0xFFFF)
+  29          #define KeyClrAllRepeatStatus() (usKeyRepeatFlags = 0x0000)
+  30          #define KeyGetHoldStatus(idx)   ((usKeyHoldFlags >> idx) & BIT0)
+  31          #define KeySetHoldStatus(idx)   (usKeyHoldFlags |= (BIT0 << idx))
+  32          #define KeyClrHoldStatus(idx)   (usKeyHoldFlags &= ~((USHRT)BIT0 << idx))
+  33          #define KeySetAllHoldStatus()   (usKeyHoldFlags = 0xFFFF)
+  34          #define KeyClrAllHoldStatus()   (usKeyHoldFlags = 0x0000)
+  35          #define KeyGetMFuncStatus(idx)   ((usKeyMFuncFlags >> idx) & BIT0)
+  36          #define KeySetMFuncStatus(idx)   (usKeyMFuncFlags |= (BIT0 << idx))
+  37          #define KeyClrMFuncStatus(idx)   (usKeyMFuncFlags &= ~((USHRT)BIT0 << idx))
+  38          #define KeySetAllMFuncStatus()   (usKeyMFuncFlags = 0xFFFF)
+  39          #define KeyClrAllMFuncStatus()   (usKeyMFuncFlags = 0x0000)
+  40          #define KeyGetLockStatus(idx)   ((usKeyLockFlags >> idx) & BIT0)
+  41          #define KeySetLockStatus(idx)   (usKeyLockFlags |= (BIT0 << idx))
+  42          #define KeyClrLockStatus(idx)   (usKeyLockFlags &= ~((USHRT)BIT0 << idx))
+  43          #define KeySetAllLockStatus()   (usKeyLockFlags = 0xFFFF)
+  44          #define KeyClrAllLockStatus()   (usKeyLockFlags = 0x0000)
+  45          
+  46          //******************************************************************************
+  47          // G L O B A L   V A R I A B L E S
+  48          //******************************************************************************
+  49          #if Key_Debug == ENABLE
+              xdata UCHAR GGKeyCode=0;        //150526 george test
+              xdata BOOL bGeorge=0;   //150429 George test
+              #endif
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 2   
+
+  53          //******************************************************************************
+  54          // S T A T I C   V A R I A B L E S
+  55          //******************************************************************************
+  56          static code UCHAR ucKeyEventMapTable[NUM_KEY_EVENTS][2] = {
+  57                  0x00, KEYEVT_NONE,
+  58                  KEYCODE_PWR, KEYEVT_PWR,
+  59                  KEYCODE_MENU, KEYEVT_MENU,
+  60                  KEYCODE_AUTO, KEYEVT_AUTO,              //15026 george-statement:   KEYCODE_AUTO:0x20, KEYEVT_AUTO:0x22
+  61                  KEYCODE_INPUT, KEYEVT_INPUT,
+  62                  KEYCODE_FUNC, KEYEVT_FUNC,
+  63                  KEYCODE_UP, KEYEVT_UP,
+  64                  KEYCODE_DOWN, KEYEVT_DOWN,
+  65                  KEYCODE_LEFT, KEYEVT_LEFT,
+  66                  KEYCODE_RIGHT, KEYEVT_RIGHT,
+  67                  KEYCODE_FACT, KEYEVT_FACT,
+  68                  KEYCODE_PWLOCK, KEYEVT_PWLOCK,
+  69                  KEYCODE_OSDLOCK, KEYEVT_OSDLOCK,
+  70                  KEYCODE_TMG_SW, KEYEVT_TIMING_SWITCH,
+  71                  KEYCODE_DEMO, KEYEVT_DEMO,
+  72          };
+  73          
+  74          static xdata UCHAR ucMultiFuncKeyEvtTable[NUM_KEY_EVENTS] = {0x00};
+  75          static xdata USHRT usKeyRepeatFlags = 0x0000;
+  76          static xdata USHRT usKeyHoldFlags = 0x0000;
+  77          static xdata USHRT usKeyMFuncFlags = 0x0000;
+  78          static xdata USHRT usKeyLockFlags = 0x0000;
+  79          static xdata USHRT usKeyHoldTime = KEY_HOLD_TIME;
+  80          static xdata USHRT usKeyRepeatTime = KEY_REPEAT_TIME;
+  81          static xdata USHRT usKeyLongPressTime = KEY_LONG_PRESS_TIME;
+  82          
+  83          //******************************************************************************
+  84          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  85          //******************************************************************************
+  86          static UCHAR SearchKeyCodeIndex(UCHAR cd);
+  87          static UCHAR SearchKeyEventIndex(UCHAR evt);
+  88          static UCHAR KeyGetKeyEvent(void);
+  89          
+  90          //******************************************************************************
+  91          // Prototype:
+  92          //  void KeyActionDispatcher(UCHAR event)
+  93          // Parameters:
+  94          //  event   : event from system
+  95          // Return:
+  96          //  None
+  97          // Purpose:
+  98          //  Perform key action by event id
+  99          // Notes:
+ 100          //  None
+ 101          //******************************************************************************
+ 102          void KeyActionDispatcher(UCHAR event)
+ 103          {
+ 104   1          switch (event) {
+ 105   2              default:
+ 106   2                  break;
+ 107   2          }
+ 108   1      }
+ 109          
+ 110          //******************************************************************************
+ 111          // Prototype:
+ 112          //  UCHAR KeyActionDemander(void)
+ 113          // Parameters:
+ 114          //  None
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 3   
+
+ 115          // Return:
+ 116          //  key event
+ 117          // Purpose:
+ 118          //  Return key event to system event handler
+ 119          // Notes:
+ 120          //  None
+ 121          //******************************************************************************
+ 122          UCHAR KeyActionDemander(void)
+ 123          {
+ 124   1          UCHAR evt;
+ 125   1      
+ 126   1          evt = KeyGetKeyEvent();
+ 127   1      
+ 128   1          return evt;
+ 129   1      }
+ 130          
+ 131          //******************************************************************************
+ 132          // Prototype:
+ 133          //  static UCHAR SearchKeyCodeIndex(UCHAR cd)
+ 134          // Parameters:
+ 135          //  code : Key code
+ 136          // Return:
+ 137          //  Index of key code
+ 138          // Purpose:
+ 139          //  Search index of key code
+ 140          // Notes:
+ 141          //  None
+ 142          //******************************************************************************
+ 143          static UCHAR SearchKeyCodeIndex(UCHAR cd)
+ 144          {
+ 145   1          UCHAR i;
+ 146   1          for (i = 0; i < NUM_KEY_EVENTS; i++) {
+ 147   2              if (cd == ucKeyEventMapTable[i][0]) {
+ 148   3                  break;
+ 149   3              }
+ 150   2          }
+ 151   1      
+ 152   1          // If no code is found, then zero the index.
+ 153   1          i = i % NUM_KEY_EVENTS;
+ 154   1      
+ 155   1          return i;
+ 156   1      }
+ 157          
+ 158          //******************************************************************************
+ 159          // Prototype:
+ 160          //  static UCHAR SearchKeyEventIndex(UCHAR evt)
+ 161          // Parameters:
+ 162          //  evt : Key event
+ 163          // Return:
+ 164          //  Index of key event
+ 165          // Purpose:
+ 166          //  Search index of key event
+ 167          // Notes:
+ 168          //  None
+ 169          //******************************************************************************
+ 170          static UCHAR SearchKeyEventIndex(UCHAR evt)
+ 171          {
+ 172   1          UCHAR i;
+ 173   1          for (i = 0; i < NUM_KEY_EVENTS; i++) {
+ 174   2              if (evt == ucKeyEventMapTable[i][1]) {
+ 175   3                  break;
+ 176   3              }
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 4   
+
+ 177   2          }
+ 178   1      
+ 179   1          // If no evt is found, then zero the index.
+ 180   1          i = i % NUM_KEY_EVENTS;
+ 181   1      
+ 182   1          return i;
+ 183   1      }
+ 184          
+ 185          //******************************************************************************
+ 186          // Prototype:
+ 187          //  static UCHAR KeyGetKeyEvent(void)
+ 188          // Parameters:
+ 189          //  None
+ 190          // Return:
+ 191          //  key event
+ 192          // Purpose:
+ 193          //  Return key event to system event handler
+ 194          // Notes:
+ 195          //  None
+ 196          //******************************************************************************
+ 197          static UCHAR KeyGetKeyEvent(void)
+ 198          {
+ 199   1          static idata USHRT localtimer, holdtime;
+ 200   1          static UCHAR prev_key_idx = 0x00;
+ 201   1          static KeyState key_state = KEY_NML_STATE;
+ 202   1          UCHAR cur_key_idx, evt;
+ 203   1      
+ 204   1          evt = ScanKeyPad();                                         //150526 george-mark: (pwr:0x02, menu:0x04, sel-:0x08, sel+:0x10, auto:0x20 )
+ 205   1      
+ 206   1          cur_key_idx = SearchKeyCodeIndex(evt);      //150526 george-mark: (key-idx_range: all_15_item, non_is_0(zer
+             -o);   cur_key_idx = [KEYCODE_AUTO]-idx = 3 )
+ 207   1      
+ 208   1          if (prev_key_idx != cur_key_idx)            //150526 george-statement: New/Old-Key condition.
+ 209   1              {       
+ 210   2      
+ 211   2      
+ 212   2                      {//150526 george-mark: ( KeyEventMap_Key-Cod-Idx: pwr:1_KEYEVT_PWR , menu:2_KEYEVT_MENU,  sel-:7_KEYEVT_
+             -DOWN,  sel+:6_KEYEVT_UP,  auto:3_KEYEVT_AUTO  )
+ 213   3                              #if Key_Debug == ENABLE
+                                      GGKeyCode = cur_key_idx;  //george, for test printf("...") at main.c_while(1){...} ;    
+                                      bGeorge = 1;
+                                      #endif
+ 217   3                      }
+ 218   2      
+ 219   2      
+ 220   2                      if (cur_key_idx == 0x00)                        //150526 george-statement: Key-Press-Up condition.
+ 221   2                      {       
+ 222   3                              if (key_state == KEY_MULTIFUNC_STATE)  
+ 223   3                              {
+ 224   4                              cur_key_idx = prev_key_idx;
+ 225   4                              prev_key_idx = 0x00;
+ 226   4                              key_state = KEY_NML_STATE;
+ 227   4                          }
+ 228   3                  else 
+ 229   3                              {
+ 230   4                              prev_key_idx = cur_key_idx;
+ 231   4                              }
+ 232   3                      }
+ 233   2              else                                                            //150526 george-statement: Key-Press (Repeat/Hold/Multifunc/Lock) condition.
+ 234   2                      {
+ 235   3                  prev_key_idx = cur_key_idx;
+ 236   3                  key_state = KeyGetRepeatStatus(cur_key_idx) ? KEY_REPEAT_STATE    : KEY_NML_STATE;
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 5   
+
+ 237   3                  key_state = KeyGetHoldStatus(cur_key_idx)   ? KEY_HOLD_STATE      : key_state;
+ 238   3                  key_state = KeyGetMFuncStatus(cur_key_idx)  ? KEY_MULTIFUNC_STATE : key_state;
+ 239   3                  key_state = KeyGetLockStatus(cur_key_idx)   ? KEY_LOCK_STATE      : key_state;
+ 240   3      
+ 241   3                  localtimer = GetTimerTick();
+ 242   3                  if (key_state == KEY_REPEAT_STATE) 
+ 243   3                              { //printf("------C-1-----\n"); //george
+ 244   4                      holdtime = usKeyHoldTime;
+ 245   4                              }
+ 246   3                  if (key_state == KEY_HOLD_STATE) 
+ 247   3                              { //printf("------C-2-----\n"); //george
+ 248   4                      holdtime = usKeyLongPressTime;
+ 249   4                      cur_key_idx = 0x00;
+ 250   4                              }
+ 251   3                  if (key_state == KEY_MULTIFUNC_STATE) 
+ 252   3                              { //printf("------C-3-----\n"); //george
+ 253   4                      holdtime = usKeyLongPressTime;
+ 254   4                      cur_key_idx = 0x00;
+ 255   4                              }
+ 256   3                  if (key_state == KEY_LOCK_STATE) 
+ 257   3                              { //printf("------C-4-----\n"); //george
+ 258   4                      prev_key_idx = 0x00;
+ 259   4                      cur_key_idx = 0x00;
+ 260   4                              }
+ 261   3              }
+ 262   2          }
+ 263   1          else if ((cur_key_idx != 0x00) && (key_state == KEY_HOLD_STATE)) 
+ 264   1              {//printf("KEY_HOLD_STATE\n");
+ 265   2              if ((GetTimerTick() - localtimer) > holdtime) {
+ 266   3                  key_state = KEY_NML_STATE;
+ 267   3              }
+ 268   2              else {
+ 269   3                  cur_key_idx = 0x00;
+ 270   3              }
+ 271   2          }
+ 272   1          else if ((cur_key_idx != 0x00) && (key_state == KEY_MULTIFUNC_STATE)) 
+ 273   1              {//printf("KEY_MULTIFUNC_STATE\n");
+ 274   2              if ((GetTimerTick() - localtimer) > holdtime) {
+ 275   3                  key_state = KEY_NML_STATE;
+ 276   3                  cur_key_idx = SearchKeyEventIndex(ucMultiFuncKeyEvtTable[cur_key_idx]);
+ 277   3              }
+ 278   2              else {
+ 279   3                  cur_key_idx = 0x00;
+ 280   3              }
+ 281   2          }
+ 282   1          else if ((cur_key_idx != 0x00) && (key_state == KEY_REPEAT_STATE)) 
+ 283   1              {//printf("KEY_REPEAT_STATE\n");
+ 284   2              if ((GetTimerTick() - localtimer) > holdtime) {
+ 285   3                  localtimer = GetTimerTick();
+ 286   3                  holdtime = usKeyRepeatTime;
+ 287   3              }
+ 288   2              else {
+ 289   3                  cur_key_idx = 0x00;
+ 290   3              }
+ 291   2          }
+ 292   1          else 
+ 293   1              {
+ 294   2              localtimer = GetTimerTick();
+ 295   2              key_state = KEY_NML_STATE;
+ 296   2              cur_key_idx = 0x00;
+ 297   2          }
+ 298   1      
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 6   
+
+ 299   1          evt = ucKeyEventMapTable[cur_key_idx][1];   //150526 george-statement: when evt=KEYEVT_AUTO=0x22;     KE
+             -YEVT_NONE=0x2e
+ 300   1      
+ 301   1      //printf("__evt__= %x\n\n", (USHRT)evt);        //150526 george
+ 302   1          return evt;
+ 303   1      }
+ 304          
+ 305          //******************************************************************************
+ 306          // Prototype:
+ 307          //  void KeySetRepeatEvent(UCHAR evt, UCHAR rpt)
+ 308          // Parameters:
+ 309          //  evt : Key event
+ 310          //  rpt : On/Off key repeating
+ 311          // Return:
+ 312          //  None
+ 313          // Purpose:
+ 314          //  Set key repeating by key event
+ 315          // Notes:
+ 316          //  None
+ 317          //******************************************************************************
+ 318          void KeySetRepeatEvent(UCHAR evt, UCHAR rpt)
+ 319          {
+ 320   1          UCHAR i;
+ 321   1      
+ 322   1          if (evt == 0xFF) {
+ 323   2              // repeat all event
+ 324   2              if (rpt == ON) {
+ 325   3                  KeySetAllRepeatStatus();
+ 326   3              }
+ 327   2              else {
+ 328   3                  KeyClrAllRepeatStatus();
+ 329   3              }
+ 330   2          }
+ 331   1      
+ 332   1          i = SearchKeyEventIndex(evt);
+ 333   1          if (i) {
+ 334   2              if (rpt == ON) {
+ 335   3                  KeySetRepeatStatus(i);
+ 336   3              }
+ 337   2              else {
+ 338   3                  KeyClrRepeatStatus(i);
+ 339   3              }
+ 340   2          }
+ 341   1      }
+ 342          
+ 343          //******************************************************************************
+ 344          // Prototype:
+ 345          //  void KeySetHoldEvent(UCHAR evt, UCHAR hold)
+ 346          // Parameters:
+ 347          //  evt : Key event
+ 348          //  hold : On/off holding key
+ 349          // Return:
+ 350          //  None
+ 351          // Purpose:
+ 352          //  Enable / disable holding keys by key event
+ 353          // Notes:
+ 354          //  None
+ 355          //******************************************************************************
+ 356          void KeySetHoldEvent(UCHAR evt, UCHAR hold)
+ 357          {
+ 358   1          UCHAR i;
+ 359   1      
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 7   
+
+ 360   1          if (evt == 0xFF) {
+ 361   2              // hold all event
+ 362   2              if (hold == ON) {
+ 363   3                  KeySetAllHoldStatus();
+ 364   3              }
+ 365   2              else {
+ 366   3                  KeyClrAllHoldStatus();
+ 367   3              }
+ 368   2          }
+ 369   1      
+ 370   1          i = SearchKeyEventIndex(evt);
+ 371   1          if (i) {
+ 372   2              if (hold == ON) {
+ 373   3                  KeySetHoldStatus(i);
+ 374   3              }
+ 375   2              else {
+ 376   3                  KeyClrHoldStatus(i);
+ 377   3              }
+ 378   2          }
+ 379   1      }
+ 380          
+ 381          //******************************************************************************
+ 382          // Prototype:
+ 383          //  void KeySetMFuncEvent(UCHAR major, UCHAR minor)
+ 384          // Parameters:
+ 385          //  major : Major key event for short-term key press
+ 386          //  minor : Minor key event for long-term key press
+ 387          // Return:
+ 388          //  None
+ 389          // Purpose:
+ 390          //  Set multi-function key events
+ 391          // Notes:
+ 392          //  None
+ 393          //******************************************************************************
+ 394          void KeySetMFuncEvent(UCHAR major, UCHAR minor)
+ 395          {
+ 396   1          UCHAR i;
+ 397   1      
+ 398   1          if (major == 0xFF) {
+ 399   2              // lock all event
+ 400   2              if (minor == 0x00) {
+ 401   3                  KeyClrAllMFuncStatus();
+ 402   3              }
+ 403   2          }
+ 404   1      
+ 405   1          i = SearchKeyEventIndex(major);
+ 406   1          if (i) {
+ 407   2              ucMultiFuncKeyEvtTable[i] = minor;
+ 408   2              if (minor != 0x00) {
+ 409   3                  KeySetMFuncStatus(i);
+ 410   3              }
+ 411   2              else {
+ 412   3                  KeyClrMFuncStatus(i);
+ 413   3              }
+ 414   2          }
+ 415   1      }
+ 416          
+ 417          //******************************************************************************
+ 418          // Prototype:
+ 419          //  void KeySetLockEvent(UCHAR evt, UCHAR lock)
+ 420          // Parameters:
+ 421          //  evt : Key event
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 8   
+
+ 422          //  lock : Lock / unlock key
+ 423          // Return:
+ 424          //  None
+ 425          // Purpose:
+ 426          //  Lock / unlock key by key event
+ 427          // Notes:
+ 428          //  None
+ 429          //******************************************************************************
+ 430          void KeySetLockEvent(UCHAR evt, UCHAR lock)
+ 431          {
+ 432   1          UCHAR i;
+ 433   1      
+ 434   1          if (evt == 0xFF) {
+ 435   2              // lock all event
+ 436   2              if (lock == ON) {
+ 437   3                  KeySetAllLockStatus();
+ 438   3              }
+ 439   2              else {
+ 440   3                  KeyClrAllLockStatus();
+ 441   3              }
+ 442   2          }
+ 443   1      
+ 444   1          i = SearchKeyEventIndex(evt);
+ 445   1          if (i) {
+ 446   2              if (lock == ON) {
+ 447   3                  KeySetLockStatus(i);
+ 448   3              }
+ 449   2              else {
+ 450   3                  KeyClrLockStatus(i);
+ 451   3              }
+ 452   2          }
+ 453   1      }
+ 454          
+ 455          //******************************************************************************
+ 456          // Prototype:
+ 457          //  void KeySetHoldTime(USHRT time)
+ 458          // Parameters:
+ 459          //  time : Time to hold key
+ 460          // Return:
+ 461          //  None
+ 462          // Purpose:
+ 463          //  Set key hold time
+ 464          // Notes:
+ 465          //  None
+ 466          //******************************************************************************
+ 467          void KeySetHoldTime(USHRT time)
+ 468          {
+ 469   1          usKeyHoldTime = time;
+ 470   1      }
+ 471          
+ 472          //******************************************************************************
+ 473          // Prototype:
+ 474          //  void KeySetRepeatTime(USHRT time)
+ 475          // Parameters:
+ 476          //  time : Time to repeat key
+ 477          // Return:
+ 478          //  None
+ 479          // Purpose:
+ 480          //  Set key repeat time
+ 481          // Notes:
+ 482          //  None
+ 483          //******************************************************************************
+C51 COMPILER V8.02   KEYCTRL                                                               08/07/2015 16:22:29 PAGE 9   
+
+ 484          void KeySetRepeatTime(USHRT time)
+ 485          {
+ 486   1          usKeyRepeatTime = time;
+ 487   1      }
+ 488          
+ 489          //******************************************************************************
+ 490          // Prototype:
+ 491          //  void KeySetLongPressTime(USHRT time)
+ 492          // Parameters:
+ 493          //  time : Time to long press key
+ 494          // Return:
+ 495          //  None
+ 496          // Purpose:
+ 497          //  Set key long press time
+ 498          // Notes:
+ 499          //  None
+ 500          //******************************************************************************
+ 501          void KeySetLongPressTime(USHRT time)
+ 502          {
+ 503   1          usKeyLongPressTime = time;
+ 504   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    923    ----
+   CONSTANT SIZE    =     30    ----
+   XDATA SIZE       =     37       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =      4    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

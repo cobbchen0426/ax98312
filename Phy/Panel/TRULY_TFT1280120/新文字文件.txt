@@ -1,0 +1,46 @@
+
+
+
+
+
+(at \Sys\SI\NVT\NT68857_DEMO\ModelConfig.h)
+Find: MIN_H_FREQ
+
+/*******************************************************************************
+                      Define Limitations for Out Of Range
+*******************************************************************************/
+//OOR: H/V frequency limitation, pixel clock limitation
+#define MIN_H_FREQ              150 //0.1KHz
+#define MAX_H_FREQ              947 //0.1KHz
+#define MIN_V_FREQ              200 //0.1Hz
+#define MAX_V_FREQ              860 //0.1Hz
+#define MAX_ANALONG_PIXEL_CLOCK 205 //MHz
+
+
+(at \Sys\ModeTable.c)
+
+
+//	\Sys\ModeTable.c
+1280x720@60
+
+1280x720@75
+
+//1280x768@60 Reduced Blanking
+//1280x768@60
+
+//1280x768@70
+
+//1280x768@72
+
+//1280x768@75
+
+//1280x800@60
+
+//1280x800@60
+
+//1280x800@62
+
+//1280x800@72
+
+//1280x960@60
+

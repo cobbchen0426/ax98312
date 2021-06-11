@@ -1,0 +1,254 @@
+C51 COMPILER V8.02   OSDFUNC                                                               08/07/2015 16:22:27 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE OSDFUNC
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\OSDFunc.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\OSD\OSDFunc.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\A
+                    -pp\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\S
+                    -I\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\OSDFunc.ls
+                    -t) OBJECT(.\Bin\ADS\AXI\104N\OSDFunc.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          code void (*OSDKeyRoutine[OSD_NON_STATE][OSD_NONKEY_EVENT])(void) = {
+  30              //MENU_EVENT        AUTO_EVENT          UP_EVENT            DOWN_EVENT
+  31          #if ENABLE_FUNC_OSD == ON
+                  {OSDEnterMainMenu,  OSDEnterAuto,       OSDEnterFuncMenu,   OSDEnterOpt1 },     
+              #else
+  34                  //150526 george (Compiler use this)
+  35              {OSDEnterMainMenu,  OSDEnterAuto,       OSDEnterDir1,       OSDEnterDir2 },         //george: F_ALSBV_04F    
+             - //[0][x]     //140317 mike for valume        
+  36          #endif
+  37              //140421 mike 
+  38              {OSDEnterSubMenu1,  OSDExitMainMenu,    OSDMainMenuDown,    OSDMainMenuUp},         
+  39              {OSDEnterSubMenu2,  OSDExitMainMenu,    OSDMainMenuDown,    OSDMainMenuUp},          
+  40              {OSDEnterSubMenu3,  OSDExitMainMenu,    OSDMainMenuDown,    OSDMainMenuUp},         
+  41              {OSDEnterSubMenu4,  OSDExitMainMenu,    OSDMainMenuDown,    OSDMainMenuUp},     
+  42              {OSDEnterSubMenu5,  OSDExitMainMenu,    OSDMainMenuDown,    OSDMainMenuUp},     
+  43          //------------------------------------------------------------------------------
+  44              {OSDEnterFactory,   OSDExitMainMenu,    OSDMainMenuUp,    OSDMainMenuDown},      
+  45              {OSDEnterDemo,      OSDExitMainMenu,    OSDMainMenuUp,    OSDMainMenuDown},     
+  46          //-----------------------------------------------------------------------------
+  47              {OSDEnterItm11,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     //usOSDState= 8
+  48              {OSDEnterItm12,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     
+  49              {OSDEnterItm13,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     // Sharpness         150616 g
+             -eorge        : ALS_2    Ambient-Light-Sensor
+  50          
+C51 COMPILER V8.02   OSDFUNC                                                               08/07/2015 16:22:27 PAGE 2   
+
+  51          
+  52          #if ALS_EnDis == ALSMODE
+                      {OSDEnterItm14,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     //george: F_ALSOnOff_04A
+              #elif ALS_EnDis == ALSOffSET    
+                  {OSDEnterItm14,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     //george: F_ALSOnOff_0
+             -4A
+              #elif ALS_EnDis == ALSRange
+                  {OSDEnterItm14,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     
+              #else   //Normal
+  59          
+  60          #endif  //#if ALS_EnDis == ENABLE
+  61          
+  62          
+  63          //    {OSDEnterItm15,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     //george: F_ALSBV_04
+             -A        , [0x0A= 10][x]
+  64          //    {OSDEnterItm16,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     //george: F_Touch_04
+             -A
+  65          ///     {OSDEnterItm17,     OSDExitSubMenu1,    OSDSubMenuDown1,    OSDSubMenuUp1},     // george: F_ALS_1
+             -3
+  66          //-----------------------------------------------------------------------------
+  67              {OSDEnterItm21,     OSDExitSubMenu2,    OSDSubMenuDown2,    OSDSubMenuUp2},     
+  68              {OSDEnterItm22,     OSDExitSubMenu2,    OSDSubMenuDown2,    OSDSubMenuUp2},     
+  69              {OSDEnterItm23,     OSDExitSubMenu2,    OSDSubMenuDown2,    OSDSubMenuUp2},    
+  70              {OSDEnterItm24,     OSDExitSubMenu2,    OSDSubMenuDown2,    OSDSubMenuUp2},     
+  71              {OSDEnterItm31,     OSDExitSubMenu3,    OSDSubMenuDown3,    OSDSubMenuUp3},    
+  72              {OSDEnterItm32,     OSDExitSubMenu3,    OSDSubMenuDown3,    OSDSubMenuUp3},     
+  73              {OSDEnterItm33,     OSDExitSubMenu3,    OSDSubMenuDown3,    OSDSubMenuUp3},     
+  74              {OSDEnterItm34,     OSDExitSubMenu3,    OSDSubMenuDown3,    OSDSubMenuUp3},     
+  75          //--------------------------------------------------------------------------
+  76              {OSDEnterItm41,     OSDExitSubMenu4,    OSDSubMenuDown4,    OSDSubMenuUp4},     
+  77              {OSDEnterItm42,     OSDExitSubMenu4,    OSDSubMenuDown4,    OSDSubMenuUp4},     //150526 george [0x14=
+             - 20][x]
+  78              {OSDEnterItm43,     OSDExitSubMenu4,    OSDSubMenuDown4,    OSDSubMenuUp4},     
+  79              {OSDEnterItm44,     OSDExitSubMenu4,    OSDSubMenuDown4,    OSDSubMenuUp4},     
+  80          //--------------------------------------------------------------------------
+  81              {OSDEnterItm51,     OSDExitSubMenu5,    OSDSubMenuDown5,    OSDSubMenuUp5},     
+  82          //--------------------------------------------------------------------------
+  83              {OSDEnterItm52,     OSDExitSubMenu5,    OSDSubMenuDown5,    OSDSubMenuUp5},     
+  84              {OSDEnterItm53,     OSDExitSubMenu5,    OSDSubMenuDown5,    OSDSubMenuUp5},    
+  85              {OSDEnterItm54,     OSDExitSubMenu5,    OSDSubMenuDown5,    OSDSubMenuUp5},    
+  86              {OSDEnterItm57,     OSDExitSubMenu5,    OSDSubMenuDown5,    OSDSubMenuUp5}, 
+  87          #if TOUCH_EnDis == ENABLE
+                  {OSDEnterItm58,     OSDExitSubMenu5,    OSDSubMenuDown5,    OSDSubMenuUp5},     //gg_new
+              #endif //#if TOUCH_EnDis == ENABLE
+  90          //--------------------------------------------------------------------------
+  91          
+  92          //--------------------------------------------------------------------------
+  93              {OSDExitItm11,      OSDExitItm11,       OSDUpItm11,         OSDDnItm11},       
+  94              {OSDExitItm12,      OSDExitItm12,       OSDUpItm12,         OSDDnItm12},        
+  95              {OSDExitItm13,      OSDExitItm13,       OSDUpItm13,         OSDDnItm13},            //30
+  96          
+  97          #if ALS_EnDis == ALSMODE
+                      {OSDExitItm14,      OSDExitItm14,       OSDUpItm14,         OSDDnItm14},        //george: F_ALSOnOff_04B,
+             - F_ALSOnOff_04C, F_ALSOnOff_04D
+              #elif ALS_EnDis == ALSOffSET    
+                  {OSDExitItm14,      OSDExitItm14,       OSDUpItm14,         OSDDnItm14},            //george: F_ALSOnOff_0
+             -4B, F_ALSOnOff_04C, F_ALSOnOff_04D
+              #elif ALS_EnDis == ALSRange
+                  {OSDExitItm14,      OSDExitItm14,       OSDUpItm14,         OSDDnItm14},            
+              #else   //Normal
+ 104          
+ 105          #endif  //#if ALS_EnDis == ENABLE
+C51 COMPILER V8.02   OSDFUNC                                                               08/07/2015 16:22:27 PAGE 3   
+
+ 106          
+ 107          //    {OSDExitItm15,      OSDExitItm15,       OSDUpItm15,         OSDDnItm15},          //george: F_ALSBV_04
+             -B, F_ALSBV_04C, F_ALSBV_04D 
+ 108          //gg_old    {OSDExitItm16,      OSDExitItm16,       OSDUpItm16,         OSDDnItm16},            //george: F_To
+             -uch_04B, F_Touch_04C, F_Touch_04D             //george_Item16
+ 109          ///     {OSDExitItm17,      OSDExitItm17,       OSDDnItm17,         OSDUpItm17},       // george_Item17
+ 110          
+ 111              {OSDExitItm21,      OSDExitItm21,       OSDUpItm21,         OSDDnItm21},        
+ 112              {OSDExitItm22,      OSDExitItm22,       OSDUpItm22,         OSDDnItm22},       
+ 113              {OSDExitItm23,      OSDExitItm23,       OSDUpItm23,         OSDDnItm23},        
+ 114              {OSDExitItm24,      OSDExitItm24,       OSDUpItm24,         OSDDnItm24},        
+ 115              //-----------------------------------------------------------------
+ 116             
+ 117              {OSDEnterItm331,      OSDExitItm31,       OSDDnItm31,         OSDUpItm31},            
+ 118              {OSDEnterItm332,      OSDExitItm32,       OSDUpItm32,         OSDDnItm32},         
+ 119              {OSDEnterItm333,      OSDExitItm33,       OSDUpItm33,         OSDDnItm33},          
+ 120              {OSDEnterItm334,      OSDExitItm34,       OSDUpItm34,         OSDDnItm34},        //,       //40
+ 121          
+ 122              //=================================================
+ 123              //-----------------------------------------------------------------
+ 124              {OSDExitItm41,      OSDExitItm41,       OSDUpItm41,         OSDDnItm41},        //,
+ 125              {OSDExitItm42,      OSDExitItm42,       OSDUpItm42,         OSDDnItm42},        //,
+ 126              {OSDExitItm43,      OSDExitItm43,       OSDUpItm43,         OSDDnItm43},        //,
+ 127              {OSDExitItm44,      OSDExitItm44,       OSDUpItm44,         OSDDnItm44},        //,
+ 128          //    {OSDExitItm45,      OSDExitItm45,       OSDUpItm45,         OSDDnItm45},        //,                                       // non-used 
+             -(at OSDView.h) #define OSDFocusItm45 OSDFocusOSDRotation
+ 129              {OSDExitItm51,      OSDExitItm51,       OSDDnItm51,         OSDUpItm51},        //,   //    
+ 130              {OSDExitItm52,      OSDExitItm52,       OSDUpItm52,         OSDDnItm52},        //,
+ 131              {OSDExitItm53,      OSDExitItm53,       OSDUpItm53,         OSDDnItm53},        //,
+ 132              {OSDExitItm54,      OSDExitItm54,       OSDDnItm54,         OSDUpItm54},        
+ 133          //    {OSDExitItm55,      OSDExitItm55,       OSDUpItm55,         OSDDnItm55},        //,    //50               // non-
+             -used (at OSDView.h) #define OSDFocusItm55 OSDFocusOverscan
+ 134          //    {OSDExitItm56,      OSDExitItm56,       OSDUpItm56,         OSDDnItm56},        //,                               // non-used (
+             -at OSDView.h) #define OSDFocusItm56 OSDFocusOD
+ 135              {OSDExitItm57,      OSDExitItm57,       OSDUpItm57,         OSDDnItm57},        //,  
+ 136          
+ 137          #if TOUCH_EnDis == ENABLE
+                      {OSDExitItm58,      OSDExitItm58,       OSDUpItm58,         OSDDnItm58},        //,  //gg_new
+              #endif //#if TOUCH_EnDis == ENABLE
+ 140          
+ 141          #if ENABLE_FUNC_OSD == ON
+                  {OSDEnterFunc1,     OSDExitFuncMenu,    OSDFuncMenuDown,    OSDFuncMenuUp},     //,         //Compiler no use
+             -d
+                  {OSDEnterFunc2,     OSDExitFuncMenu,    OSDFuncMenuDown,    OSDFuncMenuUp},     //,
+                  {OSDEnterFunc3,     OSDExitFuncMenu,    OSDFuncMenuDown,    OSDFuncMenuUp},     //,
+                  {OSDEnterFunc4,     OSDExitFuncMenu,    OSDFuncMenuDown,    OSDFuncMenuUp},     //,
+                  {OSDEnterFunc5,     OSDExitFuncMenu,    OSDFuncMenuDown,    OSDFuncMenuUp},     //,
+                  {OSDEnterFunc6,     OSDExitFuncMenu,    OSDFuncMenuDown,    OSDFuncMenuUp},     //,
+                  {OSDExitFunc1,      OSDExitFunc1,       OSDFuncDown1,       OSDFuncUp1},        //,
+                  {OSDExitFunc2,      OSDExitFunc2,       OSDFuncDown2,       OSDFuncUp2},        //,
+                  {OSDExitFunc3,      OSDExitFunc3,       OSDFuncUp3,         OSDFuncDown3},      //,
+                  {OSDExitFunc4,      OSDExitFunc4,       OSDFuncUp4,         OSDFuncDown4},      //,
+                  {OSDExitFunc5,      OSDExitFunc5,       OSDFuncDown5,       OSDFuncUp5},        //,
+                  {OSDExitFunc6,      OSDExitFunc6,       OSDFuncDown6,       OSDFuncUp6},        //,
+              #endif
+ 155              {OSDExitDir,        OSDExitDir,         OSDUpDir1,          OSDDnDir1},         //,         //Compiler used h
+             -ere
+ 156              {OSDExitDir,        OSDExitDir,         OSDUpDir2,          OSDDnDir2},         //,
+ 157              {OSDExitDir,        OSDExitDir,         OSDUpDir3,          OSDDnDir3},         //,
+ 158              {NULL,              NULL,               NULL,               NULL},              //,
+ 159          #if ENABLE_FUNC_OSD == ON
+                  {OSDEnterMainMenu,  OSDEnterAuto,       OSDEnterFuncMenu,   OSDEnterOpt1},      //,         //Compiler no use
+C51 COMPILER V8.02   OSDFUNC                                                               08/07/2015 16:22:27 PAGE 4   
+
+             -d
+              #else
+ 162              {OSDEnterMainMenu,  OSDEnterAuto,       OSDEnterDir2,       OSDEnterOpt1},      //,         //Compiler used h
+             -ere
+ 163          #endif
+ 164            //-------------------------------------------------------------------------
+ 165              {NULL,              NULL,               NULL,               NULL},      //, ->  
+ 166              {NULL,              NULL,               NULL,               NULL},      //,     ->  
+ 167              {NULL,              NULL,               NULL,               NULL},      //,                         //60
+ 168           //-------------------------------------------------------------------------------------------------------
+             ---
+ 169          #if ENABLE_FUNC_OSD == ON
+                  {OSDEnterMainMenu,  OSDEnterAuto,       OSDEnterFuncMenu,   OSDEnterOpt1},      //,         //Compiler no use
+             -d
+              #else
+ 172              {OSDEnterMainMenu,  OSDEnterAuto,       OSDEnterDir2,               OSDEnterDir1 }, //  //Compiler use
+             -d here
+ 173          #endif
+ 174              {NULL,              NULL,               NULL,               NULL },             //,
+ 175              {OSDExitOpt1,       OSDExitOpt1,        OSDDnOpt1,          OSDUpOpt1},         //,
+ 176              {OSDExitOpt2,       OSDExitOpt2,        OSDDnOpt2,          OSDUpOpt2},         //,
+ 177          //----------------------------------------------------------------    
+ 178              {OSDEnterFItm,      NULL,               OSDUpFactory,    OSDDnFactory},         //, ,  
+ 179              {OSDExitFItm,       OSDExitFItm,        OSDUpFItm ,         OSDDnFItm},        //,  
+ 180           //----------------------------------------------------------------   
+ 181              {OSDEnterDItm,      OSDCloseAll,        OSDUpDemo,          OSDDnDemo},    //
+ 182              {OSDExitDItm,       OSDExitDItm,        OSDUpDItm,          OSDDnDItm},      //                     //68
+ 183              
+ 184          };
+ 185          
+ 186          code void (*OSDAppRoutine[NUM_OSD_APP_EVENTS])(void) = 
+ 187           {
+ 188              OSDEnterNoSync,             //
+ 189              OSDEnterNoCable,            //
+ 190              OSDEnterNormal,             //
+ 191              OSDEnterOOL,                // george: OUTOFLIMIT
+ 192              OSDEnterOOR,                // george: OUTOFRANCE
+ 193              OSDCloseAll,                        //
+ 194              NULL                                        //
+ 195           };
+ 196          
+ 197          code void (*OSDUnusedRoutine[])(void) = 
+ 198                  {
+ 199                          OSDEnterDir1, 
+ 200                          OSDEnterDir2
+ 201                  };
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =    795    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

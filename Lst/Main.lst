@@ -1,0 +1,535 @@
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Bin\Main.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\Main.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\User
+                    -;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\K
+                    -eypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD) DEFINE(SCALER_TYPE=NT68857,NT68857_MODULE,NVT_1920X1
+                    -080,FLASH_BANK=4) PRINT(.\Lst\Main.lst) OBJECT(.\Bin\Main.obj)
+
+line level    source
+
+   1           /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+*** WARNING C318 IN LINE 254 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\ModelConfig.h'
+*** WARNING C318 IN LINE 255 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\GlobalTimerDef.h'
+*** WARNING C318 IN LINE 256 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\NonSupportTimingList.h'
+*** WARNING C318 IN LINE 257 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\OSDConfig.h'
+*** WARNING C318 IN LINE 258 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\SRConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 15 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 26 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 40 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 54 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 61 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 68 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 75 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 82 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 89 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 96 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 110 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 2   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 117 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 124 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 131 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 140 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 147 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 154 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 161 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 175 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 187 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 194 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 201 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 208 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 215 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 222 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 229 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 236 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 243 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 250 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 259 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 266 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 273 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 280 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 287 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 294 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 301 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 308 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 315 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 322 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 329 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 336 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 3   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 343 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 350 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 360 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 367 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 374 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 381 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 388 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 395 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 402 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 409 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 419 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 426 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 438 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 442 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 452 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 460 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 17 OF .\PHY\SI\NVT\BOARD\BOARD.H: unknown identifier
+*** WARNING C318 IN LINE 18 OF .\PHY\SI\NVT\BOARD\BOARD.H: can't open file 'NT68168_DEMO_BOARD\BoardConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** ERROR C202 IN LINE 74 OF .\LIB\INT.H: 'UART_TX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 74 OF .\LIB\INT.H: invalid dimension size: [0]
+*** ERROR C202 IN LINE 75 OF .\LIB\INT.H: 'UART_RX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 75 OF .\LIB\INT.H: invalid dimension size: [0]
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 16 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: unknown identifier
+*** WARNING C318 IN LINE 17 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: can't open file 'NT68168_DEMO_KEYPAD\KeyPadConfig.h'
+*** WARNING C322 IN LINE 42 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_POWER.H: unknown identifier
+*** WARNING C322 IN LINE 36 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_PWM.H: unknown identifier
+*** WARNING C322 IN LINE 227 OF SYS\NVRAM.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 505 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 97 OF .\APP\OSD\OSDINDEX.H: unknown identifier
+*** WARNING C322 IN LINE 66 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 148 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 4   
+
+*** WARNING C322 IN LINE 320 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 389 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 475 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** ERROR C320 IN LINE 170 OF .\PHY\PANEL\PANEL.H: "Please choose one panel at least!"
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** ERROR C320 IN LINE 173 OF .\PHY\PANEL\PANEL.H: "Wrong PanelVTotal setting! Please review it!"
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF SYS\SYSAPI.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 111 OF .\APP\INCLUDE.H: unknown identifier
+  13          #include "Warning.h"
+*** WARNING C322 IN LINE 19 OF SYS\WARNING.H: unknown identifier
+  14          
+  15          /**** George statement something :
+  16          1. #ifdef X_ADS  
+  17                          {... ADS ...}
+  18             #else
+  19                          {... AXI ...}
+  20             #endif
+  21          
+  22          2. george define word at: ChiuDef.h file.
+  23          
+  24          3. xdata UCHAR KeyComp: is //150526 george: avert the same key-value to always print("...");
+  25          4. (at \Sys\SI\NVTMODELCONFIG.H) ->  
+  26          
+  27                                  #if ENABLE_HDMI_PRETEST == OFF
+  28                                  
+  29                                          if(!((IsDPTrainingDone() == TRUE) && IsDPConnect()))
+  30                                          { 
+  31                                          ScalerPowerSaving();
+  32                                      }
+  33                                  
+  34                                      //ScalerPowerSaving();
+  35                                  #endif
+  36          
+  37          *****/
+  38          
+  39          
+  40          //#define       CHANGE_TOUCH_OFF        0       //george: for touch-detect chang-event
+  41          //#define       CHANGE_TOUCH_ON         1       //george: for touch-detect chang-event
+  42          
+  43          //#define FLIPW( ray )  ( (((USHRT) (ray)[0]) * 256) + (ray)[1] ) 
+  44          
+  45          //#define WORD_LO(xxx) ((byte) ((word)(xxx) & 255)) 
+  46          //#define WORD_HI(xxx) ((byte) ((word)(xxx) >> 8)) 
+  47          
+  48          
+  49          
+  50          //******************************************************************************
+  51          // M A C R O   D E F I N I T I O N S
+  52          //******************************************************************************
+  53          
+  54          //******************************************************************************
+  55          // G L O B A L   V A R I A B L E S
+  56          //******************************************************************************
+  57          xdata USHRT     ucGeorge;       //150429 George test
+  58          
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 5   
+
+  59          
+  60          //******************************************************************************
+  61          // S T A T I C   V A R I A B L E S
+  62          //******************************************************************************
+  63          
+  64          //******************************************************************************
+  65          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  66          //******************************************************************************
+  67          
+  68          
+  69          
+  70          //******************************************************************************
+  71          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  72          //******************************************************************************
+  73          #if ENABLE_HDCP_TRIM_MODE == ON
+              static USHRT ReadScalerID(void);
+              #endif
+  76          #if ENABLE_ESD_PROTECT == ON
+              static void ESD_CHECK(void);
+              #endif
+  79          //******************************************************************************
+  80          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  81          //******************************************************************************
+  82          
+  83          //******************************************************************************
+  84          // F U N C T I O N   B O D Y S
+  85          //******************************************************************************
+  86          
+  87          /**************************************************************************//**
+  88           * The entry point of FALCON.
+  89           * This function will be called by startup.a51.
+  90           ******************************************************************************/
+  91          void main(void)
+  92          {
+  93   1        ucGeorge=0;   //150429 George
+  94   1      
+  95   1      
+  96   1      
+  97   1          // According to our MCU spec, we must set the type of bank allocation first.
+  98   1          // Therefore, we set BankSet(0x22) first. (We MUST set it first!)
+  99   1          BankSet(0x22);
+ 100   1      
+ 101   1          DisableInterrupt();
+ 102   1      #if ENABLE_HDCP_TRIM_MODE == ON
+                  ucEFUSE_ID = (UCHAR)(ReadScalerID()>>8);
+              #endif
+ 105   1      
+ 106   1          McuInitialize();
+ 107   1      
+ 108   1      #if (ENABLE_DIGI1_HPD == ON) || (ENABLE_DIGI0_HPD == ON) || (ENABLE_DP_HPD == ON)
+                  SYSAPI_PerformHPDOff(TRUE);                 // AC off/on set hot plug Pin off(Low)    
+              #endif    
+ 111   1      
+ 112   1      #if     PWROn_Debug == ENABLE
+                  printf("Start Program0509\r\n");
+              #endif 
+ 115   1      
+ 116   1      //=====================
+ 117   1      //#ifdef XRS232
+ 118   1      //     ucUARTRxIn = 0 ;                                 //140701 mike 
+ 119   1      //#endif
+ 120   1      //=====================
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 6   
+
+ 121   1          RamInitialize();            //printf("00-1\n");
+ 122   1          EnableInterrupt();          //printf("00-2\n");
+ 123   1          ScalerInitialize();         //printf("00-3\n");
+ 124   1          NvramLoadData();            //printf("00-4\n");
+ 125   1          UserData.bPowerStatus = ON;  //fefanjacky ADD for dc-on power is on
+ 126   1          Custom_System_Init();       //printf("00-5\n");
+ 127   1      
+ 128   1          APPInitSystem();            //printf("00-6\n");
+ 129   1      
+ 130   1      //#if MCU_UART_OUTPUT != 0    //140304 mike 
+ 131   1      #if     PWROn_Debug == ENABLE
+                 printf("Start Program\r\n");
+              #endif
+ 134   1      //#endif                                        //140304 mike
+ 135   1      
+ 136   1              SC_MCU_IO_CTRL5 &=  ~(BIT3 | BIT2);     //150504 George  , used PC6 / INTE2        ( McuMisc.c -> McuInitLPD() )
+ 137   1      
+ 138   1      
+ 139   1              #if (ALS_EnDis == ALSMODE) || (ALS_EnDis == ALSOffSET)
+                              CM3218Initialize();
+                      #elif ALS_EnDis == ALSRange
+                              //LS3101 don't need Initialize.
+                      #endif  //#if ALS_EnDis == ENABLE
+ 144   1      
+ 145   1      
+ 146   1      
+ 147   1              //Run \App\APPCtrl.c -> IR_Initalize()
+ 148   1      
+ 149   1      
+ 150   1          while (1) 
+ 151   1              {
+ 152   2      
+ 153   2                              ResetWDTimer(); 
+ 154   2                      ModeHandler();                                  //140319 mike check sysnc
+ 155   2                      EventHandler();
+ 156   2                      SYSAPI_CheckSysPower();                 //140319 mike check system power 
+ 157   2      
+ 158   2                      #if ENABLE_ESD_PROTECT == ON
+                               ESD_CHECK();
+                              #endif
+ 161   2      
+ 162   2                      #if((INPUT_INTERFACE&INPUT_DP)  && ENABLE_DP_AUX_MONITOR==ON)           
+*** WARNING C322 IN LINE 162 OF Sys\Main.c: unknown identifier
+                              DP_Aux_Channel_Monitor();    
+                              #endif   
+ 165   2      
+ 166   2                      //Ambient-Light-Sensor Process. 
+ 167   2                      #if (ALS_EnDis == ALSMODE) || (ALS_EnDis == ALSOffSET)
+                                      CM3218_Process();       //george: F_CM3218_03
+                              #elif ALS_EnDis == ALSRange
+                                      LS3101_Process();
+                              #endif  //#if ALS_EnDis == ENABLE
+ 172   2      
+ 173   2      
+ 174   2                      //UART Command Analyze Process.
+ 175   2                      #if (XRS232 == ADS_RS232)
+ 176   2                                      Analy_CMD();
+ 177   2                      #elif (XRS232 == LWO_RS232)
+                                              UartHandler();
+                              #endif //#if (XRS232 == ENABLE)
+ 180   2      
+ 181   2      
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 7   
+
+ 182   2      
+ 183   2                      ucGeorge++;
+ 184   2                      if( ucGeorge == 1500)
+ 185   2                      {       
+ 186   3                              
+ 187   3                      }
+ 188   2              
+ 189   2                      if(ucGeorge == 1000)    //1000)
+ 190   2                      {       //ucGeorge=100; 
+ 191   3                              ucGeorge=0;     
+ 192   3      
+ 193   3                              //printf("ratio= %d\n", (USHRT)UserData.ucOSDTimer*100/MAXIMUM_OSD_TIMER;);
+ 194   3      //                      printf("OSDTimer= %d\n", (USHRT)UserData.ucOSDTimer);
+ 195   3      
+ 196   3      //printf("ucModeHdlrState= %d\n", (USHRT) ucModeHdlrState);
+ 197   3      
+ 198   3                              //printf("UserData[]= %d\n", (USHRT)sizeof(NvramUserData));     
+ 199   3                              //printf("usADBoardID_Hi[]= %x\n", (USHRT) (UserData.usADBoardID & 0xFF00) );
+ 200   3                              //printf("usADBoardID_Low[]= %x\n\n", (USHRT) (UserData.usADBoardID & 0x00FF) );
+ 201   3                              //printf("usADBoardID_Hi[]= %x\n", (UCHAR) (UserData.usADBoardID >> 8) );
+ 202   3      
+ 203   3                              
+ 204   3      
+ 205   3      //                      printf("UserData.ucInputSource= %d\n", (USHRT)UserData.ucInputSource);
+ 206   3                              //printf("ucModeHdlrState= %d\n", (USHRT) ucModeHdlrState);
+ 207   3                              ////    OSDShowResolution(0,0); //george 15,14);
+ 208   3      /*                      printf(" %dx%d@%d.%dHz, %d.%dkHz, Pol:%x\n",InputTiming.usModeHActive,
+ 209   3                                        InputTiming.usModeVActive,
+ 210   3                                        InputTiming.usVSyncFreq/10, 
+ 211   3                                        InputTiming.usVSyncFreq%10,
+ 212   3                                                                        InputTiming.usHSyncFreq/10,
+ 213   3                                                                        InputTiming.usHSyncFreq%10,
+ 214   3                                                                        InputTiming.ucHVPolarity);
+ 215   3        
+ 216   3                      //Debug Printer Process.   
+ 217   3                              #if (ALS_EnDis == ALSMODE) || (ALS_EnDis == ALSOffSET)
+ 218   3      //                              CM3218_Print();
+ 219   3                              #elif ALS_EnDis == ALSRange
+ 220   3              //gg                     LS3101_Print();
+ 221   3                              #endif  //#if ALS_EnDis == ENABLE
+ 222   3      
+ 223   3                              #if (XRS232 == ENABLE)
+ 224   3      //                              DBG_Print();
+ 225   3                                      //printf("Sou= %d\n", (USHRT) UserData.ucInputSource);
+ 226   3                              #endif //#if (XRS232 == ENABLE)
+ 227   3      //                      printf("State= %d\n", (USHRT)SystemData.bDemo);
+ 228   3      */
+ 229   3                      }
+ 230   2      
+ 231   2      
+ 232   2              } //While(1) End
+ 233   1      }//main() END
+ 234          
+ 235          
+ 236          
+ 237          
+ 238          
+ 239          //========================================================================================================
+             -===============
+ 240          #if ENABLE_HDCP_TRIM_MODE == ON
+              //NT68850=0x0B
+              //NT68770=0x0C
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 8   
+
+              //NT68655=0x0D
+              USHRT ReadScalerID(void)
+              { 
+              USHRT scaler_id = 0x0000;
+              UCHAR tmp_0xF04C, tmp_0x8D55, tmp_0x8D50, tmp_0x8101, tmp_0x8102, tmp_0x8641;
+              //12MHz
+                  SC_ADC_ZERO_POWER_CTRL |= 0x81;
+                  tmp_0xF04C = CPU_CLK;
+                  CPU_CLK = 0x10;
+                  tmp_0x8101 = SC_POWER_CTRL1;
+                  SC_POWER_CTRL1 = 0x00;
+                  tmp_0x8102 = SC_POWER_CTRL2;
+                  SC_POWER_CTRL2 |= BIT1;
+                  tmp_0x8641 = SC_HDCP_INPUT_CTRL;
+                  SC_HDCP_INPUT_CTRL |= BIT7;
+              //
+                  tmp_0x8D55 = SC_HDCP_TRIM_CTRL2;
+                  SC_HDCP_TRIM_CTRL2 &= ~BIT6;
+              // 
+                  tmp_0x8D50 = SC_HDCP_TRIM_CTRL;
+                  SC_HDCP_TRIM_CTRL |= BIT0;
+                  SC_HDCP_TRIM_CTRL &= ~BIT1;
+              //address
+                  SC_HDCP_TRIM_ADDR = 0x91;
+              //read enable
+                  SC_HDCP_TRIM_CTRL |= BIT6;
+              //read data hi
+                  scaler_id = SC_HDCP_TRIM_DATA_HI;
+                  scaler_id <<= 8;
+              //read data lo
+                  if((SC_HDCP_TRIM_DATA_LO & 0x0F) == 0x0F) {
+                      scaler_id |= (SC_HDCP_TRIM_DATA_LO>>4);
+                  }
+                  else {
+                      scaler_id |= SC_HDCP_TRIM_DATA_LO;
+                  }
+                  SC_HDCP_TRIM_CTRL = tmp_0x8D50;
+                  SC_HDCP_TRIM_CTRL2 = tmp_0x8D55;
+                  CPU_CLK = tmp_0xF04C;
+                  SC_HDCP_INPUT_CTRL = tmp_0x8641;
+                  SC_POWER_CTRL1 = tmp_0x8101;
+                  SC_POWER_CTRL2 = tmp_0x8102;
+                  return scaler_id; 
+              }
+              #endif
+ 288          
+ 289          
+ 290          #if ENABLE_ESD_PROTECT == ON
+              void ESD_CHECK(void)
+              {
+                  static UCHAR ucPreOSDRAMCheckSum;
+                  UCHAR ucNowOSDRAMCheckSum;
+                  if (IsBackLightOn() == TRUE) {
+                      if (SC_INDEX_CTRL != 0x8C) {// read OSD SRAM
+                          ucNowOSDRAMCheckSum = ReadOSDCheckSum();
+                          ucPreOSDRAMCheckSum = ucNowOSDRAMCheckSum;
+              //            printf("OSDRAMCheckSumN1=%x\r\n", (USHRT)ucNowOSDRAMCheckSum);
+                      }
+                      else {
+                          ucNowOSDRAMCheckSum = ReadOSDCheckSum();
+              //            printf("OSDRAMCheckSumN2=%x\r\n", (USHRT)ucNowOSDRAMCheckSum);
+                          if (ucPreOSDRAMCheckSum != ucNowOSDRAMCheckSum) {
+C51 COMPILER V7.50   MAIN                                                                  11/16/2016 14:31:20 PAGE 9   
+
+              //                printf("ucPreOSDRAMCheckSum=%x\r\n", (USHRT)ucPreOSDRAMCheckSum);
+              //                printf("ucNowOSDRAMCheckSum=%x\r\n", (USHRT)ucNowOSDRAMCheckSum);
+                              ucPreOSDRAMCheckSum = ucNowOSDRAMCheckSum;
+                              //Error////////////////////////////////////////////
+                              while(1){};
+                              ///////////////////////////////////////////////////
+                          }
+                      }
+              
+                  }
+                  else {
+                      ClearESDCKStatus();
+                  }
+              #if 1
+                  CLR_WDT2 = 0x55;
+                  WDT2_SEL = WDT2SELECT;
+              #endif
+              }
+              #endif
+
+C51 COMPILATION COMPLETE.  106 WARNING(S),  6 ERROR(S)

@@ -1,0 +1,1366 @@
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_DISPLAY
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_Display.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_Display.c LARGE OPTIMIZE(9,SPEED) BROWSE 
+                    -INCDIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Ph
+                    -y\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X2
+                    -15) PRINT(.\Lst\Scaler_Display.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_Display.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          
+  23          //******************************************************************************
+  24          // S T A T I C   V A R I A B L E S
+  25          //******************************************************************************
+  26          static xdata ULONG ulDisplayClk; /*!< Variable of display clock. */
+  27          static xdata UCHAR ucAspRatioMode = ASP_RATIO_FULL; /*!< Variable of aspect ratio mode. */
+  28          static xdata USHRT usDisRatio = 0; /*!< Variable of the ratio of H/V. */
+  29          
+  30          //******************************************************************************
+  31          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          extern xdata ULONG ulHFreqCounter;
+  34          
+  35          //******************************************************************************
+  36          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  37          //******************************************************************************
+  38          static void SetDPLL(void);
+  39          static void CheckInterlacedSignalField(void);
+  40          static void SetFixHR2(void);
+  41          static void CheckFIFO(void);
+  42          
+  43          //******************************************************************************
+  44          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  45          //******************************************************************************
+  46          
+  47          //******************************************************************************
+  48          // F U N C T I O N   B O D Y S
+  49          //******************************************************************************
+  50          
+  51          /**************************************************************************//**
+  52           * Initialize display-related registers.
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 2   
+
+  53           * Through this function, the scaler will be under free-run mode and output black screen.
+  54           ******************************************************************************/
+  55          void DisplayInit(void)
+  56          {
+  57   1          SC_FIFO_FLAG = 0x03;
+  58   1          SC_FIFO_FLAG_EN = 0x00;
+  59   1          EnableDPLL();
+  60   1      
+  61   1          SC_INTE_CTRL = 0x00;
+  62   1          SC_BK_H_SHAP_CTRL |= BIT7;
+  63   1          SC_DISP_DRIVE_CTRL = PANEL_PAD_DRIVE;
+  64   1          SC_DISPLAY_POL_CTRL = (PANEL_DISP_DE_POL << 7) | (PANEL_DISP_HSYNC_POL << 5) | (PANEL_DISP_VSYNC_POL <
+             -< 4);
+  65   1          SC_DISPLAY_CLK_CTRL = 0x40;
+  66   1      
+  67   1          SC_DISPLAY_CHANNEL = BIT6;//(BIT5|BIT6);
+  68   1      #if (INPUT_INTERFACE&INPUT_DP)
+  69   1          SC_DP_FAST_MUTE_CTRL = SCREG_B88;
+  70   1      #endif
+  71   1      
+  72   1          SC_DISP_SWAP = DT16A;
+  73   1      
+  74   1          SC_GRAPHIC_DISP_WIN_CTRL = 0x07;
+  75   1      
+  76   1          SC_HR_CTRL = 0x00;
+  77   1          SC_RESIDUAL_DISP_HOR_SYNC_CTRL = 0x00;
+  78   1      
+  79   1          SC_FIFO_CTRL1 &= ~BIT6;
+  80   1          SC_FIFO_CTRL1 |= BIT5;
+  81   1      
+  82   1          DisplayMuteImage();
+  83   1          LoadDefaultPanelData();
+  84   1          SetFreeRunClk();
+  85   1          SetDclkSSC(UserPanelData.ucSpreadSpectrumCtrl);
+  86   1          SC_DITHER_TP_GRAY_LVL_LO = 0x00;
+  87   1          SC_DITHER_TP_GRAY_LVL_HI = 0x00;
+  88   1      }
+  89          
+  90          /**************************************************************************//**
+  91           * Turn off DPLL (display PLL).
+  92           ******************************************************************************/
+  93          void DisableDPLL(void)
+  94          {
+  95   1          UCHAR tmpReg0f0, tmpReg101, tmpReg065;
+  96   1          
+  97   1          tmpReg0f0 = SC_DPLL_CTRL1;
+  98   1          tmpReg101 = SC_POWER_CTRL1;
+  99   1          tmpReg065 = SC_GAMMA_CTRL;
+ 100   1          
+ 101   1          if ((tmpReg0f0 & BIT0) != 0) {
+ 102   2              // Do anything necessary here
+ 103   2              #if ENABLE_GAMMA
+ 104   2              SC_GAMMA_CTRL = 0x00;
+ 105   2              #endif    
+ 106   2              
+ 107   2              // Disable DPLL sequence
+ 108   2              SC_POWER_CTRL1 = tmpReg101 | BIT0;
+ 109   2              SC_DPLL_CTRL1 = tmpReg0f0 & ~BIT0;
+ 110   2      
+ 111   2              #if ENABLE_GAMMA
+ 112   2              SC_GAMMA_CTRL = tmpReg065;
+ 113   2              #endif    
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 3   
+
+ 114   2          }
+ 115   1      }
+ 116          
+ 117          /**************************************************************************//**
+ 118           * Turn on DPLL (display PLL).
+ 119           ******************************************************************************/
+ 120          void EnableDPLL(void)
+ 121          {
+ 122   1          UCHAR tmpReg0f0, tmpReg101, tmpReg065;
+ 123   1      
+ 124   1          tmpReg0f0 = SC_DPLL_CTRL1;
+ 125   1          tmpReg101 = SC_POWER_CTRL1;
+ 126   1          tmpReg065 = SC_GAMMA_CTRL;
+ 127   1      
+ 128   1          if ((tmpReg0f0 & BIT0) == 0) {
+ 129   2              #if ENABLE_GAMMA
+ 130   2              SC_GAMMA_CTRL = 0x00;
+ 131   2              #endif    
+ 132   2              // Enable DPLL sequence
+ 133   2              SC_DPLL_CTRL1 = tmpReg0f0 | BIT0;
+ 134   2              SC_POWER_CTRL1 = tmpReg101 & ~BIT0;
+ 135   2              Sleep(5);
+ 136   2      
+ 137   2              // Do anything necessary here
+ 138   2              #if ENABLE_GAMMA
+ 139   2              SC_GAMMA_CTRL = tmpReg065;
+ 140   2              #endif    
+ 141   2          }    
+ 142   1      }
+ 143          
+ 144          /**************************************************************************//**
+ 145           * Turn on DCLK (display clock).
+ 146           ******************************************************************************/
+ 147          void EnableDclk(void)
+ 148          {
+ 149   1          SC_POWER_CTRL1 &= ~BIT0;
+ 150   1      }
+ 151          
+ 152          /**************************************************************************//**
+ 153           * Initialize display h/v parameters according to the panel spec.
+ 154           ******************************************************************************/
+ 155          void LoadDefaultPanelData(void)
+ 156          {
+ 157   1          UCHAR ch;
+ 158   1          ch = 0x61;
+ 159   1      
+ 160   1          if (UserPanelData.bBitShift == TRUE)            
+ 161   1              {
+ 162   2                ch |= BIT7;                                           
+ 163   2             }
+ 164   1          else 
+ 165   1              {
+ 166   2                ch &= ~BIT7;
+ 167   2             }
+ 168   1          if (UserPanelData.ucColorDepth == 8)  
+ 169   1              {       
+ 170   2                      ch &= ~BIT3;
+ 171   2              }
+ 172   1          else 
+ 173   1              {
+ 174   2                      ch |= BIT3;
+ 175   2              }
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 4   
+
+ 176   1          if (UserPanelData.bDualPortLVDS == TRUE)  
+ 177   1              {
+ 178   2                     ch &= ~BIT2;
+ 179   2             }
+ 180   1          else 
+ 181   1              {
+ 182   2                      ch |= BIT2;
+ 183   2              }
+ 184   1          if (UserPanelData.bDEMode == TRUE)             
+ 185   1              {
+ 186   2                      ch |= BIT1;
+ 187   2              }
+ 188   1          else
+ 189   1              {
+ 190   2                      ch &= ~BIT1;
+ 191   2              }
+ 192   1          SC_DISPLAY_CTRL = ch;                                         
+ 193   1      
+ 194   1          //Display VTotal
+ 195   1          WriteShortScaler(&SC_DV_TOTAL_LO, UserPanelData.usTypVTotal);
+ 196   1          //Display VSync Width
+ 197   1          SC_DV_VS_WID = (UCHAR) UserPanelData.usMinVSyncWidth;
+ 198   1          //Display Background Window Vertical Begin
+ 199   1          WriteShortScaler(&SC_DV_BG_BEG_LO, UserPanelData.usMinVSyncWidth + UserPanelData.usMinVSyncBackPorch);
+ 200   1          //Display Background Window Vertical Length
+ 201   1          WriteShortScaler(&SC_DV_BG_LEN_LO, UserPanelData.usHeight);
+ 202   1          //Display Active Window Vertical Begin
+ 203   1          WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_BEG_LO, UserPanelData.usMinVSyncWidth + UserPanelData.usMinV
+             -SyncBackPorch);
+ 204   1          //Display Active Window Vertical Length
+ 205   1          WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, UserPanelData.usHeight);
+ 206   1          //Display HTotal
+ 207   1          WriteShortScaler(&SC_DH_HTOTAL_LO, UserPanelData.usTypHTotal);
+ 208   1          //Display HSync Width
+ 209   1          SC_DH_HS_WID = (UCHAR) UserPanelData.usMinHSyncWidth;
+ 210   1          //Display Background Window Horizontal Begin
+ 211   1          WriteShortScaler(&SC_DH_BG_BEG_LO, UserPanelData.usMinHSyncWidth + UserPanelData.usMinHSyncBackPorch);
+ 212   1          //Display Background Window Horizontal Width
+ 213   1          WriteShortScaler(&SC_DH_BG_WID_LO, UserPanelData.usWidth);
+ 214   1          //Display Active Window Horizontal Begin
+ 215   1          WriteShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_BEG_LO, UserPanelData.usMinHSyncWidth + UserPanelData.usMinH
+             -SyncBackPorch);
+ 216   1          //Display Active Window Horizontal Width
+ 217   1          WriteShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_WID_LO, UserPanelData.usWidth);
+ 218   1          //Free run htotal
+ 219   1          WriteShortScaler(&SC_FREE_RUN_HTOTAL_LO, PANEL_TYP_HTOTAL);
+ 220   1      }
+ 221          
+ 222          /**************************************************************************//**
+ 223           * Set free-run clock.
+ 224           * The clock is panel typical clock defined in panel spec.
+ 225           * This function set DCLK only and does not turn the scaler to free-run mode.
+ 226           ******************************************************************************/
+ 227          void SetFreeRunClk(void)
+ 228          {
+ 229   1          ulDisplayClk = (UserPanelData.ulFreeRunH_Freq * UserPanelData.usTypHTotal + 5) / 10;
+ 230   1          SetDPLL();
+ 231   1      }
+ 232          
+ 233          /**************************************************************************//**
+ 234           * Setup DPLL by ulDisplayClk.
+ 235           ******************************************************************************/
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 5   
+
+ 236          static void SetDPLL(void)
+ 237          {
+ 238   1          ULONG temp;
+ 239   1          SC_VPLL_CTRL |= BIT3;
+ 240   1          temp = ((float)ulDisplayClk * 131072) / REF_CLK;
+ 241   1      
+ 242   1          SC_DDDS_RATIO_LO = (UCHAR) temp;
+ 243   1          SC_DDDS_RATIO_MI = (UCHAR) (temp >> 8);
+ 244   1              
+ 245   1          SC_DDDS_RATIO_HI = (UCHAR) (temp >> 16);
+ 246   1              
+ 247   1          SC_VPLL_CTRL &= ~BIT3;
+ 248   1          SetLvdsP2SByDCLK();
+ 249   1      }
+ 250          
+ 251          #if ENABLE_LD == ON
+              /**************************************************************************//**
+               * Setup DPLL to the specified clock.
+               * @param clk Display clock. The unit is Hz.
+               ******************************************************************************/
+              void SetDisplayDCLK(ULONG clk)
+              {
+                  ulDisplayClk = clk;
+                  SetDPLL();
+              }
+              #endif
+ 262          
+ 263          #if ENABLE_LD == ON || ENABLE_PREFRC == ON
+              /**************************************************************************//**
+               * Get display clock.
+               * @return Display clock.
+               ******************************************************************************/
+              ULONG GetDisplayDCLK(void)
+              {
+                  return ulDisplayClk;
+              }
+              #endif
+ 273          
+ 274          
+ 275          /**************************************************************************//**
+ 276           * display clock Compress.
+ 277           * @param input and display timing
+ 278           ******************************************************************************/
+ 279          void DispClkCompress(tTIMING *input,tTIMING *disp)
+ 280          {
+ 281   1      #if ENABLE_PREFRC == ON || ENABLE_DFR == ON
+                  if (!((GetInputSyncMode() == DIG_SYNC)
+              #if ENABLE_PREFRC == ON        
+                       && (usVSyncFreq < FRC_NACT_MIN || usVSyncFreq > FRC_NACT_MAX)
+              #elif ENABLE_DFR == ON   
+                       &&(usVSyncFreq < 310)
+              #endif
+                     ))
+              #endif
+ 290   1          { 
+ 291   2             disp->htotal = (UserPanelData.usMinHTotal / 8) * 8 + 8;
+ 292   2             disp->active_height = (USHRT) (((float)disp->clock / 100 / disp->htotal) * input->active_height / u
+             -sHSyncFreq + 0.5);
+ 293   2             disp->vtotal = ((((ULONG)input->vtotal * disp->active_height) << 4) / input->active_height + 8) >> 
+             -4;
+ 294   2             
+ 295   2             if (disp->vtotal < UserPanelData.usMinVTotal) {
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 6   
+
+ 296   3                 disp->active_height = (ULONG) UserPanelData.usMinVTotal * input->active_height / input->vtotal;
+ 297   3             }
+ 298   2             
+ 299   2             if (IsInterlaced()) {
+ 300   3                 disp->active_height >>= 1;
+ 301   3             }
+ 302   2            
+ 303   2             ulDisplayClk = disp->clock;
+ 304   2          }
+ 305   1      }
+ 306          
+ 307          #if ENABLE_PREFRC == ON || ENABLE_DFR == ON 
+              /**************************************************************************//**
+               * Setup FRC or DFR.
+               * @param input and display timing
+               ******************************************************************************/
+              void Check_PreFRC_DFR(ULONG *Dclk)
+              {
+                      if ((GetInputSyncMode() == DIG_SYNC) 
+                          && (IsInterlaced() == FALSE)
+              #if ENABLE_PREFRC == ON
+                          && (usVSyncFreq < FRC_NACT_MIN || usVSyncFreq > FRC_NACT_MAX)
+              #elif ENABLE_DFR == ON   
+                          && (usVSyncFreq < 310)
+              #endif
+              #if ENABLE_SCALER_3D == ON
+                          && (SC3DAPI_IsHDMI3DMode() == FALSE)
+              #endif
+                       ){
+                          MMUConfig();
+                          
+                          WriteShortScaler(&SC_DV_BG_LEN_LO, UserPanelData.usHeight); //Display Background Vertical Leng
+             -th
+                          WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, UserPanelData.usHeight); //Display Active Ve
+             -rtical Length
+                          *Dclk = (ULONG)UserPanelData.usTypHTotal * UserPanelData.usTypVTotal * FRC_V_FREQ;
+                      }
+                      else {
+                          SC_FRC_CTRL = 0x00;
+                      }
+              }
+              #endif
+ 336          
+ 337          /**************************************************************************//**
+ 338           * Setup the display timing.
+ 339           * The function includes:
+ 340           *  - Display clock calculation.
+ 341           *  - Panel timing limitation check.
+ 342           *  - In/out clock check.
+ 343           *  - Last line (fixed residue) calculation.
+ 344           * @param htotal50 Current input htotal value.
+ 345           ******************************************************************************/
+ 346          BOOL SetupDisplayTiming(USHRT htotal50)
+ 347          {
+ 348   1          USHRT i;
+ 349   1          xdata tTIMING input,disp;
+ 350   1          
+ 351   1          UCHAR Reg0x1ED;
+ 352   1      
+ 353   1          xdata float temp;
+ 354   1          BOOL interlace;
+ 355   1          
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 7   
+
+ 356   1          Reg0x1ED = SC_ADC_BAND_GAP;
+ 357   1          SC_ADC_BAND_GAP |= BIT0;
+ 358   1              htotal50 = 0; // Disable compiler error.
+ 359   1          SC_DISPLAY_CTRL |= BIT5;                                    //150112 mike 0x150     //fifo auto lock, auto usHTotal 
+ 360   1          SC_GRAPHIC_DISP_WIN_CTRL = 0x07;
+ 361   1      
+ 362   1          input.active_width = ReadShortScaler(&SC_GI_CAP_HWID_LO);
+ 363   1          input.active_height = ReadShortScaler(&SC_GI_CAP_VLEN_LO);
+ 364   1          if ((input.active_height > 1024) && (input.active_width < 1280))             //Dual link
+ 365   1              { 
+ 366   2               LoadDefaultPanelData();
+ 367   2                      SetFreeRunClk();
+ 368   2                      return FALSE;
+ 369   2                }
+ 370   1      
+ 371   1          input.vtotal = GetInputVTotal();
+ 372   1      
+ 373   1          if (IsInterlaced()) 
+ 374   1              {
+ 375   2               interlace = TRUE;
+ 376   2              }
+ 377   1          else 
+ 378   1              {
+ 379   2                      interlace = FALSE;
+ 380   2              }
+ 381   1      
+ 382   1          disp.active_height = UserPanelData.usHeight; //Set the vertical active height to the Panel Height
+ 383   1      
+ 384   1      #if ENABLE_FIT_ALL_PANEL_SPEC == ON
+                  disp.vtotal = ((((ULONG)input.vtotal * disp.active_height) << 4) / input.active_height + 8) >> 4;
+                  if (disp.vtotal > UserPanelData.usMaxVTotal) {
+                      disp.vtotal = UserPanelData.usMaxVTotal;
+                      disp.active_height = ((((ULONG)disp.vtotal * input.active_height) << 4) / input.vtotal + 8) >> 4;
+                  }
+              #endif
+ 391   1      
+ 392   1      #if ENABLE_SCALER_3D == ON
+ 393   1          for (disp.htotal = (UserPanelData.usMinHTotal / 8) * 8 + 8; disp.htotal < 4080; disp.htotal += 8) {
+ 394   2      #else
+                  for (disp.htotal = (UserPanelData.usMinHTotal / 8) * 8 + 8; disp.htotal < UserPanelData.usMaxHTotal; d
+             -isp.htotal += 8) {
+              #endif
+ 397   2              temp = ((float)disp.htotal-0.1) * disp.active_height * 4096 / ulHFreqCounter / input.active_height
+             -;
+ 398   2              ulDisplayClk = (ULONG) (temp * REF_CLK * 16);
+ 399   2              if (interlace == TRUE) {
+ 400   3                  ulDisplayClk <<= 1;
+ 401   3              }
+ 402   2              if (ulDisplayClk > UserPanelData.ulMinPClk) {
+ 403   3                  break;
+ 404   3              }
+ 405   2          }
+ 406   1      
+ 407   1          if (disp.htotal > UserPanelData.usMaxHTotal) { //Htotal too large, dclk too small
+ 408   2              disp.htotal -= 8;
+ 409   2          }
+ 410   1      
+ 411   1      #if ENABLE_FIT_ALL_PANEL_SPEC == ON
+                  if ((ulDisplayClk > UserPanelData.ulMaxPClk) || (ulDisplayClk < UserPanelData.ulMinPClk))  {
+                      LoadDefaultPanelData();
+                      SetFreeRunClk();
+                      return FALSE;
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 8   
+
+                  }
+              #endif
+ 418   1      
+ 419   1          if (ulDisplayClk > UserPanelData.ulMaxPClk) {
+ 420   2             disp.clock = UserPanelData.ulMaxPClk;
+ 421   2      #if ENABLE_SCALER_3D == ON
+ 422   2             if (ulDisplayClk > 285000000) {
+ 423   3                disp.clock = 285000000;
+ 424   3          }
+ 425   2      #endif
+ 426   2              DispClkCompress(&input,&disp);
+ 427   2          }
+ 428   1      
+ 429   1          WriteShortScaler(&SC_DV_BG_LEN_LO, disp.active_height); //Display Background Vertical Length
+ 430   1          WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, disp.active_height); //Display Active Vertical Lengt
+             -h
+ 431   1      
+ 432   1      //-----fefanjacky for 1850x1036---------------------------------------------------------------------------
+             ---------------
+ 433   1      #if SPECIALAPP == ON
+                WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, 0x40c); //Display Active Vertical Length
+              #else
+ 436   1        WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, disp.active_height); //Display Active Vertical Length
+ 437   1      #endif
+ 438   1      //--------------------------------------------------------------------------------------------------------
+             ---------------
+ 439   1      //--------------------------------------------------------------------------------------------------------
+             ---------------
+ 440   1      #ifdef AUO_G151EVN01_720
+                WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, 0x2D0); //Display Active Vertical Length
+              #endif
+ 443   1      //--------------------------------------------------------------------------------------------------------
+             ---------------
+ 444   1          temp = ((float)disp.htotal-0.1) * disp.active_height * 4096 / ulHFreqCounter / input.active_height;
+ 445   1          ulDisplayClk = (ULONG) (temp * REF_CLK * 16);
+ 446   1          
+ 447   1      #if ENABLE_PREFRC == ON || ENABLE_DFR == ON
+                  Check_PreFRC_DFR(&ulDisplayClk);
+              #endif
+ 450   1      
+ 451   1          if (interlace == TRUE) {
+ 452   2      //        SC_VCR_CTRL = 0x10;
+ 453   2              ulDisplayClk <<= 1;
+ 454   2          }
+ 455   1      //    else {
+ 456   1      //#if ENABLE_SR == ON
+ 457   1      //        SC_VCR_CTRL = 0x10;
+ 458   1      //#else
+ 459   1      //        SC_VCR_CTRL = 0x00;
+ 460   1      //#endif
+ 461   1      //    }
+ 462   1      
+ 463   1          SetDPLL();
+ 464   1      #if (ENABLE_SCALER_3D == ON)
+ 465   1          if (SC3DAPI_IsHDMI3DMode() == TRUE) {
+ 466   2              DelayVTime(2);
+ 467   2          }
+ 468   1      #endif
+ 469   1          Sleep(80);
+ 470   1      
+ 471   1          if (CheckModeChangeFlag() == FALSE) {
+ 472   2              if (interlace == TRUE) { //1080i
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 9   
+
+ 473   3      #if ENABLE_SCALER_3D == ON
+ 474   3                  if (SC3DAPI_IsHDMI3DMode() == TRUE) {
+ 475   4                      SC_GPORT_CTRL &= ~BIT2;
+ 476   4                      DelayVTime(1);
+ 477   4                      SC_GPORT_CTRL |= BIT2;
+ 478   4                  }
+ 479   3      #else
+                          i = SC_DISPLAY_CTRL;                                                        //150112 mike 
+                          SC_DISPLAY_CTRL = (i & ~BIT5);                              //Manual HTotal
+              #endif
+ 483   3              }
+ 484   2              else {
+ 485   3                  i = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO) & 0x0FFF;
+ 486   3                  if (abs(i-disp.htotal) < 5) {
+ 487   4                      disp.htotal = i;
+ 488   4                  }
+ 489   3              }
+ 490   2              disp.vtotal = (float)ulDisplayClk * 10 / disp.htotal / usVSyncFreq + 0.5;
+ 491   2              
+ 492   2              WriteShortScaler(&SC_DV_TOTAL_LO, disp.vtotal); //Display Active Vtotal
+ 493   2              WriteShortScaler(&SC_DV_BG_BEG_LO, UserPanelData.usMinVSyncWidth + UserPanelData.usMinVSyncBackPor
+             -ch); //Display Background VStart
+ 494   2              i = UserPanelData.usMinVSyncWidth + UserPanelData.usMinVSyncBackPorch + (UserPanelData.usHeight - 
+             -disp.active_height) / 2;
+ 495   2      //------fefanjacky for 1850x1036@60---------------------------------
+ 496   2      #if SPECIALAPP == ON
+                      i=i+0x16;
+              #endif
+ 499   2      //------------------------------------------------------------------
+ 500   2      #ifdef AUO_G151EVN01_720  //fefanjacky for this panel dp-mode first line flash
+                      i=i+1;
+              #endif
+ 503   2      //--------------------------------------------------------------------------------------------------------
+             ---------------
+ 504   2              WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_BEG_LO, i); //Display Active VStart
+ 505   2              WriteShortScaler(&SC_DH_HTOTAL_LO, disp.htotal); //Display Active Htotal
+ 506   2      
+ 507   2      #if ENABLE_SCALER_3D == ON
+ 508   2              if (SC3DAPI_IsHDMI3DMode() == FALSE) //If input is not HDMI 3D format, then exit directly
+ 509   2      #endif
+ 510   2              {
+ 511   3                  if (disp.active_height != UserPanelData.usHeight) {
+ 512   4                      i = SC_DISPLAY_CTRL;                                            //150112 mike 
+ 513   4                      SC_DISPLAY_CTRL = (i & ~BIT5);                          //Manual HTotal
+ 514   4                  }
+ 515   3              }
+ 516   2          }
+ 517   1      
+ 518   1          WriteShortScaler(&SC_DV_BG_LEN_LO, UserPanelData.usHeight); //Display Background Vertical Length
+ 519   1      
+ 520   1          // CheckFIFO must be prior to SetFixHR2 because FIFO lock setting!
+ 521   1          CheckFIFO();
+ 522   1          
+ 523   1          CheckInterlacedSignalField();
+ 524   1      
+ 525   1          if (CheckModeChangeFlag() == FALSE) {
+ 526   2              SetFixHR2();
+ 527   2          }
+ 528   1          else {
+ 529   2              LoadDefaultPanelData();
+ 530   2              SetFreeRunClk();
+ 531   2          }
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 10  
+
+ 532   1      
+ 533   1      #if ENABLE_SR == ON
+ 534   1           SetSRInputTimingParameter();
+ 535   1      #endif
+ 536   1      
+ 537   1          SC_ADC_BAND_GAP = Reg0x1ED;
+ 538   1          return TRUE;
+ 539   1      }
+ 540          
+ 541          /**************************************************************************//**
+ 542           * Set the background color of post-pattern.
+ 543           * @param r Gray level of red color.
+ 544           * @param g Gray level of green color.
+ 545           * @param b Gray level of blue color.
+ 546           ******************************************************************************/
+ 547          void SetPostBGColor(UCHAR r, UCHAR g, UCHAR b)
+ 548          {
+ 549   1          SC_DISP_BACKGROUND_RED = r;
+ 550   1          SC_DISP_BACKGROUND_GREEN = g;
+ 551   1          SC_DISP_BACKGROUND_BLUE = b;
+ 552   1      }
+ 553          
+ 554          /**************************************************************************//**
+ 555           * Set the background color of post pattern, turn the scaler to free-run mode and output post-pattern.
+ 556           * @param r Gray level of red color.
+ 557           * @param g Gray level of green color.
+ 558           * @param b Gray level of blue color.
+ 559           ******************************************************************************/
+ 560          void Force2Background(UCHAR r, UCHAR g, UCHAR b)
+ 561          {
+ 562   1          if ((SC_DISPLAY_MUTE_CTRL & 0x03) != 0x02) {
+ 563   2              SetPostBGColor(r, g, b);
+ 564   2              DisplayMuteImage();
+ 565   2              LoadDefaultPanelData();
+ 566   2              SetFreeRunClk();
+ 567   2          }
+ 568   1          SC_DISPLAY_CHANNEL = BIT6;//(BIT5|BIT6); //RGB
+ 569   1      #if (INPUT_INTERFACE&INPUT_DP)
+ 570   1          SC_DP_FAST_MUTE_CTRL = SCREG_B88;
+ 571   1      #endif
+ 572   1      }
+ 573          
+ 574          /**************************************************************************//**
+ 575           * Wait until next display VSync pulse.
+ 576           * The maximum waiting time is 100ms.
+ 577           * If the display-related power is off, the default delay time is 40ms.
+ 578           ******************************************************************************/
+ 579          void WaitDisVSync(void)
+ 580          {
+ 581   1          USHRT temp;
+ 582   1      
+ 583   1          // Confirm the scaler has display VSync out or not!
+ 584   1          if (((SC_POWER_CTRL1 & BIT0) != 0) ||
+ 585   1              ((SC_DPLL_CTRL1 & BIT0) == 0) ||
+ 586   1              ((SC_DISPLAY_CTRL & BIT0) == 0)) {                      
+ 587   2              Sleep(40);
+ 588   2              return;
+ 589   2          }
+ 590   1      
+ 591   1          ResetWDTimer();
+ 592   1          if ((SC_DISPLAY_POL_CTRL & BIT4) == 0x00) {
+ 593   2              temp = GetTimerTick();
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 11  
+
+ 594   2              while ((GetTimerTick() - temp) < 50) {
+ 595   3                  if ((SC_DISP_SYNC_STATUS & BIT7) == 0) {
+ 596   4                      break;
+ 597   4                  }
+ 598   3              }
+ 599   2              while ((GetTimerTick() - temp) < 100) {
+ 600   3                  if ((SC_DISP_SYNC_STATUS & BIT7) != 0) {
+ 601   4                      break;
+ 602   4                  }
+ 603   3              }
+ 604   2          }
+ 605   1          else {
+ 606   2              temp = GetTimerTick();
+ 607   2              while ((GetTimerTick() - temp) < 50) {
+ 608   3                  if ((SC_DISP_SYNC_STATUS & BIT7) != 0) {
+ 609   4                      break;
+ 610   4                  }
+ 611   3              }
+ 612   2              while ((GetTimerTick() - temp) < 100) {
+ 613   3                  if ((SC_DISP_SYNC_STATUS & BIT7) == 0) {
+ 614   4                      break;
+ 615   4                  }
+ 616   3              }
+ 617   2          }
+ 618   1          ResetWDTimer();
+ 619   1      }
+ 620          
+ 621          /**************************************************************************//**
+ 622           * Disable display (mute R/G/B data).
+ 623           ******************************************************************************/
+ 624          void GraphicDisplayWindowDisable(void)
+ 625          {
+ 626   1          SC_DITHER_TOGGLE_CTRL |= BIT7;
+ 627   1      }
+ 628          
+ 629          /**************************************************************************//**
+ 630           * Enable display (un-mute R/G/B data).
+ 631           ******************************************************************************/
+ 632          void GraphicDisplayWindowEnable(void)
+ 633          {
+ 634   1          SC_DITHER_TOGGLE_CTRL &= ~BIT7;
+ 635   1      }
+ 636          
+ 637          /**************************************************************************//**
+ 638           * Check Interlaced Signal Odd/Even Field
+ 639           ******************************************************************************/
+ 640          void CheckInterlacedSignalField(void)
+ 641          {
+ 642   1      //    xdata UCHAR i,j, *p, matrix[3][6], reg0x1D0;
+ 643   1          xdata UCHAR ssc_backup, reg0x150, reg0x154,reg0x188;
+ 644   1       xdata USHRT temp, tmp_ord, tmp_erd;
+ 645   1      
+ 646   1       if (IsInterlaced()) { //If input is interlaced
+ 647   2              reg0x154 = SC_DISPLAY_MUTE_CTRL;
+ 648   2              reg0x150 = SC_DISPLAY_CTRL;                                     
+ 649   2              reg0x188 = SC_VCR_CTRL;
+ 650   2      /*
+ 651   2              reg0x1D0 = SC_SRGB_CTRL;
+ 652   2              for (i=0; i<3; i++) {
+ 653   2                  SC_SRGB_CTRL = ((i * 2) + 0x01);
+ 654   2                  p = &SC_SRGB_COEF_R_LO;
+ 655   2                  for (j=0; j<6; j++) {
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 12  
+
+ 656   2                      matrix[i][j] = *p;
+ 657   2                      *p = 0;
+ 658   2                      p++;
+ 659   2                  }
+ 660   2              }
+ 661   2              SC_SRGB_CTRL = 0x0D;
+ 662   2      */
+ 663   2              SC_DITHER_TOGGLE_CTRL |= BIT7;
+ 664   2              //for get data to calculate   
+ 665   2              SC_DISPLAY_MUTE_CTRL = 0x00;
+ 666   2       
+ 667   2              ssc_backup = SC_SSC_CTRL;
+ 668   2              DisableDclkSSC();
+ 669   2      //        SC_DISPLAY_MUTE_CTRL = 0x00;
+ 670   2              if ((SC_INPUT_SELECT & 0x03) < 2) {   //analog
+ 671   3                  SC_GRAPHIC_DISP_WIN_CTRL = 0x07;
+ 672   3                  temp = GetInputVStart();
+ 673   3                  SetEvenFieldOffset(0);
+ 674   3                  SetVP(5);
+ 675   3      /* 
+ 676   3                  if ((SC_DISPLAY_CTRL & BIT6) == 0x00) {
+ 677   3                      WriteShortScaler(&SC_LOCK_H_SHIFT_LO, ReadShortScalerHighLowFilter(&SC_CAP_HTOTAL_LENGTH_L
+             -O)/2);
+ 678   3                  }
+ 679   3                  else {
+ 680   3                      WriteShortScaler(&SC_LOCK_H_SHIFT_LO, 0x00);
+ 681   3                  }
+ 682   3      */
+ 683   3                  DelayVTime(8);//50Hz: over 120ms, 60Hz: over 100ms. 6 times frame
+ 684   3                  if (abs(ReadShortScalerHighLowFilter(&SC_MISC_O_RD_LO) - ReadShortScalerHighLowFilter(&SC_MISC
+             -_E_RD_LO)) > 1) {
+ 685   4                      SetEvenFieldOffset(-1);
+ 686   4                      SetVP(5);
+ 687   4                      DelayVTime(8);//50Hz: over 120ms, 60Hz: over 100ms. 6 times frame
+ 688   4                      if (abs(ReadShortScalerHighLowFilter(&SC_MISC_O_RD_LO) - ReadShortScalerHighLowFilter(&SC_
+             -MISC_E_RD_LO)) > 1) {
+ 689   5                          SetEvenFieldOffset(1);
+ 690   5                          SetVP(5);
+ 691   5                          DelayVTime(8);//50Hz: over 120ms, 60Hz: over 100ms. 6 times frame
+ 692   5                      }
+ 693   4                  }
+ 694   3                  SetVP(temp);
+ 695   3                  DelayVTime(8);//50Hz: over 120ms, 60Hz: over 100ms. 6 times frame
+ 696   3                  if (abs(ReadShortScalerHighLowFilter(&SC_MISC_O_RD_LO) - ReadShortScalerHighLowFilter(&SC_MISC
+             -_E_RD_LO)) > 1) {
+ 697   4                      SC_GRAPHIC_DISP_WIN_CTRL = 0x47;
+ 698   4                  }
+ 699   3              }
+ 700   2          #if (INPUT_INTERFACE&INPUT_DP)
+ 701   2              else if ((SC_INPUT_SELECT & 0x03) == 0x03) {   //displayport
+ 702   3                  SC_GRAPHIC_DISP_WIN_CTRL = 0x07;
+ 703   3              }
+ 704   2          #endif
+ 705   2              else {
+ 706   3                  SC_GRAPHIC_DISP_WIN_CTRL = 0x07;
+ 707   3      /*
+ 708   3                  if ((SC_DISPLAY_CTRL & BIT6) == 0x00) {
+ 709   3                      if ((GetVCaptureSize() == 1080) && (GetInputVTotal() > 593)) {
+ 710   3                          // CEA timing 39: 1920x1080i/50Hz
+ 711   3                          WriteShortScaler(&SC_LOCK_H_SHIFT_LO, 0x00);
+ 712   3                      }
+ 713   3                      else {
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 13  
+
+ 714   3                          WriteShortScaler(&SC_LOCK_H_SHIFT_LO, ReadShortScalerHighLowFilter(&SC_CAP_HTOTAL_LENG
+             -TH_LO)/2);
+ 715   3                      }
+ 716   3                  }
+ 717   3                  else {
+ 718   3                      WriteShortScaler(&SC_LOCK_H_SHIFT_LO, 0x00);
+ 719   3                  }
+ 720   3      */
+ 721   3                  if (abs(ReadShortScalerHighLowFilter(&SC_GI_CAP_VBEGO_LO) - ReadShortScalerHighLowFilter(&SC_G
+             -I_CAP_VBEGE_LO)) > 0) {
+ 722   4                      if ((SC_GI_SYNC_CTRL3 & BIT0) == 0x00) {
+ 723   5                          SC_GI_SYNC_CTRL3 |= BIT0;
+ 724   5                          temp = ReadShortScaler(&SC_GI_CAP_VBEGE_LO);
+ 725   5                          WriteShortScaler(&SC_GI_CAP_VBEGE_LO, ReadShortScaler(&SC_GI_CAP_VBEGO_LO));
+ 726   5                          WriteShortScaler(&SC_GI_CAP_VBEGO_LO, temp);
+ 727   5                      }
+ 728   4                  }
+ 729   3                  else {
+ 730   4                      SC_GI_SYNC_CTRL3 &= ~BIT0;
+ 731   4                  }
+ 732   3      
+ 733   3                  DelayVTime(8);//50Hz: over 120ms, 60Hz: over 100ms. 6 times frame
+ 734   3                  tmp_ord = ReadShortScalerHighLowFilter(&SC_MISC_O_RD_LO);
+ 735   3                  tmp_erd = ReadShortScalerHighLowFilter(&SC_MISC_E_RD_LO);
+ 736   3      
+ 737   3                  if (abs(ReadShortScalerHighLowFilter(&SC_MISC_O_RD_LO) - ReadShortScalerHighLowFilter(&SC_MISC
+             -_E_RD_LO)) > 1) {
+ 738   4                      SC_GRAPHIC_DISP_WIN_CTRL |= BIT6;
+ 739   4                      DelayVTime(8);
+ 740   4                      // If the blanking time of odd/even fields are not stable, we switch the settings of odd/e
+             -ven position
+ 741   4                      // Jude 2011/10/18
+ 742   4                      if ((abs(tmp_ord - ReadShortScalerHighLowFilter(&SC_MISC_O_RD_LO)) > 5) ||
+ 743   4                          (abs(tmp_erd - ReadShortScalerHighLowFilter(&SC_MISC_E_RD_LO)) > 5)) {
+ 744   5                          temp = ReadShortScaler(&SC_GI_CAP_VBEGE_LO);
+ 745   5                          WriteShortScaler(&SC_GI_CAP_VBEGE_LO, ReadShortScaler(&SC_GI_CAP_VBEGO_LO));
+ 746   5                          WriteShortScaler(&SC_GI_CAP_VBEGO_LO, temp);
+ 747   5                      }
+ 748   4                  }
+ 749   3              }
+ 750   2              SC_SSC_CTRL = ssc_backup;
+ 751   2      
+ 752   2              SC_DISPLAY_MUTE_CTRL = reg0x154;
+ 753   2              SC_DISPLAY_CTRL = reg0x150;                                     
+ 754   2              SC_VCR_CTRL = reg0x188;
+ 755   2      /*
+ 756   2              for (i=0; i<3; i++) {
+ 757   2                  SC_SRGB_CTRL = ((i * 2) + 0x01);
+ 758   2                  p = &SC_SRGB_COEF_R_LO;
+ 759   2                  for (j=0; j<6; j++) {
+ 760   2                      *p = matrix[i][j];
+ 761   2                      p++;
+ 762   2                  }
+ 763   2              }
+ 764   2              SC_SRGB_CTRL |= BIT3;
+ 765   2              SC_SRGB_CTRL = reg0x1D0;        
+ 766   2      */  
+ 767   2              SC_DITHER_TOGGLE_CTRL &= ~BIT7;
+ 768   2          }
+ 769   1      }
+ 770          
+ 771          /**************************************************************************//**
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 14  
+
+ 772           * Get display vertical DE time.
+ 773           * @return Number of counts of display clock.
+ 774           ******************************************************************************/
+ 775          ULONG GetVCounter(void)
+ 776          {
+ 777   1          xdata ULONG vtotalcounter, vtotalcounter2;
+ 778   1          UCHAR i;
+ 779   1      
+ 780   1          vtotalcounter = Read3ByteScalerHighLowFilter(&SC_VER_COUNTER_LO);
+ 781   1          DelayVTime(1);
+ 782   1          vtotalcounter2 = Read3ByteScalerHighLowFilter(&SC_VER_COUNTER_LO);
+ 783   1          i=0;
+ 784   1      
+ 785   1          while((labs(vtotalcounter - vtotalcounter2) < 0x10) && (i < 3)) {
+ 786   2              i++;
+ 787   2              vtotalcounter = Read3ByteScalerHighLowFilter(&SC_VER_COUNTER_LO);
+ 788   2              DelayVTime(1);
+ 789   2              vtotalcounter2 = Read3ByteScalerHighLowFilter(&SC_VER_COUNTER_LO);
+ 790   2          }
+ 791   1          
+ 792   1          vtotalcounter = (vtotalcounter + vtotalcounter2) >> 1;
+ 793   1      
+ 794   1          return vtotalcounter;
+ 795   1      }
+ 796          
+ 797          /**************************************************************************//**
+ 798           * Force the display clock to the one with desired HR2 (count of latest line).
+ 799           * We use this function to force the display residue to the value we expect.
+ 800           ******************************************************************************/
+ 801          void SetFixHR2(void)
+ 802          {
+ 803   1      //    xdata UCHAR matrix[3][6], reg0x1D0;
+ 804   1      //    xdata UCHAR j, *p;
+ 805   1          xdata UCHAR reg0x150, reg0x154, i,reg0x188;
+ 806   1          xdata USHRT gdv_act_len, vtotal, cal_hr1, cal_hr2, temp;
+ 807   1          xdata ULONG vtcnt, vdecnt;
+ 808   1          xdata signed short delta0p9hr1, deltahr2of0p9hr1, hr2of0p9hr1, delta_hr2, dsthtotal, wanted_hr2;
+ 809   1          xdata signed long delta_clk;
+ 810   1      
+ 811   1          reg0x154 = SC_DISPLAY_MUTE_CTRL;
+ 812   1          reg0x150 = SC_DISPLAY_CTRL;                                 
+ 813   1          reg0x188 = SC_VCR_CTRL;
+ 814   1      /*
+ 815   1          reg0x1D0 = SC_SRGB_CTRL;
+ 816   1          for (i=0; i<3; i++) {
+ 817   1              SC_SRGB_CTRL = ((i * 2) + 0x01);
+ 818   1              p = &SC_SRGB_COEF_R_LO;
+ 819   1              for (j=0; j<6; j++) {
+ 820   1                  matrix[i][j] = *p;
+ 821   1                  *p = 0;
+ 822   1                  p++;
+ 823   1              }
+ 824   1          }
+ 825   1          SC_SRGB_CTRL = 0x0D;
+ 826   1      */
+ 827   1          SC_DITHER_TOGGLE_CTRL |= BIT7;
+ 828   1          //for get data to calculate   
+ 829   1          SC_DISPLAY_MUTE_CTRL = 0x00;
+ 830   1          
+ 831   1          gdv_act_len = ReadShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO);
+ 832   1          WriteShortScaler(&SC_DV_BG_LEN_LO, gdv_act_len);
+ 833   1          SC_DISPLAY_CTRL = (reg0x150 | BIT5);                                                        
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 15  
+
+ 834   1      
+ 835   1          // Before HR2 calculation, force HR1 being closed to 0.9 V-active length.
+ 836   1          temp = ReadShortScalerHighLowFilter(&SC_HR_VALUE_LO);
+ 837   1          if (temp > (gdv_act_len * 0.9)) {
+ 838   2              delta0p9hr1 = temp - (gdv_act_len * 0.9);
+ 839   2          }
+ 840   1          else {
+ 841   2              delta0p9hr1 = temp + (gdv_act_len * 0.1);
+ 842   2          }
+ 843   1          dsthtotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO) & 0x0FFF;
+ 844   1          if( (dsthtotal >= UserPanelData.usMinHTotal) && (dsthtotal <= UserPanelData.usMaxHTotal) )
+ 845   1              {
+ 846   2                      delta_clk = (float) ulDisplayClk * delta0p9hr1 / gdv_act_len / dsthtotal;
+ 847   2                      ulDisplayClk -= delta_clk;
+ 848   2                      SetDPLL();
+ 849   2              }
+ 850   1          SC_HR_CTRL = 0x01;
+ 851   1          SC_VCR_CTRL = 0x06;
+ 852   1          Sleep(80);
+ 853   1          if (CheckModeChangeFlag() == FALSE) {
+ 854   2              dsthtotal = 0;
+ 855   2              vtcnt = 0;
+ 856   2              vdecnt = 0;
+ 857   2              for (i=0; i<4; i++) {
+ 858   3                  SC_VCR_CTRL = 0x06;
+ 859   3                  DelayVTime(1);
+ 860   3                  dsthtotal += ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO);
+ 861   3                  if (IsInterlaced()) { //If input is interlaced
+ 862   4                      vtcnt += GetVCounter();
+ 863   4                  }
+ 864   3                  else {
+ 865   4                      vtcnt += Read3ByteScalerHighLowFilter(&SC_VER_COUNTER_LO);
+ 866   4                  }
+ 867   3                  SC_VCR_CTRL = 0x02;
+ 868   3                  vdecnt += Read3ByteScalerHighLowFilter(&SC_VER_COUNTER_LO);
+ 869   3              }    
+ 870   2              dsthtotal = (dsthtotal + 2) / 4;
+ 871   2              vtcnt = (vtcnt + 2) / 4;
+ 872   2              vdecnt = (vdecnt + 2) / 4;
+ 873   2              cal_hr1 = vdecnt % gdv_act_len;
+ 874   2              cal_hr2 = vtcnt % dsthtotal;
+ 875   2              vtotal = vtcnt / dsthtotal;
+ 876   2      
+ 877   2              delta0p9hr1 = (gdv_act_len * 0.9) - cal_hr1;
+ 878   2              deltahr2of0p9hr1 = (float)delta0p9hr1 * vtotal / gdv_act_len;
+ 879   2              hr2of0p9hr1 = cal_hr2 + deltahr2of0p9hr1;
+ 880   2      
+ 881   2      
+ 882   2              if (hr2of0p9hr1 > (dsthtotal*9/6)) {
+ 883   3                  wanted_hr2 = dsthtotal*9/6;
+ 884   3              }
+ 885   2              else if (hr2of0p9hr1 > (dsthtotal*7/6)) {
+ 886   3                  wanted_hr2 = dsthtotal*7/6;
+ 887   3              }
+ 888   2              else if (hr2of0p9hr1 > (dsthtotal*5/6)) {
+ 889   3                  wanted_hr2 = dsthtotal*5/6;
+ 890   3              }
+ 891   2              else if (hr2of0p9hr1 > (dsthtotal*3/6)) {
+ 892   3                  wanted_hr2 = dsthtotal*3/6;
+ 893   3              }
+ 894   2              else if (hr2of0p9hr1 > (dsthtotal*1/6)) {
+ 895   3                  wanted_hr2 = dsthtotal*1/6;
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 16  
+
+ 896   3              }
+ 897   2              else if (hr2of0p9hr1 > -(dsthtotal*1/6)) {
+ 898   3                  wanted_hr2 = -(dsthtotal*1/6);
+ 899   3              }
+ 900   2              else if (hr2of0p9hr1 > -(dsthtotal*3/6)) {
+ 901   3                  wanted_hr2 = -(dsthtotal*3/6);
+ 902   3              }
+ 903   2              else {
+ 904   3                  wanted_hr2 = dsthtotal*1/6;
+ 905   3              }
+ 906   2              delta_hr2 = wanted_hr2 - cal_hr2;
+ 907   2              delta_clk = (float)ulDisplayClk * delta_hr2 / vtotal /dsthtotal;
+ 908   2              ulDisplayClk +=delta_clk;   //here is for hr2
+ 909   2      
+ 910   2              if (dsthtotal%2) {        //for hr1
+ 911   3                  ulDisplayClk = (float)ulDisplayClk / dsthtotal * (dsthtotal-1);
+ 912   3                  WriteShortScaler(&SC_DH_HTOTAL_LO, dsthtotal-1); //Display Active Htotal
+ 913   3              }
+ 914   2              else {
+ 915   3                  WriteShortScaler(&SC_DH_HTOTAL_LO, dsthtotal); //Display Active Htotal
+ 916   3              }
+ 917   2               BacklightOff();           
+ 918   2              SetDPLL();
+ 919   2      ////////check/////////////////////////////////
+ 920   2      #if 0
+                      SC_DISPLAY_CTRL = (reg0x150 & ~BIT5);                                   
+                      SC_HR_CTRL = 0x01;
+                      Sleep(80);
+                      cal_hr1 = ReadShortScalerHighLowFilter(&SC_HR_VALUE_LO);
+                      printf("cal_hr1=%d\r\n", cal_hr1);
+                      SC_HR_CTRL = 0x12;
+                      Sleep(80);
+                      cal_hr2 = ReadShortScalerHighLowFilter(&SC_HR_VALUE_LO);
+                      SC_HR_CTRL = 0x00;
+                      printf("cal_hr2=%d\r\n", cal_hr2);
+                      dsthtotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO);
+                      printf("dsthtotaly=%d\r\n",dsthtotal);
+              #endif
+ 934   2      ///////////////////////////////////////////
+ 935   2          }
+ 936   1          SC_DISPLAY_MUTE_CTRL = reg0x154;
+ 937   1          SC_HR_CTRL = 0x00;
+ 938   1          SC_DISPLAY_CTRL = reg0x150;                                                         
+ 939   1      #if 0
+                  if (CheckModeChangeFlag() == FALSE) {
+                      Sleep(80);
+                      dsthtotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO);
+                      WriteShortScaler(&SC_DH_HTOTAL_LO, dsthtotal); //Display Active Htotal
+                      printf("dsthtotalz=%d\r\n",dsthtotal);
+                  }
+              #endif
+ 947   1          WriteShortScaler(&SC_DV_BG_LEN_LO, UserPanelData.usHeight);
+ 948   1          SC_VCR_CTRL = reg0x188;
+ 949   1          SC_DITHER_TOGGLE_CTRL &= ~BIT7;
+ 950   1      }
+ 951          
+ 952          /**************************************************************************//**
+ 953           * Get display h/v ratio.
+ 954           * E.x. 0 means full screen.
+ 955           *      1333 means 4:3.
+ 956           *      1250 means 5:4.
+ 957           *      1600 means 16:10.
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 17  
+
+ 958           * @return Display h/v ratio.
+ 959           ******************************************************************************/
+ 960          /*
+ 961          USHRT GetCustomDspRatio(void)
+ 962          {
+ 963              return usDisRatio;
+ 964          }
+ 965          */
+ 966          
+ 967          /**************************************************************************//**
+ 968           * Set display h/v ratio.
+ 969           * ratio : Range is "less then 1000", or "1000 to 65535".
+ 970           *         E.x. If aspect ratio is full screen, ratio is "less then 1000". 0 is preferred.
+ 971           *              If aspect ratio is 16:10, ratio is 1600.
+ 972           *              If aspect ratio is 5:4, ratio is 1250.
+ 973           *              If aspect ratio is 4:3, ratio is 1333.
+ 974           * @param ratio Display h/v ratio.
+ 975           ******************************************************************************/
+ 976          void SetCustomAspRatio(USHRT ratio)
+ 977          {
+ 978   1          USHRT dh_bg_beg, width, begin;
+ 979   1      
+ 980   1      #if (ENABLE_SCALER_3D == ON)
+ 981   1          if (SC3DAPI_IsDisplay3D()) {
+ 982   2              return;
+ 983   2          }
+ 984   1      #endif
+ 985   1      
+ 986   1          usDisRatio = ratio;
+ 987   1          dh_bg_beg = ReadShortScaler(&SC_DH_BG_BEG_LO);
+ 988   1      
+ 989   1          if (ratio < 1000) {
+ 990   2              width = UserPanelData.usWidth;
+ 991   2              begin = dh_bg_beg;
+ 992   2          }
+ 993   1          else {
+ 994   2              width = ((ULONG)UserPanelData.usHeight * ratio + 500) / 1000;
+ 995   2              width &= 0xFFFE; // Force active width being even
+ 996   2              if (width > UserPanelData.usWidth) width = UserPanelData.usWidth;
+ 997   2              begin = dh_bg_beg + (UserPanelData.usWidth - width) / 2;
+ 998   2          }
+ 999   1      
+1000   1      //--FEFANJACKY for 1850x1036 -------------------------------------------------
+1001   1      #if SPECIALAPP == ON
+                      begin = dh_bg_beg + 0x23;
+                      width = 0x73A;
+              #endif
+1005   1      //----------------------------------------------------------------------------
+1006   1      
+1007   1      
+1008   1      #if 1
+1009   1          if ((begin != ReadShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_BEG_LO)) ||
+1010   1              (width != ReadShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_WID_LO))) {
+1011   2      #else
+                  {
+              #endif
+1014   2              WaitDisVSync();
+1015   2              GraphicDisplayWindowDisable();
+1016   2              WriteShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_BEG_LO, begin);
+1017   2              WriteShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_WID_LO, width);
+1018   2              Sleep(80);
+1019   2              WaitDisVSync();
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 18  
+
+1020   2              GraphicDisplayWindowEnable();
+1021   2          }
+1022   1      }
+1023          
+1024          /**************************************************************************//**
+1025           * Set display ratio by mode.
+1026           * If the mode is
+1027           *   ASP_RATIO_FULL  : Display full screen.
+1028           *   ASP_RATIO_SCALE : Keep org. display ratio.
+1029           *   ASP_RATIO_4_3   : Force display ratio to 4:3.
+1030           *   ASP_RATIO_SMART_4_3 : Force display ratio to 4:3 if input ratio is small 16:10.
+1031           *   ASP_RATIO_REAL  : pixel by pixel.
+1032           * @param aspectmode Aspect ratio mode.
+1033           ******************************************************************************/
+1034          void SetDisplayMode(AspectRatio aspectmode)
+1035          {
+1036   1          USHRT input_vactive, input_hactive, ratio;
+1037   1      
+1038   1          ucAspRatioMode = aspectmode;
+1039   1          if ((SC_INPUT_SELECT & 0x03) < 2) {   //analog
+1040   2              input_vactive = InputTiming.usModeVActive; 
+1041   2              input_hactive = InputTiming.usModeHActive; //for double sampling (ucSampling)
+1042   2          }
+1043   1          else {    
+1044   2              input_vactive = ReadShortScaler(&SC_GI_CAP_VLEN_LO);
+1045   2              input_hactive = ReadShortScaler(&SC_GI_CAP_HWID_LO);
+1046   2          }
+1047   1      
+1048   1      
+1049   1          if (aspectmode == ASP_RATIO_SMART_4_3) {
+1050   2              ratio = input_hactive * 10 / input_vactive;
+1051   2              if (ratio < 16)
+1052   2                  aspectmode = ASP_RATIO_4_3;
+1053   2              else
+1054   2                  aspectmode = ASP_RATIO_FULL;
+1055   2          }
+1056   1      
+1057   1          if (aspectmode == ASP_RATIO_4_3) {
+1058   2              ratio = 1333;
+1059   2          }
+1060   1          else if (aspectmode == ASP_RATIO_SCALE) {
+1061   2              ratio = ((ULONG) input_hactive * 1000 + input_vactive / 2)
+1062   2                      / input_vactive;
+1063   2          }
+1064   1          else if (aspectmode == ASP_RATIO_REAL) {
+1065   2              ratio = 0;
+1066   2          }
+1067   1          else { //Full screen
+1068   2              ratio = 0;
+1069   2          }
+1070   1      
+1071   1          SetCustomAspRatio(ratio);
+1072   1      }
+1073          
+1074          /**************************************************************************//**
+1075           * Setup aspect ratio and enable scaler fast mute function.
+1076           ******************************************************************************/
+1077          void NormalDisplay(void)
+1078          {
+1079   1      
+1080   1      //    SC_DITHER_TP_GRAY_LVL_LO = 0x00;
+1081   1      //    SC_DITHER_TP_GRAY_LVL_HI = 0x00;
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 19  
+
+1082   1          SC_DITHER_TOGGLE_CTRL |= BIT7;
+1083   1          SC_DISPLAY_CHANNEL = 0xC0;
+1084   1      #if (INPUT_INTERFACE&INPUT_DP)
+1085   1          if (GetCurrInputInterface() == DISPLAY_PORT_INPUT) {
+1086   2              SC_DP_FAST_MUTE_CTRL |= 0x0B;
+1087   2          }
+1088   1      #endif
+1089   1          SC_DISPLAY_MUTE_CTRL = 0x00;
+1090   1          //SetDisplayMode(ucAspRatioMode);
+1091   1          UserSetAspectRatio();
+1092   1          SetPostBGColor(0x00, 0x00, 0x00); // Set black color to avoid unexpected color from user-level burn-in
+             - mode.
+1093   1          Sleep(40);
+1094   1          if ((SC_INPUT_SELECT & 0x03) < 2) { //analog
+1095   2              WaitHPLLstable();
+1096   2              HwAutoOffset();
+1097   2              if ((SC_GI_SYNC_CTRL & 0x03) == 0x01) {
+1098   3                  SC_HPLL_FREQ_CTRL |= BIT6; //Disable updating HS_CNT
+1099   3              }
+1100   2          }
+1101   1      
+1102   1          // Reduce time to detect overflow when input HSync is varied.
+1103   1          SetupHSyncOverflowMask(TRUE);
+1104   1      
+1105   1      //      bTouchOnOffChange = TRUE;       //150612 george
+1106   1      }
+1107          
+1108          /**************************************************************************//**
+1109           * Configure post-pattern and turn it on (display free-run).
+1110           ******************************************************************************/
+1111          void DisplayPostPattern(UCHAR pattern)
+1112          {
+1113   1          SC_DISPLAY_MUTE_CTRL = pattern | 0x01;
+1114   1      }
+1115          
+1116          /**************************************************************************//**
+1117           * Mute display with OSD enabled (display free-run).
+1118           ******************************************************************************/
+1119          void DisplayMuteImage(void)
+1120          {
+1121   1          SC_DISPLAY_MUTE_CTRL = 0x02;
+1122   1      }
+1123          
+1124          /**************************************************************************//**
+1125           * Turn the scaler to normal display.
+1126           ******************************************************************************/
+1127          void DisplayNormalImage(void)
+1128          {
+1129   1          WaitDisVSync();
+1130   1          SC_DITHER_TOGGLE_CTRL &= ~BIT7;
+1131   1      }
+1132          
+1133          /**************************************************************************//**
+1134           * Enable SSC.
+1135           ******************************************************************************/
+1136          void EnableDclkSSC(void)
+1137          {
+1138   1          if (UserPanelData.bEnableSSC) {
+1139   2              SC_SSC_CTRL |= BIT0;
+1140   2          }
+1141   1          else {
+1142   2              SC_SSC_CTRL &= ~BIT0;
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 20  
+
+1143   2          }
+1144   1      }
+1145          
+1146          /**************************************************************************//**
+1147           * Disable SSC.
+1148           ******************************************************************************/
+1149          void DisableDclkSSC(void)
+1150          {
+1151   1          SC_SSC_CTRL &= ~BIT0;
+1152   1      }
+1153          
+1154          /**************************************************************************//**
+1155           * Set SSC ratio.
+1156           * @param ratio SSC ratio.
+1157           ******************************************************************************/
+1158          void SetDclkSSCRatio(SSCRatio ratio)
+1159          {
+1160   1          SC_SSC_CTRL = (SC_SSC_CTRL & 0xE1) | ratio;
+1161   1      }
+1162          
+1163          /**************************************************************************//**
+1164           * Set SSC frequency.
+1165           * @param freq SSC frequency.
+1166           ******************************************************************************/
+1167          void SetDclkSSCFreq(SSCFreq freq)
+1168          {
+1169   1          SC_SSC_CTRL = (SC_SSC_CTRL & 0x1F) | freq;
+1170   1      }
+1171          
+1172          /**************************************************************************//**
+1173           * Set both SSC ratio and frequency and turn SSC on.
+1174           * @param value Combinational value of SSC ratio and frequency.
+1175           ******************************************************************************/
+1176          void SetDclkSSC(UCHAR value)
+1177          {
+1178   1          SetDclkSSCRatio(value);
+1179   1          SetDclkSSCFreq(value);
+1180   1          EnableDclkSSC();
+1181   1      }
+1182          
+1183          /**************************************************************************//**
+1184           * Set FIFO to manual lock mode if input timing is interlaced or vertical scaling down.
+1185           ******************************************************************************/
+1186          void CheckFIFO(void)
+1187          {
+1188   1      #if IS_NT68150_SERIES
+                  if (IsInterlaced()) { //If input is interlaced. FIFO -= half htotal
+                      if ((GetInputVTotal() > 593) && ((GetVCaptureSize() == 1080) || (GetDigInputVActiveImmediate() == 
+             -540))) {            
+                          // CEA timing 39: 1920x1080i/50Hz
+                          SC_DISPLAY_VLOCK = 1;
+                          WriteShortScaler(&SC_DISPLAY_HLOCK_LO, 0);
+                          SC_DISPLAY_CTRL &= ~BIT6;                                                           
+                          SC_DISPLAY_CTRL &= ~BIT4;                                                           
+                      }
+                      else {
+                          SC_DISPLAY_CTRL |= BIT6;                                                                    
+                          SC_DISPLAY_CTRL |= BIT4;                                                                    
+                      }
+                  }
+                  else {
+                      SC_DISPLAY_CTRL |= BIT6;                                                                        
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 21  
+
+                      SC_DISPLAY_CTRL &= ~BIT4;                                                                       
+                  }
+              #else
+1207   1                                                                                                                              //    UCHAR backup, fifo_v;
+1208   1          USHRT fifo_h;                                                                                               //, temp, input_vactive;
+1209   1      #if IS_NT68850_SERIES || IS_NT68790_SERIES
+1210   1          SC_DISPLAY_HLOCK_HI &= 0x0F;
+1211   1      #endif
+1212   1      
+1213   1          if (IsInterlaced()) { //If input is interlaced. FIFO -= half htotal
+1214   2      /*
+1215   2              backup = SC_SSC_CTRL;
+1216   2              SC_SSC_CTRL &= ~BIT0;
+1217   2              DelayVTime(4);
+1218   2              temp = ReadShortScalerHighLowFilter(&SC_DISP_HLOCK_POS_R);
+1219   2              fifo_v = temp >> 12;
+1220   2              fifo_h = temp & 0x0FFF;
+1221   2              temp = ReadShortScalerHighLowFilter(&SC_CAP_HTOTAL_LENGTH_LO);//capture htotal
+1222   2              fifo_h += temp * fifo_v;
+1223   2              if ((GetVCaptureSize() == 1080) && (GetInputVTotal() > 593)) {
+1224   2                  // CEA timing 39: 1920x1080i/50Hz
+1225   2                  fifo_h -= (ReadShortScalerHighLowFilter(&SC_CAP_HTOTAL_LENGTH_LO) / 2);
+1226   2              }
+1227   2              else {
+1228   2                  fifo_h -= ReadShortScalerHighLowFilter(&SC_CAP_HTOTAL_LENGTH_LO);
+1229   2              }
+1230   2              fifo_v = fifo_h / temp;
+1231   2              fifo_h = fifo_h % temp;
+1232   2      
+1233   2              SC_DISPLAY_VLOCK = fifo_v;
+1234   2              WriteShortScaler(&SC_DISPLAY_HLOCK_LO, fifo_h);
+1235   2              SC_SSC_CTRL = backup;
+1236   2      */
+1237   2              if ((GetInputVTotal() > 593) && ((GetVCaptureSize() == 1080) || (GetDigInputVActiveImmediate() == 
+             -540))) {            
+1238   3                  // CEA timing 39: 1920x1080i/50Hz
+1239   3                  SC_DISPLAY_VLOCK = 1;
+1240   3                  fifo_h = ReadShortScaler(&SC_DISPLAY_HLOCK_LO) & 0xF000;
+1241   3                  WriteShortScaler(&SC_DISPLAY_HLOCK_LO, fifo_h);
+1242   3                  SC_DISPLAY_CTRL &= ~BIT6;                                           
+1243   3                  SC_DISP_DRIVE_CTRL &= ~BIT7;
+1244   3              }
+1245   2              else {
+1246   3                  SC_DISPLAY_CTRL |= BIT6;                                                    
+1247   3                  SC_DISP_DRIVE_CTRL |= BIT7;
+1248   3              }
+1249   2          }
+1250   1          else {
+1251   2      #if IS_NT68850_SERIES || IS_NT68790_SERIES
+1252   2              SC_DISPLAY_HLOCK_HI |= BIT5;
+1253   2      #endif
+1254   2      #if (INPUT_INTERFACE&INPUT_DP)
+1255   2              if (SC_FRC_CTRL != 0x00) {                                                      // DFR, FRC
+1256   3                  SC_DISPLAY_VLOCK = 1;
+1257   3                  fifo_h = ReadShortScaler(&SC_DISPLAY_HLOCK_LO) & 0xF000;
+1258   3                  WriteShortScaler(&SC_DISPLAY_HLOCK_LO, fifo_h);
+1259   3                  SC_DISPLAY_CTRL &= ~BIT6;                                           
+1260   3                  SC_DISP_DRIVE_CTRL &= ~BIT7;
+1261   3              }
+1262   2              else
+1263   2      #endif
+1264   2              {
+C51 COMPILER V8.02   SCALER_DISPLAY                                                        08/07/2015 16:22:24 PAGE 22  
+
+1265   3                  SC_DISPLAY_CTRL |= BIT6;                                                    
+1266   3                  SC_DISP_DRIVE_CTRL &= ~BIT7;
+1267   3              }
+1268   2          }
+1269   1      #endif
+1270   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   5575    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     13     114
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

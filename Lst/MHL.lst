@@ -1,0 +1,1711 @@
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MHL
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\MHL.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\MHL.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\User;
+                    -.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Ke
+                    -ypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\MHL.lst) OBJECT(.\
+                    -Bin\ADS\AXI\104N\MHL.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+  15          
+  16          //******************************************************************************
+  17          // G L O B A L   D E F I N I T I O N S
+  18          //******************************************************************************
+  19          
+  20          // Write Burst State
+  21          enum {
+  22           WB_NONE,
+  23           WB_WAIT2GO,
+  24           WB_REQ,
+  25           WB_GRT,
+  26           WB_WRITING,
+  27           WB_DEVCHG,
+  28          };
+  29          
+  30          //******************************************************************************
+  31          // G L O B A L   V A R I A B L E S
+  32          //******************************************************************************
+  33          idata UCHAR ucMHLConnState = MHL_NONE;
+  34          idata UCHAR ucCBusState = CBUS_UNACTIVE;
+  35          idata UCHAR ucCmdIndex;
+  36          idata UCHAR ucCBUSErrorCode;
+  37          idata UCHAR ucDataLen;
+  38          idata USHRT usCBUSTimeoutIdle;
+  39          idata USHRT usCBUSTimeoutACK;
+  40          idata USHRT usCBUSTimeoutAbort;
+  41          idata USHRT usCBUSTimeoutDAT;
+  42          idata USHRT usTimerCDSense2VBus;
+  43          idata UCHAR ucCBUSDDCStatus;
+  44          xdata UCHAR ucCbusBuffer[CBUS_BUF_LEN];
+  45          xdata UCHAR ucEDIDIndex = 0;
+  46          xdata UCHAR ucHdcpIndex = 0;
+  47          xdata UCHAR ucIsMHLSrcConnected[MHL_CBUS_NUM];
+  48          xdata UCHAR ucWrBurstState;
+  49          xdata UCHAR ucWrBurstCount;
+  50          static BOOL bStartOfFrame = 0;
+  51          static BOOL bHdcpFlag = FALSE;
+  52          static BOOL bDDCWriteFlag = FALSE;      // TRUE: Received "Write" command
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 2   
+
+  53          static BOOL bReadDevCapFlag = FALSE;    // David.
+  54          static BOOL bPackPixelModeIntFlag = FALSE;
+  55          static BOOL bClearHPD = 0;
+  56          static BOOL bCheckDDCTimeout = 0;
+  57          static BOOL bEnEOF = 0;
+  58          static BOOL bTranslationReady = 0;
+  59          BOOL bCheckTimeout;
+  60          BOOL bCBUSAbort;
+  61          BOOL bTranCMD;
+  62          BOOL bSetVBus;
+  63          BOOL bWaitACK;
+  64          idata UCHAR ucCBUSCMDTxBuffer = 0;
+  65          #if 1//def E_DEBUG
+  66          BOOL bCBusArbFailFlag = 0;
+  67          #endif
+  68          extern idata USHRT usTimerTickMHL;
+  69          
+  70          //UCHAR volatile xdata EDID_SRAM_BUFF3[256] _at_ 0xFB00;
+  71          #if MHL_DDC_CHANNEL == 0x00
+  72          //    xdata UCHAR volatile EDID_SRAM_MHL[256] _at_ 0xF800;
+  73              #define EDID_SRAM_MHL EDID_SRAM_BUFF0
+  74          #elif MHL_DDC_CHANNEL == 0x01
+              //    xdata UCHAR volatile EDID_SRAM_MHL[256] _at_ 0xF900;
+                  #define EDID_SRAM_MHL EDID_SRAM_BUFF1
+              #elif MHL_DDC_CHANNEL == 0x02
+              //    xdata UCHAR volatile EDID_SRAM_MHL[256] _at_ 0xFA00;
+                  #define EDID_SRAM_MHL EDID_SRAM_BUFF2
+              #elif MHL_DDC_CHANNEL == 0x03
+              //    xdata UCHAR volatile EDID_SRAM_MHL[256] _at_ 0xFB00;
+                  #define EDID_SRAM_MHL EDID_SRAM_BUFF3
+              #endif
+  84          UCHAR volatile xdata *pMHLDDCPtr;
+  85              
+  86          #if defined(MHL_CTS_DEBUG_TEST1)
+              BOOL bCbusLowFlag = FALSE;
+              idata USHRT usTimerCheckCBUSLow = 0;
+              #endif
+  90          
+  91          //******************************************************************************
+  92          // S T A T I C   V A R I A B L E S
+  93          //******************************************************************************
+  94          #if ENABLE_DEMO_MHL_EDID == ON
+              static code UCHAR MHL_EDID_Tbl[]={
+                      //0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
+              0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x4D, 0x29, 0x87, 0x96, 0x01, 0x00, 0x00, 0x00,
+              0x20, 0x15, 0x01, 0x03, 0x80, 0x52, 0x2E, 0x78, 0x0A, 0x0D, 0xC9, 0xA0, 0x57, 0x47, 0x98, 0x27,
+              0x12, 0x48, 0x4C, 0x21, 0x09, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+              0x01,0x01,0x01,0x01,0x01,0x01,0x02,0x3A,0x80,0x18,0x71,0x38,0x2D,0x40,0x58,0x2C,
+              0x45, 0x00, 0xC4, 0x8E, 0x21, 0x00, 0x00, 0x1E, 0x01, 0x1D, 0x00, 0x72, 0x51, 0xD0, 0x1E, 0x20,
+              0x6E, 0x28, 0x55, 0x00, 0xC4, 0x8E, 0x21, 0x00, 0x00, 0x1E, 0x00, 0x00, 0x00, 0xFC, 0x00, 0x43,
+              0x50, 0x39, 0x36, 0x38, 0x37, 0x0A, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0xFD,
+              0x00, 0x17, 0x78, 0x0F, 0x85, 0x1E, 0x00, 0x0A, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x01, 0x15,
+              0x02, 0x03, 0x34, 0x72, 0x55, 0x90, 0x84, 0x03, 0x02, 0x0E, 0x0F, 0x07, 0x23, 0x24, 0x05, 0x94,
+              0x13, 0x12, 0x11, 0x1D, 0x1E, 0x20, 0x21, 0x22, 0x01, 0x1F, 0x26, 0x09, 0x7F, 0x07, 0x15, 0x07,
+              0x50, 0x83, 0x01, 0x00, 0x00, 0x6E, 0x03, 0x0C, 0x00, 0x40, 0x00, 0xF8, 0x3C, 0x21, 0x84, 0x80,
+              0x01, 0x02, 0x03, 0x04, 0x8C, 0x0A, 0xD0, 0x90, 0x20, 0x40, 0x31, 0x20, 0x0C, 0x40, 0x55, 0x00,
+              0xC4, 0x8E, 0x21, 0x00, 0x00, 0x18, 0x01, 0x1D, 0x80, 0x18, 0x71, 0x1C, 0x16, 0x20, 0x58, 0x2C,
+              0x25, 0x00, 0xC4, 0x8E, 0x21, 0x00, 0x00, 0x9E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24,
+              };
+              #endif
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 3   
+
+ 115          
+ 116          //******************************************************************************
+ 117          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+ 118          //******************************************************************************
+ 119          
+ 120          //******************************************************************************
+ 121          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+ 122          //******************************************************************************
+ 123          static BOOL WriteBurst3DInfo(void);
+ 124          
+ 125          //******************************************************************************
+ 126          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+ 127          //******************************************************************************
+ 128          
+ 129          
+ 130          //******************************************************************************
+ 131          // Prototype: 
+ 132          //  void MHLInit()
+ 133          // Parameters:
+ 134          //
+ 135          // Return:
+ 136          //  None
+ 137          // Purpose:
+ 138          //
+ 139          // Notes:
+ 140          //  None
+ 141          //******************************************************************************
+ 142          void MHLInit(void)
+ 143          {
+ 144   1          USHRT i;
+ 145   1      #if ENABLE_DEMO_MHL_EDID == ON     //150425 George (use #if for compiler code no-warning. )
+                  bit diff;
+              #endif
+ 148   1          SC_MHL_CDSENSE_CTRL |= BIT1; //turn off CDSense
+ 149   1      
+ 150   1          // Init EDID data
+ 151   1      #if ENABLE_DEMO_MHL_EDID == ON
+                  diff = FALSE;
+                  for (i=0; i<256; i++) {
+                      if ((EDID_SRAM_MHL[i] != MHL_EDID_Tbl[i]) && (i < 8)) {//check head
+                          diff = TRUE;
+                      EDID_SRAM_MHL[i] = MHL_EDID_Tbl[i];
+                  }
+                      else if ((i > 7) && (diff == TRUE)) {//copy
+                          EDID_SRAM_MHL[i] = MHL_EDID_Tbl[i];
+                      }
+                  }
+              #endif
+ 163   1      
+ 164   1          for(i=0; i<40; i++) {
+ 165   2              ucCbusBuffer[i]=0x00;
+ 166   2          }
+ 167   1      
+ 168   1          ucMHLConnState = MHL_NONE;
+ 169   1          ucCBusState = CBUS_UNACTIVE;
+ 170   1          ucCBUSErrorCode = CBUS_NORMAL;
+ 171   1          ucIsMHLSrcConnected[MHL_CBUS_CH1] = ucIsMHLSrcConnected[MHL_CBUS_CH2] = FALSE;
+ 172   1          IntMHLStatus();
+ 173   1          RCP_TEST = 0xFF;
+ 174   1      
+ 175   1          SC_18V_LDO_CONTROL = 0x41;
+ 176   1      //    SC_CBUS_DEBUG_CTRL = 0x01;    // Set MHL_LANE_ON to manual mode.
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 4   
+
+ 177   1      #if 1//def E_DEBUG
+ 178   1              // for cut 4 ECO version (David, @ 2012/08/28)
+ 179   1          SC_CBUS_DEBUG_CTRL = BIT4|BIT5|BIT6;
+ 180   1      #endif
+ 181   1          SC_SINK_WAKE = 0x0F;    // Fix HTC EVO discovery fail bug. (change 0x0C to 0x0F)
+ 182   1          MHL_SetCBus1DrvCurrent();
+ 183   1          MHL_SetCBus2DrvCurrent();
+ 184   1          SC_CBUS_RESISTOR_CTRL = 0x33;
+ 185   1          SC_ACK_BIT_INIT_FALLING_EDGE = 0x00; // 4.3.10.1
+ 186   1          SC_ARBIT_WAIT_TIME1 = 0xC2; // 4.3.11.1
+ 187   1          SC_RXSENSE_EN_TIME = 0x01; //follow LG
+ 188   1          SC_LINK_CONTROL = 0x00;
+ 189   1          SC_CBUS_DISCOVERY_TIME = 0x01;//for 4.3.23.2 & 4.3.6.2
+ 190   1          SC_CBUS_DRV = 0x44;
+ 191   1          MHL_EnhanceCompatibility();
+ 192   1          MHL_SetCBus1K();
+ 193   1          #if SET_IO_VBUS_ACTIVE == HIGH
+ 194   1          SC_VBUS_ENABLE_TIME &= ~BIT7;
+ 195   1          #else
+                  SC_VBUS_ENABLE_TIME |= BIT7;
+                  #endif
+ 198   1      
+ 199   1          SC_CBUS_DIS_INT_MASK = ~(BIT1|BIT5);//Enable CD_sense change, connected INT, Stuck low
+ 200   1      #if 1//def E_DEBUG
+ 201   1              SC_CBUS_INT_EN = 0xF0|BIT0;                                             // Enable DIS, TRANS, LINK
+ 202   1              SC_CBUS_LINK_INT_MASK = ~CBUS_ARB_FAIL;//~(INVALID_BIT_TIME|CBUS_ARB_FAIL);
+ 203   1      #else
+                  SC_CBUS_INT_EN = 0xF0|CBUS_INT_MASK;
+              #endif  
+ 206   1      
+ 207   1          INTSC_EN |= BIT6;   // enable MHL interrupt group
+ 208   1          SC_MHL_CDSENSE_CTRL &= ~BIT1; //turn on CDSense
+ 209   1      
+ 210   1          MHLCDSense1On();
+ 211   1          MHLCDSense2On();
+ 212   1          bSetVBus = 0;
+ 213   1          usTimerCDSense2VBus = GetTimerTick();
+ 214   1      
+ 215   1          SetCbusChannel();
+ 216   1      #if (INPUT_INTERFACE&INPUT_MHL0)
+ 217   1          if (MHL_GetCbusCH() == MHL_CBUS_CH1 ) {
+ 218   2              Digi0HPDOn();
+ 219   2          }
+ 220   1      #endif
+ 221   1      #if (INPUT_INTERFACE&INPUT_MHL1)
+                  if (MHL_GetCbusCH() == MHL_CBUS_CH2 ) {
+                      Digi1HPDOn();
+                  }
+              #endif
+ 226   1      
+ 227   1      //initial device capability
+ 228   1          SC_CBUS_DEV_STATE = 0x00;
+ 229   1          SC_CBUS_MHL_VER = CDF_MHL_VER;
+ 230   1          SC_CBUS_DEV_CAT = CDF_DEV_CAT;
+ 231   1          SC_CBUS_ADOPTER_ID_H = CDF_ADOPTER_ID_H;
+ 232   1          SC_CBUS_ADOPTER_ID_L = CDF_ADOPTER_ID_L;
+ 233   1          SC_CBUS_VID_LINK_MODE = CDF_VID_LINK_MODE;
+ 234   1          SC_CBUS_AUD_LINK_MODE = CDF_AUD_LINK_MODE;
+ 235   1          SC_CBUS_VIDEO_TYPE = CDF_VIDEO_TYPE;
+ 236   1          SC_CBUS_LOG_DEV_MAP = CDF_LOG_DEV_MAP;
+ 237   1          SC_CBUS_BANDWIDTH = CDF_BANDWIDTH;
+ 238   1          SC_CBUS_FEATURE_FLAG = CDF_FEATURE_FLAG;
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 5   
+
+ 239   1          SC_CBUS_DEVICE_ID_H = CDF_DEVICE_ID_H;
+ 240   1          SC_CBUS_DEVICE_ID_L = CDF_DEVICE_ID_L;
+ 241   1          SC_CBUS_SCRATCHPAD_SIZE = CDF_SCRATCHPAD_SIZE;
+ 242   1          SC_CBUS_INT_STAT_SIZE = CDF_INT_STAT_SIZE;
+ 243   1      }
+ 244          
+ 245          //******************************************************************************
+ 246          // Prototype: 
+ 247          //  void SetCbusChannel(void)
+ 248          // Parameters:
+ 249          //
+ 250          // Return:
+ 251          //  None
+ 252          // Purpose:
+ 253          //
+ 254          // Notes:
+ 255          //  None
+ 256          //******************************************************************************
+ 257          void SetCbusChannel(void)
+ 258          {
+ 259   1          if( MHL_IsCDSenseFlagOn()) {
+ 260   2              if ( (SC_DVI_CTRL_333&(BIT0|BIT1|BIT2)) != (BIT0|BIT1|BIT2) ) {
+ 261   3              DVI_PowerOn();
+ 262   3              }
+ 263   2              if (MHL_GetCbusCH() == MHL_CBUS_CH1) {
+ 264   3                  MHLCBus1On();
+ 265   3              }
+ 266   2              else {
+ 267   3                  MHLCBus2On();
+ 268   3              }
+ 269   2          }
+ 270   1          else {
+ 271   2              // If can't detected CD sense in present C bus,then change to another C bus channel.
+ 272   2              if (MHL_GetCbusCH() == MHL_CBUS_CH1) {
+ 273   3                  MHLCBus1Off();
+ 274   3      #if (INPUT_INTERFACE&INPUT_MHL1)           
+                          MHL_SetCbusCH(MHL_CBUS_CH2);
+              #endif
+ 277   3              }
+ 278   2              else {
+ 279   3                  MHLCBus2Off();
+ 280   3      #if (INPUT_INTERFACE&INPUT_MHL0)
+ 281   3                  MHL_SetCbusCH(MHL_CBUS_CH1);
+ 282   3      #endif
+ 283   3              }
+ 284   2              SetCbusConnectStatus(MHL_NONE);
+ 285   2          }
+ 286   1      
+ 287   1      #if ENABLE_VBUS_IO_CONTROL==OFF
+ 288   1          if ( !bSetVBus ) {
+ 289   2              if ( (GetTimerTick()-usTimerCDSense2VBus) > 100 ) {
+ 290   3                  // From sink VBUS output (set by 0x2A1)
+ 291   3                  // For avoid temporary pulse, so postpone to turn on VBus control
+ 292   3                  // remember to set PC2,PC3 to correct initial state
+ 293   3                  MHL_EnableVBus1();
+ 294   3                  MHL_EnableVBus2();
+ 295   3                  bSetVBus = 1;
+ 296   3              }
+ 297   2          }
+ 298   1      #endif
+ 299   1      }
+ 300          
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 6   
+
+ 301          //******************************************************************************
+ 302          // Prototype: 
+ 303          //  void CbusDiscoveryHandler()
+ 304          // Parameters:
+ 305          //
+ 306          // Return:
+ 307          //  None
+ 308          // Purpose:
+ 309          //
+ 310          // Notes:
+ 311          //  None
+ 312          //******************************************************************************
+ 313          void CbusDiscoveryHandler(void)
+ 314          {
+ 315   1          if( MHL_IsDiscoveryFlagOn() ) {
+ 316   2          #if ENABLE_INT_DISCOVERY == ON
+                      SC_CBUS_INT_EN |= DIS_INT_CLR;
+                  #endif
+ 319   2              if (ucMHLConnState == MHL_NONE) {
+ 320   3                  //IP = 0x01;
+ 321   3           #if ENABLE_INT_DISCOVERY == ON
+                      usTimerTickMHL = GetTimerTickInt();
+                   #else
+ 324   3              usTimerTickMHL = GetTimerTick();
+ 325   3           #endif
+ 326   3              ucMHLConnState = MHL_DISCOVERY_RDY;
+ 327   3              ucCBusState = CBUS_DISCOVERY_DONE;
+ 328   3              ucIsMHLSrcConnected[MHL_GetCbusCH()] = TRUE;
+ 329   3                  IntMHLStatus();
+ 330   3              }
+ 331   2          }
+ 332   1          else if (MHL_IsDisconnFlagOn()) {
+ 333   2          #if ENABLE_INT_DISCOVERY == ON
+                      SC_CBUS_INT_EN |= DIS_INT_CLR;
+                  #endif
+ 336   2              SC_CBUS_RESISTOR_CTRL = 0x38;//Toggle RxSense
+ 337   2              SC_CBUS_RESISTOR_CTRL = 0x33;
+ 338   2              ucMHLConnState = MHL_NONE;
+ 339   2              ucCBusState = CBUS_UNACTIVE;
+ 340   2              ucIsMHLSrcConnected[MHL_GetCbusCH()] = FALSE;
+ 341   2              //IP = 0x00;
+ 342   2              IntMHLStatus();
+ 343   2          }
+ 344   1      }
+ 345          
+ 346          void IntMHLStatus(void)
+ 347          {
+ 348   1          ucCmdIndex = 0;
+ 349   1          bEnEOF = 0;
+ 350   1          bCheckTimeout = 0;
+ 351   1          bCBUSAbort = 0;
+ 352   1          ucDataLen = 0;
+ 353   1          bTranCMD = 1;
+ 354   1          bStartOfFrame = 0;
+ 355   1          bDDCWriteFlag = FALSE;
+ 356   1          ucCBUSDDCStatus = CBUS_DDC_EOF;
+ 357   1          ucCBUSErrorCode = CBUS_NORMAL;
+ 358   1          bClearHPD = 0;
+ 359   1          bWaitACK = 0;
+ 360   1          ucWrBurstState = 0;
+ 361   1          ucWrBurstCount = 0;
+ 362   1          MHL_Set24bitMode();
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 7   
+
+ 363   1      }
+ 364          
+ 365          //******************************************************************************
+ 366          // Prototype: 
+ 367          //  void CbusHandler()
+ 368          // Parameters:
+ 369          //
+ 370          // Return:
+ 371          //  None
+ 372          // Purpose:
+ 373          //
+ 374          // Notes:
+ 375          //  None
+ 376          //******************************************************************************
+ 377          void CbusHandler(void)
+ 378          {
+ 379   1          if ( !IsZpMode() ) {
+ 380   2              SetCbusChannel();
+ 381   2          }
+ 382   1      
+ 383   1      #if ENABLE_INT_DISCOVERY == OFF
+ 384   1          CbusDiscoveryHandler();
+ 385   1          SC_CBUS_INT_EN |= DIS_INT_CLR;
+ 386   1      #endif
+ 387   1      
+ 388   1      #if ENABLE_VBUS_IO_CONTROL == ON
+                  if ( MHL_Is_CDSense1_IO_HIGH() ) {
+                      MHL_Set_VBus1_IO_On();
+                  }
+                  else {
+                      MHL_Set_VBus1_IO_Off();
+                  }
+                  if ( MHL_Is_CDSense2_IO_HIGH() ) {
+                      MHL_Set_VBus2_IO_On();
+                  }
+                  else {
+                      MHL_Set_VBus2_IO_Off();
+                  }
+              #endif
+ 402   1      }
+ 403          
+ 404          //******************************************************************************
+ 405          // Prototype: 
+ 406          //  void CbusMSCCmdHandler(void)
+ 407          // Parameters:
+ 408          //
+ 409          // Return:
+ 410          //  None
+ 411          // Purpose:
+ 412          //
+ 413          // Notes:
+ 414          //  None
+ 415          //******************************************************************************
+ 416          void CbusMSCCmdHandler(void) using 1
+ 417          {
+ 418   1          idata UCHAR tmp;
+ 419   1          idata UCHAR i;
+ 420   1      
+ 421   1          do {
+ 422   2              usTimerTickMHL = GetTimerTickInt();//reset MHL timer
+ 423   2              if (ucMHLConnState == MHL_NONE) {
+ 424   3                  ucMHLConnState = MHL_DISCOVERY_RDY;
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 8   
+
+ 425   3                  ucCBusState = CBUS_DISCOVERY_DONE;
+ 426   3                  ucIsMHLSrcConnected[MHL_GetCbusCH()] = TRUE;
+ 427   3              }
+ 428   2              //if ((bCBUSAbort == 1) && ((GetTimerTickInt() - usCBUSTimeoutAbort) < CBUS_AA_TIMEOUT)) {
+ 429   2                  //break;
+ 430   2              //}
+ 431   2              tmp = SC_CBUS_TRANS_FLAG0 & (MSC_CMD_READ_VALID|MSC_DATA_READ_VALID);
+ 432   2              switch ( tmp )   {
+ 433   3              case MSC_CMD_READ_VALID:
+ 434   3                  cMSCCmd = SC_CBUS_RX_DATA;
+ 435   3                  //if ((bWaitACK == 1) && ((cMSCCmd != CBUS_ACK) && (cMSCCmd != CBUS_GET_STATE) && (cMSCCmd != 
+             -CBUS_ABORT))) {
+ 436   3      //            if ((bWaitACK == 1) && ((cMSCCmd != CBUS_ACK) && (cMSCCmd != CBUS_GET_STATE))) {
+ 437   3                      //break;
+ 438   3                  //}
+ 439   3      
+ 440   3                  switch ( cMSCCmd ) {
+ 441   4                  case CBUS_ACK:
+ 442   4                      bWaitACK = 0;
+ 443   4                      bTranslationReady = 1;
+ 444   4      
+ 445   4                      if (bTranCMD == 1) {
+ 446   5              //TEST CASE : 6.3.11.4 CBM: DUT Receives (0x33) ACK Packet While No Command Outstanding
+ 447   5                          MHLCbusTx(TX_MSC_CMD,CBUS_ABORT);
+ 448   5                          ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 449   5                      }
+ 450   4                      bTranCMD = 1;
+ 451   4                      
+ 452   4      #if ENABLE_INT_TRANSLATION == ON
+ 453   4                      if ( bReadDevCapFlag == FALSE ) {
+ 454   5                          bTranslationReady = 0;
+ 455   5                          MSCCmdTranslation();
+ 456   5                      }
+ 457   4      #endif                
+ 458   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 459   4                      break;
+ 460   4                  case CBUS_ABORT:
+ 461   4                      //TEST CASE : 6.3.11.7 CBM: DUT Receives (0x35) ABORT While No Command Outstanding
+ 462   4                      ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 463   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 464   4                      break;
+ 465   4                  case CBUS_NACK:
+ 466   4                      //TEST CASE : 6.3.11.5 CBM: DUT Receives (0x34) a NACK Packet While No Command Outstanding
+ 467   4                      MHLCbusTx(TX_MSC_CMD, CBUS_ABORT);
+ 468   4                      ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 469   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 470   4                      break;
+ 471   4                  case CBUS_WRITE_STAT:
+ 472   4                      usCBUSTimeoutDAT = GetTimerTickInt();
+ 473   4                      bCheckTimeout = 1;
+ 474   4                      ucDataLen = 2;//offset + value1
+ 475   4                      ucCmdIndex = 1;//index to cMSCOffset
+ 476   4                      break;
+ 477   4                  case CBUS_READ_DEVCAP:
+ 478   4                      usCBUSTimeoutDAT = GetTimerTickInt();
+ 479   4                      bCheckTimeout = 1;
+ 480   4                      ucCmdIndex = 1;//index to cMSCOffset
+ 481   4                      break;
+ 482   4                  case CBUS_MSC_MSG:
+ 483   4                      usCBUSTimeoutDAT = GetTimerTickInt();
+ 484   4                      bCheckTimeout = 1;
+ 485   4                      ucDataLen = 2;//value1 + value2
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 9   
+
+ 486   4                      ucCmdIndex = 1;//index to cMSCOffset
+ 487   4                      break;
+ 488   4                  case CBUS_WRITE_BURST:
+ 489   4                      usCBUSTimeoutDAT = GetTimerTickInt();
+ 490   4                      bCheckTimeout = 1;
+ 491   4                      bEnEOF = 1;
+ 492   4                      ucDataLen = 16;//ID_H + ID_L + data#n
+ 493   4                      ucCmdIndex = 1;//index to cMSCOffset
+ 494   4                      break;
+ 495   4                  case CBUS_SET_HPD://0x64
+ 496   4                  case CBUS_CLR_HPD://0x65
+ 497   4                      //TEST CASE : 6.3.16.1 CBM-Sink: Sink DUT Receives (0x64) SET_HPD Command
+ 498   4                      //TEST CASE : 6.3.16.2 CBM-Sink: Sink DUT Receives (0x65) CLR_HPD Command
+ 499   4                      MHLCbusTx(TX_MSC_CMD, CBUS_ABORT);
+ 500   4                      ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 501   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 502   4                      break;
+ 503   4                  case CBUS_EOF:
+ 504   4                      if (ucDataLen != 0) {//data over ?
+ 505   5                      //TEST CASE : 6.3.11.19 CBM: DUT Receives (0x6C) WRITE_BURST - Too Much Data 
+ 506   5                      //TEST CASE : 6.3.11.20 CBM: DUT Receives (0x6C) WRITE_BURST - Offset Wrap ABORT 
+ 507   5                          if (ucCmdIndex == 2) {
+ 508   6                          //TEST CASE : 6.3.11.16 CBM: DUT Receives (0x6C) WRITE_BURST - Data 0 EOF
+ 509   6                              ucCBUSErrorCode = ERROR_CBUS_POTOCOL;
+ 510   6                          }
+ 511   5                          else {
+ 512   6                              ucCBUSErrorCode = ERROR_BAD_OFFSET;
+ 513   6                          }
+ 514   5                          MHLCbusTx(TX_MSC_CMD, CBUS_ABORT);
+ 515   5                      }
+ 516   4                      else if ((bEnEOF == 0) || (ucCBUSErrorCode != CBUS_NORMAL)) {
+ 517   5                      //TEST CASE : 6.3.11.6 CBM: DUT Receives (0x32) EOF While No Command Outstanding
+ 518   5      //                    MHLCbusTx(TX_MSC_CMD, CBUS_ABORT);//??
+ 519   5                          if (bEnEOF == 0) {
+ 520   6                              MHLCbusTx(TX_MSC_CMD, CBUS_ABORT);//??
+ 521   6                              ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 522   6                          }
+ 523   5                          else {
+ 524   6                              MHLCbusTx(TX_MSC_CMD, CBUS_ACK);//??
+ 525   6                          }
+ 526   5                      }
+ 527   4                      else if ((bEnEOF == 1) && (ucCBUSErrorCode == CBUS_NORMAL)) {
+ 528   5                      MHLCbusTx(TX_MSC_CMD, CBUS_ACK);
+ 529   5                      }
+ 530   4                      bEnEOF = 0;
+ 531   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 532   4                      break;
+ 533   4                  case CBUS_GET_STATE:
+ 534   4                      if ((ucCmdIndex != 0) || (ucCBUSErrorCode != CBUS_NORMAL)) {
+ 535   5                      //TEST CASE : 6.3.11.8 CBM: DUT Receives (0x61) READ_DEVCAP - Offset Control
+ 536   5                      //TEST CASE : 6.3.11.10 CBM: DUT Receives (0x60) SET_INT - Offset Control
+ 537   5                      //TEST CASE : 6.3.11.11 CBM: DUT Receives (0x60) SET_INT - Data Control
+ 538   5                      //TEST CASE : 6.3.11.12 CBM: DUT Receives (0x60) WRITE_STAT - Data Control
+ 539   5                      //TEST CASE : 6.3.11.14 CBM: DUT Receives (0x6C) WRITE_BURST - Offset Control
+ 540   5                      //TEST CASE : 6.3.11.15 CBM: DUT Receives (0x6C) WRITE_BURST - Control Instead of First Da
+             -ta
+ 541   5                      //TEST CASE : 6.3.11.17 CBM: DUT Receives (0x6C) WRITE_BURST - Data 1 Control
+ 542   5                      //TEST CASE : 6.3.11.22 CBM: DUT Receives (0x68) MSC_MSG - Data 0 Control 
+ 543   5                      //TEST CASE : 6.3.11.24 CBM: DUT Receives (0x68) MSC_MSG - Data 1 Control 
+ 544   5                          MHLCbusTx(TX_MSC_CMD,CBUS_ABORT);
+ 545   5                          if (ucCBUSErrorCode == CBUS_NORMAL) {
+ 546   6                              ucCBUSErrorCode = ERROR_CBUS_POTOCOL;
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 10  
+
+ 547   6                          }
+ 548   5                      }
+ 549   4                      else {
+ 550   5                          ucCBUSErrorCode = CBUS_NORMAL;
+ 551   5                          MHLCbusTx(TX_MSC_DATA, CBUS_NORMAL);//no error
+ 552   5                      }
+ 553   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 554   4                      break;
+ 555   4                  case CBUS_GET_VENDOR_ID:
+ 556   4                      MHLCbusTx(TX_MSC_DATA, 0x01);
+ 557   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 558   4                      break;
+ 559   4                  case CBUS_GET_SC1_ERRORCODE:
+ 560   4                  case CBUS_GET_SC3_ERRORCODE:
+ 561   4                  case CBUS_GET_DDC_ERRORCODE:
+ 562   4                      MHLCbusTx(TX_MSC_DATA, 0x01);
+ 563   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 564   4                      break;
+ 565   4                  case CBUS_GET_MSC_ERRORCODE:
+ 566   4                      //TEST CASE : 6.3.10.5 CBM: DUT Receives (0x6B) GET_MSC_ERRCODE Command (When Err)
+ 567   4                      MHLCbusTx(TX_MSC_DATA, ucCBUSErrorCode);
+ 568   4                      ucCmdIndex = 0;//index to cMSCCmd                
+ 569   4                      break;
+ 570   4                  default://potocol is error
+ 571   4                  //TEST CASE : 6.3.11.2 CBM: DUT Receives Illegal Commands 
+ 572   4                      MHLCbusTx(TX_MSC_CMD,CBUS_ABORT);
+ 573   4                      ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 574   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 575   4                      break;
+ 576   4                  }
+ 577   3                  if (cMSCCmd == CBUS_ABORT) {
+ 578   4                      bCBUSAbort = 1;
+ 579   4                      usCBUSTimeoutAbort = GetTimerTickInt();
+ 580   4                  }
+ 581   3                  else {
+ 582   4                      bCBUSAbort = 0;
+ 583   4                  }
+ 584   3                  usCBUSTimeoutIdle = GetTimerTickInt();
+ 585   3                  break;
+ 586   3              case MSC_DATA_READ_VALID:
+ 587   3                  bWaitACK = 0;
+ 588   3                  ucCbusBuffer[ucCmdIndex] = SC_CBUS_RX_DATA;
+ 589   3                  usCBUSTimeoutDAT = GetTimerTickInt();
+ 590   3                  bCheckTimeout = 1;
+ 591   3                  if ((ucCmdIndex == 0) || ((GetTimerTickInt() - usCBUSTimeoutIdle) > CBUS_IDLE_TIMEOUT)) {
+ 592   4                  //TEST CASE : 6.3.6.2 CBM: DUT Receives Bad Reply; Data instead of Control
+ 593   4                  //TEST CASE : 6.3.11.3 CBM: DUT Receives Data While No Command Outstanding 
+ 594   4      //                if (ucCBUSErrorCode != ERROR_INVALID_OP_CODE) {
+ 595   4                      if (ucCBUSCMDTxBuffer != CBUS_ABORT) {
+ 596   5                      MHLCbusTx(TX_MSC_CMD,CBUS_ABORT);
+ 597   5                      ucCBUSErrorCode = ERROR_INVALID_OP_CODE;
+ 598   5                  }
+ 599   4                      bWaitACK = 0;
+ 600   4                  }
+ 601   3                  else {
+ 602   4                  if(bReadDevCapFlag == TRUE) {
+ 603   5                      bReadDevCapFlag = FALSE;
+ 604   5                  }
+ 605   4                  else {
+ 606   5                      if ( ++ucCmdIndex >= CBUS_BUF_LEN ) {
+ 607   6                          ucCmdIndex = CBUS_BUF_LEN-1;
+ 608   6                          // Do something if any error occurred?
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 11  
+
+ 609   6                      }
+ 610   5                          if(cMSCCmd == CBUS_READ_DEVCAP)    {
+ 611   6                              if (cMSCOffset > 0x0F) {
+ 612   7                              //TEST CASE : 6.3.10.5 CBM: DUT Receives (0x6B) GET_MSC_ERRCODE Command (When Err)
+ 613   7                                  MHLCbusTx(TX_MSC_CMD, CBUS_ABORT);
+ 614   7                                  ucCBUSErrorCode = ERROR_BAD_OFFSET;
+ 615   7                              }
+ 616   6                              else {
+ 617   7                          MHLCbusTx(TX_MSC_CMD, CBUS_ACK);
+ 618   7                          switch (cMSCOffset) {
+ 619   8                                  case DEVCAP_DEVSTATE:
+ 620   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_DEV_STATE);//TEST CASE : 6.3.10.3 CBM: DUT 
+             -receives (0x61) READ_DEVCAP Command
+ 621   8                                      break;
+ 622   8                                  case DEVCAP_MHLVERSION:
+ 623   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_MHL_VER);//Version 1.2
+ 624   8                                      break;
+ 625   8                          case DEVCAP_DEVCAT:
+ 626   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_DEV_CAT);                // Sink, power = 1
+ 627   8                              break;
+ 628   8                          case DEVCAP_ADOPTERIDH:
+ 629   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_ADOPTER_ID_H); //540 in Spec 2.0 for Novate
+             -k
+ 630   8                              break;
+ 631   8                          case DEVCAP_ADOPTERIDL:
+ 632   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_ADOPTER_ID_L); //540 in Spec 2.0 for Novate
+             -k
+ 633   8                              break;
+ 634   8                          case DEVCAP_VIDLINKMODE:
+ 635   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_VID_LINK_MODE);
+ 636   8                              break;
+ 637   8                          case DEVCAP_AUDLINKMODE:
+ 638   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_AUD_LINK_MODE); 
+ 639   8                              break;
+ 640   8                          case DEVCAP_VIDEOTYPE:
+ 641   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_VIDEO_TYPE); 
+ 642   8                              break;
+ 643   8                          case DEVCAP_LOGDEVMAP:
+ 644   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_LOG_DEV_MAP); 
+ 645   8                              break;
+ 646   8                          case DEVCAP_BANDWIDTH:
+ 647   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_BANDWIDTH);  //75Mhz/5
+ 648   8                              break;
+ 649   8                          case DEVCAP_FEATUREFLAG:
+ 650   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_FEATURE_FLAG); // FEATURE_FLAG = 0x07 
+ 651   8                              break;
+ 652   8                          case DEVCAP_DEVICEIDH:
+ 653   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_DEVICE_ID_H); 
+ 654   8                              break;
+ 655   8                          case DEVCAP_DEVICEIDL:
+ 656   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_DEVICE_ID_L); 
+ 657   8                              break;
+ 658   8                          case DEVCAP_SCRATCHPADSIZE:
+ 659   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_SCRATCHPAD_SIZE); 
+ 660   8                              break;
+ 661   8                          case DEVCAP_INSTATSIZE:
+ 662   8                                      MHLCbusTx(TX_MSC_DATA, SC_CBUS_INT_STAT_SIZE); 
+ 663   8                              break;
+ 664   8                          default:
+ 665   8                                      MHLCbusTx(TX_MSC_DATA, 0x00);//Reserved
+ 666   8                              break;
+ 667   8                          }
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 12  
+
+ 668   7                      }
+ 669   6                          }
+ 670   5                          else if(cMSCCmd == CBUS_WRITE_BURST) {//0x6C
+ 671   6                              if (ucCmdIndex == 2) {//offset
+ 672   7                                  if ((cMSCOffset < 0x40) || (cMSCOffset > 0x7F)){//error
+ 673   8                                      ucCBUSErrorCode = ERROR_BAD_OFFSET;
+ 674   8                                  }
+ 675   7                                  i = (CDF_SCRATCHPAD_SIZE + 0x40) - cMSCOffset;
+ 676   7                                  if (i > 16) {
+ 677   8                                      ucDataLen = 16;
+ 678   8                                  }
+ 679   7                              }
+ 680   6                              else {//CDF_ADOPTER_ID_H, CDF_ADOPTER_ID_L, value
+ 681   7                                  ucDataLen--;
+ 682   7                                  if (ucDataLen > 16) {//error: too much data
+ 683   8                                      ucCBUSErrorCode = ERROR_BAD_OFFSET;
+ 684   8                              }
+ 685   7                              else {
+ 686   8                                  //    ucWriteBurstBuffer[ucCmdIndex + cMSCOffset - 0x44] = ucCbusBuffer[ucCmdI
+             -ndex];
+ 687   8                                  }
+ 688   7                                  break;
+ 689   7                              }
+ 690   6                          }
+ 691   5                          else if(cMSCCmd == CBUS_MSC_MSG) {//0x68
+ 692   6                              ucDataLen--;
+ 693   6                              if(ucCmdIndex == 3) {//end (ucDataLen == 0)
+ 694   7                                  MHLCbusTx(TX_MSC_CMD, CBUS_ACK);
+ 695   7                                  if (cMSCOffset == MHL_MSC_MSG_RCP || cMSCOffset == MHL_MSC_MSG_UCP ) { //send 
+             -RCPK
+ 696   8                                  MHLCbusTx(TX_MSC_CMD, CBUS_MSC_MSG);
+ 697   8                                      MHLCbusTx(TX_MSC_DATA, cMSCOffset+1);  //MHL_MSC_MSG_RCPK or MHL_MSC_MSG_U
+             -CPK
+ 698   8                                      MHLCbusTx(TX_MSC_DATA, cMSCValue);
+ 699   8      //                                        ucCBusState= CBUS_MSG_RCPK; 
+ 700   8                                   }
+ 701   7                                  if (cMSCOffset == MHL_MSC_MSG_RAP) { //send RAPK
+ 702   8                                      MHLCbusTx(TX_MSC_CMD, CBUS_MSC_MSG);
+ 703   8                                      MHLCbusTx(TX_MSC_DATA, MHL_MSC_MSG_RAPK);
+ 704   8                                      MHLCbusTx(TX_MSC_DATA, 0x00);//no error
+ 705   8                                      if (cMSCValue == 0x10) {//ON
+ 706   9                                          if (SC_DISPLAY_MUTE_CTRL == 0x00) {
+ 707  10                                              SC_DITHER_TOGGLE_CTRL &= ~BIT7;
+ 708  10                                          }
+ 709   9                                      }
+ 710   8                                      else if (cMSCValue == 0x11) {//OFF
+ 711   9                                          if (SC_DISPLAY_MUTE_CTRL == 0x00) {
+ 712  10                                              SC_DITHER_TOGGLE_CTRL |= BIT7;
+ 713  10                                          }
+ 714   9                                      }
+ 715   8                                  }
+ 716   7                              }
+ 717   6                          }
+ 718   5                          else if(cMSCCmd == CBUS_SET_INT) {//CBUS_WRITE_STAT 0x60
+ 719   6                              ucDataLen--;
+ 720   6                              if(ucCmdIndex == 3) {//end (ucDataLen == 0)
+ 721   7                              MHLCbusTx(TX_MSC_CMD, CBUS_ACK);
+ 722   7      //                            if (cMSCOffset == 0x30)   {// CONNECTED_RDY
+ 723   7                                  if ((cMSCOffset == 0x20)){// || (cMSCOffset == 0x30))       {// RCHANGE_INT
+ 724   8                                  if(cMSCValue == 0x01) {
+ 725   9                                      MHLCbusTx(TX_MSC_CMD, CBUS_SET_HPD);
+ 726   9                                      ucCBusState = CBUS_SETHPD;
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 13  
+
+ 727   9                                      ucMHLConnState = MHL_SET_HPD;
+ 728   9                                          //usTimerTickMHL = usTimerTick_1ms;
+ 729   9                                  }
+ 730   8                                      else if ((cMSCValue & 0x10) != 0 ) {
+ 731   9                                          ucWrBurstState = WB_WAIT2GO;
+ 732   9                                          ucWrBurstCount = 0;
+ 733   9                                      }
+ 734   8                                      else if ((cMSCValue & 0x08) != 0) {
+ 735   9                                          ucWrBurstState = WB_GRT;
+ 736   9                                      }
+ 737   8                              }
+ 738   7                                  else if (cMSCOffset == 0x31) {
+ 739   8                                  if ( (cMSCValue&0x07)==0x02 ) {
+ 740   9                                      bPackPixelModeIntFlag = TRUE;
+ 741   9                                  }
+ 742   8                                  else {
+ 743   9                                      bPackPixelModeIntFlag = FALSE;
+ 744   9                                      }
+ 745   8                                  }
+ 746   7                              }
+ 747   6                          }
+ 748   5                      }
+ 749   4                  }
+ 750   3                  break;      
+ 751   3              }
+ 752   2          }while(tmp !=0);
+ 753   1      }
+ 754          
+ 755          //******************************************************************************
+ 756          // Prototype: 
+ 757          //  void CbusDDCCmdHandler(void)
+ 758          // Parameters:
+ 759          //
+ 760          // Return:
+ 761          //  None
+ 762          // Purpose:
+ 763          //
+ 764          // Notes:
+ 765          //  None
+ 766          //******************************************************************************
+ 767          void CbusDDCCmdHandler(void) using 1
+ 768          {
+ 769   1          UCHAR tmp;
+ 770   1          do {
+ 771   2              tmp = SC_CBUS_TRANS_FLAG0 & (DDC_CMD_READ_VALID|DDC_DATA_READ_VALID);
+ 772   2              switch ( tmp )   {
+ 773   3              case DDC_DATA_READ_VALID:
+ 774   3                  //MHLCbusTx(TX_DDC_CMD, CBUS_ACK);
+ 775   3                  DDCTranslation(SC_CBUS_RX_DATA);
+ 776   3                  break;        
+ 777   3              case DDC_CMD_READ_VALID:
+ 778   3                  tmp = SC_CBUS_RX_DATA;
+ 779   3                  switch ( tmp ) {
+ 780   4                  case CBUS_CONT:
+ 781   4                      if (bStartOfFrame == 0) {//after get offset
+ 782   5                          //TEST CASE : 6.3.22.1 CBM-Sink: DUT Receives SOF, CONT 
+ 783   5                          //TEST CASE : 6.3.22.2 CBM-Sink: DUT Receives DDC Write; Various Errs 
+ 784   5                      MHL_HDCP_SendData();
+ 785   5                          ucCBUSDDCStatus = CBUS_DDC_Data;
+ 786   5                          usCBUSTimeoutDAT = GetTimerTickInt();
+ 787   5                          bCheckDDCTimeout = 1;
+ 788   5                      }
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 14  
+
+ 789   4                      else {
+ 790   5                          MHLCbusTx(TX_DDC_CMD, CBUS_ABORT);
+ 791   5                      }
+ 792   4                      break;
+ 793   4                  case CBUS_SOF:
+ 794   4                      ucCmdIndex = 0;         // Start to push DDC command to cCBusBuffer
+ 795   4                      bStartOfFrame = 1;
+ 796   4                      ucCBUSDDCStatus = CBUS_DDC_SOF;
+ 797   4                      bCheckDDCTimeout = 0;
+ 798   4                      break;
+ 799   4                  case CBUS_EOF:
+ 800   4                      if (ucCBUSDDCStatus != CBUS_DDC_Stop){
+ 801   5                              //TEST CASE : 6.3.22.2 CBM-Sink: DUT Receives DDC Write; Various Errs 
+ 802   5                          MHLCbusTx(TX_DDC_CMD, CBUS_ABORT);
+ 803   5                      }
+ 804   4                      bCheckDDCTimeout = 0;
+ 805   4                      ucCBUSDDCStatus = CBUS_DDC_EOF;//IDLE status
+ 806   4                      bStartOfFrame = 0;              // Reset _SOF command count
+ 807   4                      bDDCWriteFlag = FALSE;  // Reset Write command ready flag.
+ 808   4                      break;
+ 809   4                  case CBUS_STOP:
+ 810   4                      if (ucCBUSDDCStatus != CBUS_DDC_Data){
+ 811   5                          MHLCbusTx(TX_DDC_CMD, CBUS_ABORT);
+ 812   5                          ucCBUSDDCStatus = CBUS_DDC_EOF;//IDLE status
+ 813   5                          bCheckDDCTimeout = 0;
+ 814   5                      }
+ 815   4                      else {
+ 816   5                          usCBUSTimeoutDAT = GetTimerTickInt();
+ 817   5                          bCheckDDCTimeout = 1;
+ 818   5                          ucCBUSDDCStatus = CBUS_DDC_Stop;//STOP status
+ 819   5                      }
+ 820   4                      bStartOfFrame = 0;              // Reset _SOF command count
+ 821   4                      bDDCWriteFlag = FALSE;  // Reset Write command ready flag.
+ 822   4                      break;
+ 823   4                  case CBUS_ABORT:
+ 824   4                      ucCBUSDDCStatus = CBUS_DDC_EOF;
+ 825   4                      bStartOfFrame = 0;              // Reset _SOF command count
+ 826   4                      bDDCWriteFlag = FALSE;  // Reset Write command ready flag.
+ 827   4                      break;
+ 828   4                  }
+ 829   3                  break;
+ 830   3              }
+ 831   2          }while(tmp !=0);
+ 832   1      }
+ 833          
+ 834          //******************************************************************************
+ 835          // Prototype: 
+ 836          //  void MHLHandler()
+ 837          // Parameters:
+ 838          //
+ 839          // Return:
+ 840          //  None
+ 841          // Purpose:
+ 842          //
+ 843          // Notes:
+ 844          //  None
+ 845          //******************************************************************************
+ 846          void MHLHandler(void)
+ 847          {
+ 848   1          UCHAR curr_interface = GetCurrInputInterface();
+ 849   1      
+ 850   1          if (IsMHL0CableConnect() || IsMHL1CableConnect()) 
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 15  
+
+ 851   1            {
+ 852   2              if (IP != 0x01)
+ 853   2                  IP = 0x01;
+ 854   2              }
+ 855   1          else 
+ 856   1              {
+ 857   2              if (IP != 0x00)
+ 858   2                  IP = 0x00;    
+ 859   2             }
+ 860   1      
+ 861   1          CbusHandler();
+ 862   1      
+ 863   1          if ( GetCbusConnectStatus() == MHL_DATA_RDY ) { 
+ 864   2              if (!((curr_interface==DIGITAL_INPUT0 &&  MHLIsCBus1On() ) ||
+ 865   2                          (curr_interface==DIGITAL_INPUT1 &&  MHLIsCBus2On() ))) { //not current MHL port
+ 866   3                  if ( !MHLIsClearHPD() ) {
+ 867   4                      MHLClearHPD();
+ 868   4                   }
+ 869   3                  }
+ 870   2              }
+ 871   1      
+ 872   1          if ( bPackPixelModeIntFlag ) {
+ 873   2              bPackPixelModeIntFlag = 0;
+ 874   2              MHLPackedPixelMode(TRUE);
+ 875   2          }
+ 876   1      
+ 877   1      #if ENABLE_HDMI_PRETEST == ON
+              //RCP/UCP test//////////////////////////////////////
+                  if ((ucMHLConnState == MHL_PATH_EN) || (ucMHLConnState == MHL_DATA_RDY)) 
+                      {
+                      if (RCP_TEST != 0xFF) {         // debug ID code.
+                          switch( SC_SRGB_DITH_CTRL ) {
+                          case 0x00:
+                          if (CBUSTxData(TX_MSC_CMD, CBUS_MSC_MSG)) {
+                              if (CBUSTxData(TX_MSC_DATA, MHL_MSC_MSG_RCP)) {
+                                  CBUSTxData(TX_MSC_DATA, RCP_TEST);
+                              }
+                          }   
+                          RCP_TEST = 0xFF;
+                              break;
+                           case 0x01:
+                              if (CBUSTxData(TX_MSC_CMD, CBUS_MSC_MSG)) {
+                                  if (CBUSTxData(TX_MSC_DATA, MHL_MSC_MSG_UCP)) {
+                                      CBUSTxData(TX_MSC_DATA, RCP_TEST);
+                                  }
+                              }       
+                              RCP_TEST = 0xFF;
+                              break;
+                           case 0x02:
+                              if (CBUSTxData(TX_MSC_CMD, CBUS_MSC_MSG)) {
+                                  if (CBUSTxData(TX_MSC_DATA, MHL_MSC_MSG_RAP)) {
+                                      CBUSTxData(TX_MSC_DATA, RCP_TEST);
+                                  }
+                              }       
+                              RCP_TEST = 0xFF;
+                              break;
+                           default:
+                              break;
+                          }
+                      }
+                  }
+              #endif
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 16  
+
+ 913   1      
+ 914   1      ///////////////////////////////////////////////
+ 915   1      //TEST CASE : 6.3.12.1 CBM: DUT Receives (0x61) READ_DEVCAP - Offset Timeout 
+ 916   1      //TEST CASE : 6.3.12.2 CBM: DUT Receives (0x60) SET_INT / WRITE_STAT - Offset Timeout 
+ 917   1      //TEST CASE : 6.3.12.3 CBM: DUT Receives (0x60) SET_INT - Data Timeout 
+ 918   1      //TEST CASE : 6.3.12.5 CBM: DUT Receives (0x6C) WRITE_BURST - Offset Timeout 
+ 919   1      //TEST CASE : 6.3.12.6 CBM: DUT Receives (0x6C) WRITE_BURST - Data 0 Timeout 
+ 920   1      //TEST CASE : 6.3.12.7 CBM: DUT Receives (0x6C) WRITE_BURST - EOF Timeout 
+ 921   1      //TEST CASE : 6.3.12.8 CBM: DUT Receives (0x68) MSC_MSG - Data 0 Timeout 
+ 922   1      //TEST CASE : 6.3.12.9 CBM: DUT Receives (0x68) MSC_MSG - Data 1 Timeout 
+ 923   1          if (bCheckTimeout == TRUE) {
+ 924   2              if ((GetTimerTick() - usCBUSTimeoutDAT) > CBUS_TPKT_TIMEOUT) {
+ 925   3                  ucCBUSErrorCode = ERROR_CBUS_TIMEOUT;
+ 926   3                  bWaitACK = 0;
+ 927   3              }
+ 928   2          }
+ 929   1          if (bCheckDDCTimeout == TRUE) {
+ 930   2          //TEST CASE : 6.3.22.1 CBM-Sink: DUT Receives SOF, CONT 
+ 931   2          //TEST CASE : 6.3.22.2 CBM-Sink: DUT Receives DDC Write; Various Errs 
+ 932   2              if ((GetTimerTick() - usCBUSTimeoutDAT) > CBUS_TPKT_TIMEOUT) {
+ 933   3                  CBUSTxData(TX_DDC_CMD, CBUS_ABORT);
+ 934   3                  bCheckDDCTimeout = 0;
+ 935   3                  bWaitACK = 0;
+ 936   3              }
+ 937   2          }
+ 938   1          if ((bWaitACK == 1) && ((GetTimerTick() - usCBUSTimeoutACK) > CBUS_AA_TIMEOUT)) {
+ 939   2              bWaitACK = 0;
+ 940   2          }
+ 941   1      
+ 942   1      #if ENABLE_INT_TRANSLATION == OFF    
+                  if (bTranslationReady == 1) {
+                      if (bReadDevCapFlag == FALSE) {
+                          bTranslationReady = 0;
+                          MSCCmdTranslation();
+                      }
+                  }
+              #endif    
+ 950   1      
+ 951   1          if (ucWrBurstState != WB_NONE) {
+ 952   2              switch (ucWrBurstState) {
+ 953   3              case WB_WAIT2GO: // send 60 20 04
+ 954   3                  if (CBUSTxData(TX_MSC_CMD, CBUS_SET_INT)) {
+ 955   4                      if (CBUSTxData(TX_MSC_DATA, 0x20)) {
+ 956   5                          if (CBUSTxData(TX_MSC_DATA, 0x04)) {
+ 957   6                              ucWrBurstState = WB_REQ;
+ 958   6                          }
+ 959   5                      }
+ 960   4                  }
+ 961   3                  break;
+ 962   3              case WB_GRT: //REQ:60 20 04; GRT:60 20 08; WriteBurst
+ 963   3                  WriteBurst3DInfo();
+ 964   3                  ucWrBurstState = WB_WRITING;
+ 965   3                  ucWrBurstCount++;
+ 966   3                  break;
+ 967   3              case WB_WRITING: //REQ:60 20 04; GRT:60 20 08; WriteBurst
+ 968   3                  if (CBUSTxData(TX_MSC_CMD, CBUS_SET_INT)) {
+ 969   4                      if (CBUSTxData(TX_MSC_DATA, 0x20)) {
+ 970   5                          if (CBUSTxData(TX_MSC_DATA, 0x02)) {
+ 971   6                              if (ucWrBurstCount <2 ) {
+ 972   7                                  ucWrBurstState = WB_WAIT2GO;
+ 973   7                              }
+ 974   6                              else {
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 17  
+
+ 975   7                                  ucWrBurstState = WB_NONE;
+ 976   7                              }
+ 977   6                          }
+ 978   5                      }
+ 979   4                  }
+ 980   3                  break;
+ 981   3              default:
+ 982   3                  break;
+ 983   3              }
+ 984   2          }
+ 985   1      }
+ 986          
+ 987          //******************************************************************************
+ 988          // Prototype: 
+ 989          //  void SetCbusConnectStatus(UCHAR status)
+ 990          // Parameters:
+ 991          //
+ 992          // Return:
+ 993          //  None
+ 994          // Purpose:
+ 995          //
+ 996          // Notes:
+ 997          //  None
+ 998          //******************************************************************************
+ 999          void SetCbusConnectStatus(UCHAR status)
+1000          {
+1001   1          ucMHLConnState = status;
+1002   1          
+1003   1          switch (status) {
+1004   2              case MHL_NONE:
+1005   2                  ucCBusState = CBUS_UNACTIVE;
+1006   2              bClearHPD = 0;
+1007   2                  break;
+1008   2              case MHL_DISCOVERY_RDY:
+1009   2                  ucCBusState = CBUS_DISCOVERY_DONE;
+1010   2                  ucIsMHLSrcConnected[MHL_GetCbusCH()] = TRUE;
+1011   2                  break;
+1012   2              case MHL_CONNECT_RDY:
+1013   2                  ucCBusState = CONNECTED_RDY;
+1014   2                  break;
+1015   2              case MHL_SET_HPD:
+1016   2                  ucCBusState = CBUS_SETHPD;
+1017   2                  break;
+1018   2              case MHL_PATH_EN:
+1019   2                  ucCBusState = LINK_MODE;
+1020   2                  break;
+1021   2              case MHL_DATA_RDY:
+1022   2                  ucCBusState = CBUS_ACTIVE;
+1023   2                  break;
+1024   2              case MHL_CLR_HPD:
+1025   2                  ucCBusState = CBUS_CLRHPD;
+1026   2              break;
+1027   2              default:
+1028   2                  ucCBusState = CBUS_UNKNOWN;
+1029   2                  break;
+1030   2          }
+1031   1      }
+1032          
+1033          //******************************************************************************
+1034          // Prototype: 
+1035          //  UCHAR GetCbusConnectStatus(void)
+1036          // Parameters:
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 18  
+
+1037          //
+1038          // Return:
+1039          //  None
+1040          // Purpose:
+1041          //
+1042          // Notes:
+1043          //  None
+1044          //******************************************************************************
+1045          UCHAR GetCbusConnectStatus(void)
+1046          {
+1047   1          return ucMHLConnState;
+1048   1      }
+1049          
+1050          //******************************************************************************
+1051          // Prototype: 
+1052          //  void MSCCmdTranslation(void)
+1053          // Parameters:
+1054          //
+1055          // Return:
+1056          //  None
+1057          // Purpose:
+1058          //
+1059          // Notes:
+1060          //  None
+1061          //******************************************************************************
+1062          void MSCCmdTranslation(void)
+1063          {
+1064   1      #if ENABLE_INT_TRANSLATION == ON
+1065   1              switch(ucCBusState) {
+1066   2              case CBUS_SETHPD:
+1067   2                  if ( MHLCbusTx(TX_MSC_CMD, CBUS_WRITE_STAT) ) {
+1068   3                      if (MHLCbusTx(TX_MSC_DATA,0x30)) {              // Connected Device Ready status
+1069   4                          if (MHLCbusTx(TX_MSC_DATA,0x01)) {          // DCAP_RDY
+1070   5                              ucCBusState = CONNECTED_RDY;
+1071   5                              ucMHLConnState = MHL_CONNECT_RDY;
+1072   5                              bWaitACK = 1;
+1073   5                              usCBUSTimeoutACK = GetTimerTickInt();
+1074   5                          }
+1075   4          }
+1076   3                  }
+1077   2                  break;
+1078   2                      case CONNECTED_RDY:
+1079   2                  if ( MHLCbusTx(TX_MSC_CMD, CBUS_WRITE_STAT) ) {
+1080   3                      if (MHLCbusTx(TX_MSC_DATA, 0x31)) {             // Link Mode
+1081   4                          if (MHLCbusTx(TX_MSC_DATA, 0x08)) {         // PATH_EN
+1082   5                              ucCBusState = LINK_MODE;
+1083   5                              ucMHLConnState = MHL_PATH_EN;
+1084   5                              bWaitACK = 1;
+1085   5                              usCBUSTimeoutACK = GetTimerTickInt();
+1086   5                          }
+1087   4                      }
+1088   3                  }
+1089   2                  break;
+1090   2              case CBUS_ACTIVE:
+1091   2                      case LINK_MODE:
+1092   2      #if 0//ENABLE_HDMI_PRETEST == ON
+                          Sleep(100);//2.     4.3.17.2 CBT-Sink: Sink Loses Arbitration Collision Correctly.
+              #endif
+1095   2                  if ( MHLCbusTx(TX_MSC_CMD, CBUS_SET_INT) ) {
+1096   3                      if ( MHLCbusTx(TX_MSC_DATA, 0x20) ) {           // Rchange_int
+1097   4                          if ( MHLCbusTx(TX_MSC_DATA, 0x01) ) {               // DCAP_CHG
+1098   5                              ucCBusState = RCHANGE_INT;
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 19  
+
+1099   5                              bWaitACK = 1;
+1100   5                              usCBUSTimeoutACK = GetTimerTickInt();
+1101   5                          }
+1102   4                      }
+1103   3                  }
+1104   2                  break;
+1105   2              case RCHANGE_INT:
+1106   2                  break;
+1107   2              default:
+1108   2                  ucCBusState = CBUS_UNKNOWN;
+1109   2              break;
+1110   2          }
+1111   1      #else
+              
+                  //if (ucCmdIndex != 0) {
+                      //return;
+                  //}
+              #if 0//ENABLE_INT_TRANSLATION == OFF    
+                  if (bCBUSAbort == 1) {
+                      if ((GetTimerTickInt() - usCBUSTimeoutIdle) < CBUS_AA_TIMEOUT) {
+                          return;
+                      }
+                  }
+              #endif
+                      switch(ucCBusState) {
+                              case CBUS_SETHPD:
+                          if (CBUSTxData(TX_MSC_CMD, CBUS_WRITE_STAT)) {
+                              if (CBUSTxData(TX_MSC_DATA,0x30)) {             // Connected Device Ready status
+                                  if (CBUSTxData(TX_MSC_DATA,0x01)) {         // DCAP_RDY
+                                      ucCBusState = CONNECTED_RDY;
+                                      ucMHLConnState = MHL_CONNECT_RDY;
+                                      bWaitACK = 1;
+                                      usCBUSTimeoutACK = GetTimerTickInt();
+                                  }
+                              }
+                          }
+                                      break;
+                              case CONNECTED_RDY:
+                          if (CBUSTxData(TX_MSC_CMD, CBUS_WRITE_STAT)) {
+                              if (CBUSTxData(TX_MSC_DATA, 0x31)) {            // Link Mode
+                                  if (CBUSTxData(TX_MSC_DATA, 0x08)) {                // PATH_EN
+                                      ucCBusState = LINK_MODE;
+                                      ucMHLConnState = MHL_PATH_EN;
+                                      bWaitACK = 1;
+                                      usCBUSTimeoutACK = GetTimerTickInt();
+                                  }
+                              }
+                          }
+                                      break;
+                          case CBUS_ACTIVE:
+                              case LINK_MODE:
+              #if 1//ENABLE_HDMI_PRETEST == ON
+                          Sleep(100);//2.     4.3.17.2 CBT-Sink: Sink Loses Arbitration Collision Correctly.
+              #endif
+                          if (CBUSTxData(TX_MSC_CMD, CBUS_SET_INT)) {
+                              if (CBUSTxData(TX_MSC_DATA, 0x20)) {            // Rchange_int
+                                  if (CBUSTxData(TX_MSC_DATA, 0x01)) {                // DCAP_CHG
+                                      ucCBusState = RCHANGE_INT;
+                                      bWaitACK = 1;
+                                      usCBUSTimeoutACK = GetTimerTickInt();
+                                  }
+                              }
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 20  
+
+                          }
+                          break;
+                      case RCHANGE_INT:
+                                      break;
+              #if 0
+                              case CBUS_MSG_RCPK:
+                                      CBUSTxData(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x01);
+                                      ucCBusState = RDEV_VER;
+                                      bReadDevCapFlag = TRUE;
+                                      break;
+                              case RDEV_VER:
+                                      MHLCbusTx(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x02);
+                                      ucCBusState = RDEV_CAT;
+                                      bReadDevCapFlag = TRUE;
+                                      break;
+                              case RDEV_CAT:
+                                      MHLCbusTx(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x08);
+                                      ucCBusState = RDEV_LOG;
+                                      bReadDevCapFlag = TRUE;                 
+                                      break;
+                              case RDEV_LOG:
+                                      MHLCbusTx(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x05);
+                                      ucCBusState = RDEV_VID_LINK;
+                                      bReadDevCapFlag = TRUE;
+                                      break;
+                              case RDEV_VID_LINK:
+                                      MHLCbusTx(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x06);
+                                      ucCBusState = RDEV_AUDIO;       
+                                      bReadDevCapFlag = TRUE;
+                                      break;
+                              case RDEV_AUDIO:
+                                      MHLCbusTx(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x07);
+                                      ucCBusState = RDEV_VIDEO_TYPE;
+                                      bReadDevCapFlag = TRUE;
+                                      break;
+                              case RDEV_VIDEO_TYPE:
+                                      MHLCbusTx(TX_MSC_CMD, CBUS_READ_DEVCAP);
+                                      MHLCbusTx(TX_MSC_DATA, 0x09);
+                                      bReadDevCapFlag = TRUE;
+                                      ucCBusState = RDEV_BANDWIDTH;      
+                                      break;
+              #endif
+                              default:
+                                      ucCBusState = CBUS_UNKNOWN;
+                                  break;
+                      }
+              #endif    
+1214   1      }
+1215          
+1216          //******************************************************************************
+1217          // Prototype: 
+1218          //  UCHAR HDCPAddrRemaping(UCHAR offset)
+1219          // Parameters:
+1220          //
+1221          // Return:
+1222          //  None
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 21  
+
+1223          // Purpose:
+1224          //
+1225          // Notes:
+1226          //  None
+1227          //******************************************************************************
+1228          UCHAR HDCPAddrRemaping(UCHAR offset) using 1
+1229          {
+1230   1                                                                      // 0    1    2    3    4    5    6    7    8    9    a
+1231   1          code UCHAR hdcp_index1[]={0x1a,0x1b,0x1c,0x1d,0x1e,0xff,0xff,0xff,0x1f,0x20,0x0a};
+1232   1                                                                      // 10   11   12   13   14   15   16   17   18   19   1a   1b   1c   1d   1e   1f
+1233   1          code UCHAR hdcp_index2[]={0x21,0x22,0x23,0x24,0x25,0xff,0xff,0xff,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0
+             -x2d};
+1234   1                                                                      // 40   41   42
+1235   1          code UCHAR hdcp_index3[]={0x2e,0xff,0x30};
+1236   1                                                                      // F8,  F9   FA
+1237   1          code UCHAR hdcp_index4[]={0xf3,0xf4,0xf5};  
+1238   1      
+1239   1          if(offset <= 0x0a)
+1240   1              return hdcp_index1[offset];
+1241   1          else if((offset >= 0x10) && (offset <= 0x1F))
+1242   1              return hdcp_index2[offset-0x10];
+1243   1          else if((offset >= 0x40) && (offset <= 0x42))
+1244   1              return hdcp_index3[offset-0x40];
+1245   1          else if((offset >=0xF8) && (offset <= 0xFA))
+1246   1              return hdcp_index4[offset-0xF8];
+1247   1          else 
+1248   1              return 0xFF;
+1249   1      }
+1250          
+1251          //******************************************************************************
+1252          // Prototype: 
+1253          //  void MHL_HDCP_SendData(void)
+1254          // Parameters:
+1255          //
+1256          // Return:
+1257          //  None
+1258          // Purpose:
+1259          //
+1260          // Notes:
+1261          //  None
+1262          //******************************************************************************
+1263          void MHL_HDCP_SendData(void) using 1
+1264          {
+1265   1          if (pMHLDDCPtr == (HDCP_PAGE_ADDR + 0xFF)) {
+1266   2              MHLCbusTx(TX_DDC_DATA, 0x00);
+1267   2          }
+1268   1          else {
+1269   2          MHLCbusTx(TX_DDC_DATA, *pMHLDDCPtr);
+1270   2          }
+1271   1          
+1272   1          if(bHdcpFlag==TRUE)  {
+1273   2              ucHdcpIndex++;
+1274   2              if ( ucHdcpIndex == 0x09 ) { // for speedup Ri
+1275   3                  pMHLDDCPtr = HDCP_PAGE_ADDR+0x20;
+1276   3                  ucMHLConnState = MHL_DATA_RDY;
+1277   3                  ResetWDTimer(); //jtest: need confirm
+1278   3              }
+1279   2              else {
+1280   3                  pMHLDDCPtr = HDCP_PAGE_ADDR + HDCPAddrRemaping(ucHdcpIndex);
+1281   3              }
+1282   2          }
+1283   1          else {     
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 22  
+
+1284   2              pMHLDDCPtr++;
+1285   2          ucEDIDIndex++;
+1286   2          if(ucEDIDIndex>=0x100) {
+1287   3              ucEDIDIndex = 0x100;
+1288   3          }
+1289   2      }
+1290   1      }
+1291          
+1292          //******************************************************************************
+1293          // Prototype: 
+1294          //  void DDCTranslation(UCHAR rxdata)
+1295          // Parameters:
+1296          //
+1297          // Return:
+1298          //  None
+1299          // Purpose:
+1300          //
+1301          // Notes:
+1302          //  None
+1303          //******************************************************************************
+1304          void DDCTranslation(UCHAR rxdata) using 1
+1305          {
+1306   1          UCHAR offset;
+1307   1      ////////////////////////////////////////////////////////////////////
+1308   1      //TEST CASE : 6.3.21.1 CBM-Sink: DUT Receives DDC Write
+1309   1      //TEST CASE : 6.3.21.2 CBM-Sink: DUT Receives DDC Current Read
+1310   1      //TEST CASE : 6.3.21.3 CBM-Sink: DUT Receives regular DDC Read 
+1311   1      //TEST CASE : 6.3.21.5 CBM-Sink: DUT NACKs DDC Segment Read; Segment Register Not Implemented
+1312   1          ucCbusBuffer[ucCmdIndex] = rxdata;
+1313   1          if (ucCmdIndex == 0) {//check DevAddr
+1314   2              offset = ucCbusBuffer[ucCmdIndex] & 0xFE;
+1315   2              if ((offset != CBUS_EDID_WRITE) && (offset != CBUS_HDCP_WRITE)) {//not EDID or HDCP and no segment
+             - function (0x60)
+1316   3                  MHLCbusTx(TX_DDC_CMD, CBUS_NACK);
+1317   3              }
+1318   2              else {//EDID or HDCP
+1319   3                  MHLCbusTx(TX_DDC_CMD, CBUS_ACK);
+1320   3              }
+1321   2          }
+1322   1          else {//data
+1323   2              MHLCbusTx(TX_DDC_CMD, CBUS_ACK);
+1324   2          }
+1325   1      
+1326   1          if(bStartOfFrame) {
+1327   2              if(ucCmdIndex == 0) {
+1328   3                  // First DDC command
+1329   3                  ucCBUSDDCStatus = CBUS_DDC_DevAddr;
+1330   3                  if((ucCbusBuffer[0] & 0x01)==0) {
+1331   4                      // Write command
+1332   4                      bDDCWriteFlag = TRUE;
+1333   4                      usCBUSTimeoutDAT = GetTimerTickInt();
+1334   4                      bCheckDDCTimeout = 1;
+1335   4                  }
+1336   3                  else {
+1337   4                      // Read command.
+1338   4                      if(bDDCWriteFlag == FALSE) {
+1339   5                          // Short Read & Current Read command.
+1340   5                          if(ucCbusBuffer[0] == CBUS_HDCP_READ) {
+1341   6                              if (bHdcpFlag == FALSE) {//DevAddr not match
+1342   7                                 // TxData(TX_DDC_CMD, CBUS_ABORT);
+1343   7                              }
+1344   6                              else {//DevAddr match
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 23  
+
+1345   7                              pMHLDDCPtr = HDCP_PAGE_ADDR + 0x1F;
+1346   7                              ucHdcpIndex = 0x08;
+1347   7                          }
+1348   6                          }
+1349   5      //                    else if(ucCbusBuffer[0] == CBUS_EDID_READ) {
+1350   5      //                        if (bHdcpFlag == TRUE) {//DevAddr not match
+1351   5                               //   TxData(TX_DDC_CMD, CBUS_ABORT);
+1352   5      //                        }
+1353   5      //                    }
+1354   5                          else {//error DevAddr
+1355   6                          }
+1356   5                      }
+1357   4                      bStartOfFrame = FALSE;
+1358   4                      bDDCWriteFlag = FALSE;
+1359   4                  }
+1360   3              }
+1361   2              else {
+1362   3                  ucCBUSDDCStatus = CBUS_DDC_Offset;
+1363   3                  if((ucCbusBuffer[0]&0xFE) == CBUS_EDID_WRITE) {
+1364   4                      pMHLDDCPtr =  &EDID_SRAM_MHL + ucCbusBuffer[1];         // Pointer = EDID_SRAM + Offset
+1365   4                      bHdcpFlag = FALSE;
+1366   4                  }
+1367   3                  else if((ucCbusBuffer[0]) == CBUS_HDCP_WRITE) {
+1368   4                      ucHdcpIndex = ucCbusBuffer[1];
+1369   4                      offset = HDCPAddrRemaping(ucHdcpIndex);
+1370   4                      pMHLDDCPtr  = HDCP_PAGE_ADDR + offset;                          // Pointer = HDCP_SRAM + Offset
+1371   4                      bHdcpFlag = TRUE;
+1372   4                  }
+1373   3                  bStartOfFrame = FALSE;
+1374   3              }               
+1375   2      
+1376   2              if ( ++ucCmdIndex >= CBUS_BUF_LEN ) {
+1377   3                  ucCmdIndex = CBUS_BUF_LEN-1;
+1378   3                  // Do something if any error occurred?
+1379   3              }
+1380   2          }           
+1381   1          else if(ucCbusBuffer[0] == CBUS_HDCP_WRITE || ucCbusBuffer[0] == CBUS_EDID_WRITE) {        // Write da
+             -ta.
+1382   2              if ((ucCBUSDDCStatus != CBUS_DDC_Offset) && (ucCBUSDDCStatus != CBUS_DDC_Data)) {//offset or data
+1383   3              //TEST CASE : 6.3.22.2 CBM-Sink: DUT Receives DDC Write; Various Errs
+1384   3              //TEST CASE : 6.3.22.3 CBM-Sink: DUT Receives DDC Short Read and Current Read; Various Errs 
+1385   3                  MHLCbusTx(TX_DDC_CMD, CBUS_ABORT);
+1386   3              }
+1387   2              else {
+1388   3                  if(pMHLDDCPtr != (HDCP_PAGE_ADDR + 0xFF)) {
+1389   4                  *pMHLDDCPtr++ = rxdata;
+1390   4          }
+1391   3                  ucCBUSDDCStatus = CBUS_DDC_Data;
+1392   3                  usCBUSTimeoutDAT = GetTimerTickInt();
+1393   3                  bCheckDDCTimeout = 1;
+1394   3              }
+1395   2          }
+1396   1      }
+1397          
+1398          //******************************************************************************
+1399          // Prototype: 
+1400          //  BOOL IsMHL0CableConnect(void)
+1401          // Parameters:
+1402          //
+1403          // Return:
+1404          //  None
+1405          // Purpose:
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 24  
+
+1406          //
+1407          // Notes:
+1408          //  None
+1409          //******************************************************************************
+1410          BOOL IsMHL0CableConnect(void)
+1411          {
+1412   1          UCHAR ret = 0;
+1413   1      #if IS_NT68850_SERIES
+1414   1          UCHAR Reg0xB57 =0;
+1415   1          UCHAR ZpState=0;
+1416   1      #endif
+1417   1      
+1418   1      #if IS_NT68770_SERIES
+                  if ( MHL_Is_CDSense1_IO_HIGH() ) {
+                      ret = TRUE;
+                  }
+              #elif IS_NT68850_SERIES
+1423   1          if ( IsZpMode() ) {
+1424   2              Reg0xB57 = SC_ADC_ZERO_POWER_CTRL;
+1425   2              SC_ADC_ZERO_POWER_CTRL |= BIT7;
+1426   2              ZpState = 1;
+1427   2          }
+1428   1          
+1429   1          if ( MHL_IsCDSenseFlagOn() ) {
+1430   2              ret = TRUE;
+1431   2          }
+1432   1          
+1433   1          if(ZpState == 1){
+1434   2              SC_ADC_ZERO_POWER_CTRL = Reg0xB57;
+1435   2          }
+1436   1      #endif
+1437   1      
+1438   1          return ret;
+1439   1      }
+1440          
+1441          //******************************************************************************
+1442          // Prototype: 
+1443          //  BOOL IsMHL1CableConnect(void)
+1444          // Parameters:
+1445          //
+1446          // Return:
+1447          //  None
+1448          // Purpose:
+1449          //
+1450          // Notes:
+1451          //  None
+1452          //******************************************************************************
+1453          BOOL IsMHL1CableConnect(void)
+1454          {
+1455   1          UCHAR ret = 0;
+1456   1      #if IS_NT68770_SERIES
+                  if ( MHL_Is_CDSense2_IO_HIGH() ) {
+                      ret = TRUE;
+                  }
+              #endif
+1461   1      
+1462   1          return ret;
+1463   1      }
+1464          
+1465          //******************************************************************************
+1466          // Prototype: 
+1467          //  BOOL IsMHL0Connect(void)
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 25  
+
+1468          // Parameters:
+1469          //
+1470          // Return:
+1471          //  None
+1472          // Purpose:
+1473          //
+1474          // Notes:
+1475          //  None
+1476          //******************************************************************************
+1477          BOOL IsMHL0Connect(void)
+1478          {
+1479   1          return ucIsMHLSrcConnected[MHL_CBUS_CH1];
+1480   1      }
+1481          
+1482          //******************************************************************************
+1483          // Prototype: 
+1484          //  BOOL IsMHL1Connect(void)
+1485          // Parameters:
+1486          //
+1487          // Return:
+1488          //  None
+1489          // Purpose:
+1490          //
+1491          // Notes:
+1492          //  None
+1493          //******************************************************************************
+1494          BOOL IsMHL1Connect(void)
+1495          {
+1496   1          return ucIsMHLSrcConnected[MHL_CBUS_CH2];
+1497   1      }
+1498          
+1499          //******************************************************************************
+1500          // Prototype: 
+1501          //  void MHLClearHPD(void)
+1502          // Parameters:
+1503          //
+1504          // Return:
+1505          //  None
+1506          // Purpose:
+1507          //
+1508          // Notes:
+1509          //  None
+1510          //******************************************************************************
+1511          void MHLClearHPD(void)
+1512          {
+1513   1          MHL_WaitCBusReady();
+1514   1          if ( ucMHLConnState == MHL_DATA_RDY && ucCBUSDDCStatus == CBUS_DDC_EOF) {
+1515   2              SC_CBUS_MSC_CMD = CBUS_CLR_HPD;
+1516   2              bClearHPD = 1;
+1517   2          }
+1518   1      }
+1519          
+1520          //******************************************************************************
+1521          // Prototype: 
+1522          //  void MHLResetHPD(void)
+1523          // Parameters:
+1524          //
+1525          // Return:
+1526          //  None
+1527          // Purpose:
+1528          //
+1529          // Notes:
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 26  
+
+1530          //  None
+1531          //******************************************************************************
+1532          void MHLResetHPD(void)
+1533          {
+1534   1          MHL_WaitCBusReady();
+1535   1          if ( ucCBUSDDCStatus == CBUS_DDC_EOF ) {
+1536   2              SC_CBUS_MSC_CMD = CBUS_SET_HPD;
+1537   2          SetCbusConnectStatus(MHL_SET_HPD);
+1538   2          bClearHPD = 0;
+1539   2          }
+1540   1      }
+1541          
+1542          
+1543          //******************************************************************************
+1544          // Prototype: 
+1545          //  void MHLIsClearHPD(void)
+1546          // Parameters:
+1547          //
+1548          // Return:
+1549          //  None
+1550          // Purpose:
+1551          //
+1552          // Notes:
+1553          //  None
+1554          //******************************************************************************
+1555          
+1556          BOOL MHLIsClearHPD(void)
+1557          {
+1558   1          return bClearHPD;
+1559   1      }
+1560          
+1561          #if ((INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1))// && ENABLE_HDMI_PRETEST == ON
+1562          //TEST CASE : 6.3.1.1 CBM: Capability Regs
+1563          // Error : DUT does not response all 16 DEV_CAP registers.
+1564          //TEST CASE : 4.2.x.x: wait discovery....
+1565          void ToggleRxSense(void)
+1566          {
+1567   1          SC_CBUS_RESISTOR_CTRL = 0x38;
+1568   1          Sleep(5);
+1569   1          SC_CBUS_RESISTOR_CTRL = 0x33;
+1570   1      }
+1571          #endif
+1572          
+1573          #if defined(MHL_CTS_DEBUG_TEST1)
+              BOOL MHLIsCBus1Active(void)
+              {
+                   if (McuGetIOBit(DIG0_HPD_PORT, DIG0_HPD_BIT) != DIG0_HPD_ACTIVE) {
+                      return FALSE;
+                  }
+                  return TRUE;
+              }
+              
+              BOOL MHLIsCBus2Active(void)
+              {
+                   if (McuGetIOBit(DIG1_HPD_PORT, DIG1_HPD_BIT) != DIG1_HPD_ACTIVE) {
+                      return FALSE;
+                  }
+                  return TRUE;
+              }
+              #endif
+1590          
+1591          static BOOL WriteBurst3DInfo(void)
+C51 COMPILER V8.02   MHL                                                                   08/07/2015 16:22:33 PAGE 27  
+
+1592          {
+1593   1          UCHAR i;
+1594   1          if ( !CBUSTxData(TX_MSC_CMD, CBUS_WRITE_BURST) ) { //WriteBurst
+1595   2              return 0;
+1596   2          }
+1597   1          if ( !CBUSTxData(TX_MSC_DATA, 0x40) ) { //Scrapthpad
+1598   2              return 0;
+1599   2          }
+1600   1          if ( !CBUSTxData(TX_MSC_DATA, 0x00) ) { // 3D_VIC(2) or 3D_DTD(2)
+1601   2              return 0;
+1602   2          }
+1603   1          if ( !CBUSTxData(TX_MSC_DATA, 0x10+ucWrBurstCount) ) { // 3D_VIC(2) or 3D_DTD(2)
+1604   2              return 0;
+1605   2          }
+1606   1          if ( !CBUSTxData(TX_MSC_DATA, 0xFF-0x10-ucWrBurstCount+1) ) { // Checksum
+1607   2              return 0;
+1608   2          }
+1609   1          for (i=0; i<13; i++ ) {
+1610   2              if (!CBUSTxData(TX_MSC_DATA, 0x00)) {
+1611   3                  return 0;
+1612   3              }
+1613   2          }
+1614   1          if (!CBUSTxData(TX_MSC_CMD, CBUS_EOF)) {
+1615   2              return 0;
+1616   2          }
+1617   1      
+1618   1          return 1;
+1619   1      }
+1620          
+1621          #endif
+1622          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   3009    ----
+   CONSTANT SIZE    =     33    ----
+   XDATA SIZE       =     54       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =     17       2
+   BIT SIZE         =     15    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,239 @@
+C51 COMPILER V8.02   MCUREG                                                                08/07/2015 16:22:27 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MCUREG
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\McuReg.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\McuReg.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.
+                    -\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT
+                    -\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRIN
+                    -T(.\Lst\McuReg.lst) OBJECT(.\Bin\ADS\AXI\104N\McuReg.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          //GPIO PORT CONTROL REGISTERS
+  22          xdata UCHAR volatile PortA _at_ 0xF000;
+  23          xdata UCHAR volatile PortB _at_ 0xF001;
+  24          xdata UCHAR volatile PortC _at_ 0xF002;
+  25          xdata UCHAR volatile PortD _at_ 0xF003;
+  26          xdata UCHAR volatile PortE _at_ 0xF004;
+  27          //GPIO PORT DIRECTION CONTROL REGISTERS
+  28          xdata UCHAR volatile RDPA_REG _at_ 0xF005;
+  29          xdata UCHAR volatile RDPB_REG _at_ 0xF006;
+  30          xdata UCHAR volatile RDPC_REG _at_ 0xF007;
+  31          xdata UCHAR volatile RDPD_REG _at_ 0xF008;
+  32          xdata UCHAR volatile RDPE_REG _at_ 0xF009;
+  33          //WATCH-DOG TIMER CONTROL REGISTER
+  34          xdata UCHAR volatile CLR_WDT _at_ 0xF00A;
+  35          //A/D CONVERTER CONTROL REGISTERS
+  36          xdata UCHAR volatile ADC_CON _at_ 0xF00B;       //20150423 George,      Ctrl_ADC0~3
+  37          xdata UCHAR volatile ADC_CON2 _at_ 0xF080;      //20150423 George,      Ctrl_ADC4~7
+  38          xdata UCHAR volatile ADC_REG0 _at_ 0xF00C;
+  39          xdata UCHAR volatile ADC_REG1 _at_ 0xF00D;
+  40          xdata UCHAR volatile ADC_REG2 _at_ 0xF00E;
+  41          xdata UCHAR volatile ADC_REG3 _at_ 0xF00F;
+  42          xdata UCHAR volatile ADC_REG4 _at_ 0xF081;
+  43          xdata UCHAR volatile ADC_REG5 _at_ 0xF082;
+  44          xdata UCHAR volatile ADC_REG6 _at_ 0xF083;
+  45          xdata UCHAR volatile ADC_REG7 _at_ 0xF084;
+  46          //PWM CHANNEL ENABLE CONTROL REGISTERS
+  47          xdata UCHAR volatile ENPWM_LB _at_ 0xF010;
+  48          xdata UCHAR volatile ENPWM_HB _at_ 0xF011;
+  49          xdata UCHAR volatile ENPWM_UB _at_ 0xF0A0;
+  50          //PWM CHANNEL CONTROL REGISTERS
+  51          xdata UCHAR volatile PWM_REG0 _at_ 0xF012;
+  52          xdata UCHAR volatile PWM_REG1 _at_ 0xF013;
+C51 COMPILER V8.02   MCUREG                                                                08/07/2015 16:22:27 PAGE 2   
+
+  53          xdata UCHAR volatile PWM_REG2 _at_ 0xF014;
+  54          xdata UCHAR volatile PWM_REG3 _at_ 0xF015;
+  55          xdata UCHAR volatile PWM_REG4 _at_ 0xF016;
+  56          xdata UCHAR volatile PWM_REG5 _at_ 0xF017;
+  57          xdata UCHAR volatile PWM_REG6 _at_ 0xF018;
+  58          xdata UCHAR volatile PWM_REG7 _at_ 0xF019;
+  59          xdata UCHAR volatile PWM_REG8 _at_ 0xF01A;
+  60          xdata UCHAR volatile PWM_REG9 _at_ 0xF01B;
+  61          xdata UCHAR volatile PWM_REG10 _at_ 0xF0A1;
+  62          xdata UCHAR volatile PWM_REG11 _at_ 0xF0A2;
+  63          //DDC PORT-0 CONTROL REGISTERS
+  64          xdata UCHAR volatile DDC_CTL0 _at_ 0xF01C;
+  65          xdata UCHAR volatile DDC_ADDR0 _at_ 0xF01D;
+  66          //DDC PORT-1 CONTROL REGISTERS
+  67          xdata UCHAR volatile DDC_CTL1 _at_ 0xF01E;
+  68          xdata UCHAR volatile DDC_ADDR1 _at_ 0xF01F;
+  69          //DDC PORT-2 CONTROL REGISTERS
+  70          xdata UCHAR volatile DDC_CTL2 _at_ 0xF085;
+  71          xdata UCHAR volatile DDC_ADDR2 _at_ 0xF086;
+  72          //DDC PORT-3 CONTROL REGISTERS
+  73          xdata UCHAR volatile DDC_CTL3 _at_ 0xF087;
+  74          xdata UCHAR volatile DDC_ADDR3 _at_ 0xF088;
+  75          //INTERRUPT SOURCE CONTROL REGISTER
+  76          xdata UCHAR volatile INT_SRC _at_ 0xF020;
+  77          //EXTERNAL INTERRUPT CONTROL REGISTERS
+  78          xdata UCHAR volatile INTEXT_FLG _at_ 0xF021;
+  79          xdata UCHAR volatile INTEXT_EN _at_ 0xF022;
+  80          //SCALER INTERRUPT CONTROL REGISTER
+  81          xdata UCHAR volatile INTSC_EN _at_ 0xF024;
+  82          //LOW POWER DETECT
+  83          xdata UCHAR volatile LPD_CTRL _at_ 0xF025;
+  84          xdata UCHAR volatile LPD0_ADJ _at_ 0xF026;
+  85          //MHL INTERRUPT
+  86          xdata UCHAR volatile DP_SRC _at_ 0xF02C;
+  87          xdata UCHAR volatile MHL_SRC _at_ 0xF02D;
+  88          //IIC PORT-0 CONTROL REGISTERS
+  89          xdata UCHAR volatile IIC0_CFG _at_ 0xF039;
+  90          xdata UCHAR volatile IIC0_STATUS _at_ 0xF03A;
+  91          xdata UCHAR volatile IIC0_INT_EN _at_ 0xF03B;
+  92          xdata UCHAR volatile IIC0_INT_FLG _at_ 0xF03C;
+  93          xdata UCHAR volatile IIC0_INT_CLR _at_ 0xF03D;
+  94          xdata UCHAR volatile IIC0_TXDATA _at_ 0xF03E;
+  95          xdata UCHAR volatile IIC0_RXDATA _at_ 0xF03F;
+  96          xdata UCHAR volatile IIC0_ADDR _at_ 0xF040;
+  97          //IIC PORT-1 CONTROL REGISTERS
+  98          xdata UCHAR volatile IIC1_CFG _at_ 0xF041;
+  99          xdata UCHAR volatile IIC1_STATUS _at_ 0xF042;
+ 100          xdata UCHAR volatile IIC1_INT_EN _at_ 0xF043;
+ 101          xdata UCHAR volatile IIC1_INT_FLG _at_ 0xF044;
+ 102          xdata UCHAR volatile IIC1_INT_CLR _at_ 0xF045;
+ 103          xdata UCHAR volatile IIC1_TXDATA _at_ 0xF046;
+ 104          xdata UCHAR volatile IIC1_RXDATA _at_ 0xF047;
+ 105          xdata UCHAR volatile IIC1_ADDR _at_ 0xF048;
+ 106          //IIC PORT-2 CONTROL REGISTERS
+ 107          xdata UCHAR volatile IIC2_CFG _at_ 0xF089;
+ 108          xdata UCHAR volatile IIC2_STATUS _at_ 0xF08A;
+ 109          xdata UCHAR volatile IIC2_INT_EN _at_ 0xF08B;
+ 110          xdata UCHAR volatile IIC2_INT_FLG _at_ 0xF08C;
+ 111          xdata UCHAR volatile IIC2_INT_CLR _at_ 0xF08D;
+ 112          xdata UCHAR volatile IIC2_TXDATA _at_ 0xF08E;
+ 113          xdata UCHAR volatile IIC2_RXDATA _at_ 0xF08F;
+ 114          xdata UCHAR volatile IIC2_ADDR _at_ 0xF090;
+C51 COMPILER V8.02   MCUREG                                                                08/07/2015 16:22:27 PAGE 3   
+
+ 115          //IIC PORT-3 CONTROL REGISTERS
+ 116          xdata UCHAR volatile IIC3_CFG _at_ 0xF091;
+ 117          xdata UCHAR volatile IIC3_STATUS _at_ 0xF092;
+ 118          xdata UCHAR volatile IIC3_INT_EN _at_ 0xF093;
+ 119          xdata UCHAR volatile IIC3_INT_FLG _at_ 0xF094;
+ 120          xdata UCHAR volatile IIC3_INT_CLR _at_ 0xF095;
+ 121          xdata UCHAR volatile IIC3_TXDATA _at_ 0xF096;
+ 122          xdata UCHAR volatile IIC3_RXDATA _at_ 0xF097;
+ 123          xdata UCHAR volatile IIC3_ADDR _at_ 0xF098;
+ 124          //MISC CONTROL REGISTERS
+ 125          xdata UCHAR volatile CPU_CLK _at_ 0xF04C;
+ 126          xdata UCHAR volatile BANK_SET _at_ 0xF04D;
+ 127          xdata UCHAR volatile DDC_THRES _at_ 0xF04E;
+ 128          xdata UCHAR volatile SC_HW_RST _at_ 0xF04F;
+ 129          xdata UCHAR volatile LDO_ADJ _at_ 0xF050;
+ 130          xdata UCHAR volatile IIC_MASK _at_ 0xF053;
+ 131          xdata UCHAR volatile UART_MUX _at_ 0xF054;
+ 132          xdata UCHAR volatile SC_CR_MUX _at_ 0xF055;
+ 133          xdata UCHAR volatile HDCP_MUX _at_ 0xF056;
+ 134          xdata UCHAR volatile PA47_CURR _at_ 0xF058;
+ 135          xdata UCHAR volatile SPI_CURR _at_ 0xF05D;
+ 136          xdata UCHAR volatile PD46_CURR _at_ 0xF05E;
+ 137          xdata UCHAR volatile CURR_ADJ1 _at_ 0xF060;
+ 138          xdata UCHAR volatile CURR_ADJ2 _at_ 0xF061;
+ 139          xdata UCHAR volatile SLEW_CTL _at_ 0xF062;
+ 140          xdata UCHAR volatile IIC_MASK_CTRL _at_ 0xF06A;
+ 141          //SPI INTERFACE CONTROL REGISTERS
+ 142          xdata UCHAR volatile SPI_OPTION _at_ 0xF075;
+ 143          xdata UCHAR volatile CORE_FIX _at_ 0xF077;
+ 144          xdata UCHAR volatile SPI_IDLE_CNT _at_ 0xF0D1; 
+ 145          //SDMA
+ 146          xdata UCHAR volatile SDMA_TYPE _at_ 0xF078;
+ 147          xdata UCHAR volatile SDMA_TADH _at_ 0xF079;
+ 148          xdata UCHAR volatile SDMA_TADL _at_ 0xF07A;
+ 149          xdata UCHAR volatile SDMA_AH _at_ 0xF07B;
+ 150          xdata UCHAR volatile SDMA_AL _at_ 0xF07C;
+ 151          xdata UCHAR volatile SDMA_LEN1 _at_ 0xF07D;
+ 152          xdata UCHAR volatile SDMA_LEN2 _at_ 0xF07E;
+ 153          xdata UCHAR volatile SDMA_SDIV _at_ 0xF07F;
+ 154          //SYNC COUNTER CONTROL REGISTERS
+ 155          xdata UCHAR volatile CNT_CTRL _at_ 0xF0A8;
+ 156          xdata UCHAR volatile HS_CNT_LB _at_ 0xF0A9;
+ 157          xdata UCHAR volatile HS_CNT_HB _at_ 0xF0AA;
+ 158          xdata UCHAR volatile SOG_CNT_LB _at_ 0xF0AB;
+ 159          xdata UCHAR volatile SOG_CNT_HB _at_ 0xF0AC;
+ 160          xdata UCHAR volatile VS_CNT _at_ 0xF0AD;
+ 161          //GPIO PORT TYPE CONTROL REGISTERS
+ 162          xdata UCHAR volatile PTA_PP_REG _at_ 0xF0B0;
+ 163          xdata UCHAR volatile PTB_PP_REG _at_ 0xF0B1;
+ 164          xdata UCHAR volatile PTC_PP_REG _at_ 0xF0B2;
+ 165          xdata UCHAR volatile PTD_PP_REG _at_ 0xF0B3;
+ 166          xdata UCHAR volatile PTE_PP_REG _at_ 0xF0B4;
+ 167          xdata UCHAR volatile PTA_PU_REG _at_ 0xF0C7;
+ 168          xdata UCHAR volatile PTB_PU_REG _at_ 0xF0C8;
+ 169          xdata UCHAR volatile PTC_PU_REG _at_ 0xF0C9;
+ 170          xdata UCHAR volatile PTD_PU_REG _at_ 0xF0CA;
+ 171          xdata UCHAR volatile PTE_PU_REG _at_ 0xF0CB;
+ 172          xdata UCHAR volatile PT3_PU_REG _at_ 0xF0CC;
+ 173          xdata UCHAR volatile ADC_5V_EN _at_ 0xF0CD;
+ 174          //DISPLAYPORT CONTROL
+ 175          xdata UCHAR volatile DP_CTRL  _at_ 0xF0D2;
+ 176          //AO DETECT
+C51 COMPILER V8.02   MCUREG                                                                08/07/2015 16:22:27 PAGE 4   
+
+ 177          xdata UCHAR volatile AO_DETECT _at_ 0xF0DD;
+ 178          //Watch-Dog #2 Timer Control Register
+ 179          xdata UCHAR volatile CLR_WDT2 _at_ 0xF0E0;
+ 180          xdata UCHAR volatile WDT2_SEL _at_ 0xF0E1;
+ 181          // EDID SRAM
+ 182          #if 1                                                   
+ 183          xdata UCHAR volatile EDID_SRAM_BUFF0[256] _at_ 0xF800;  
+ 184          xdata UCHAR volatile EDID_SRAM_BUFF1[256] _at_ 0xF900;  
+ 185          xdata UCHAR volatile EDID_SRAM_BUFF2[256] _at_ 0xFA00;  
+ 186          xdata UCHAR volatile EDID_SRAM_BUFF3[256] _at_ 0xFB00;  
+ 187          #endif
+ 188          
+ 189          //******************************************************************************
+ 190          // S T A T I C   V A R I A B L E S
+ 191          //******************************************************************************
+ 192          
+ 193          //******************************************************************************
+ 194          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+ 195          //******************************************************************************
+ 196          
+ 197          //******************************************************************************
+ 198          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+ 199          //******************************************************************************
+ 200          
+ 201          //******************************************************************************
+ 202          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+ 203          //******************************************************************************
+ 204          
+ 205          //******************************************************************************
+ 206          // F U N C T I O N   B O D Y S
+ 207          //******************************************************************************
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,473 @@
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE OSDAPI_INDENT
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\OSDAPI_Indent.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\OSD\OSDAPI_Indent.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\O
+                    -SD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.
+                    -\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\OSDA
+                    -PI_Indent.lst) OBJECT(.\Bin\ADS\AXI\104N\OSDAPI_Indent.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // S T A T I C   V A R I A B L E S
+  20          //******************************************************************************
+  21          static idata USHRT *pIndentFontBase;
+  22          static idata UCHAR *pIndentWidthBase;
+  23          static idata USHRT usIndentFontIndex = 0;
+  24          static idata UCHAR ucIndentStringLen = 0;
+  25          static idata UCHAR ucIndentWidth = 0;
+  26          static xdata USHRT usIndentFontBuffer[18];
+  27          
+  28          //******************************************************************************
+  29          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  30          //******************************************************************************
+  31          static void OSDAPI_LoadIndentFont(void) small;
+  32          
+  33          //******************************************************************************
+  34          // Prototype: 
+  35          //  void OSDAPI_SetIndentTable(UCHAR id)
+  36          // Parameters:
+  37          //
+  38          // Return:
+  39          //  None
+  40          // Purpose:
+  41          //  
+  42          // Notes:
+  43          //  None
+  44          //******************************************************************************
+  45          void OSDAPI_SetIndentTable(UCHAR id)
+  46          {
+  47   1          if (id == CHINESE_TABLE)
+  48   1              OSDAPI_SetIndentFont(usArialFontChineseTable, NULL);
+  49   1          else
+  50   1              OSDAPI_SetIndentFont(usArialFontTable, ucArialWidthTable);
+  51   1      }
+  52          
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 2   
+
+  53          //******************************************************************************
+  54          // Prototype:
+  55          //  void OSDAPI_SetIndentIndex(USHRT index)
+  56          // Parameters:
+  57          //  index   : start font index of a indent string
+  58          // Return:
+  59          //  None
+  60          // Purpose:
+  61          //  Set start font index of a indent string
+  62          // Notes:
+  63          //  None
+  64          //******************************************************************************
+  65          void OSDAPI_SetIndentIndex(USHRT index)
+  66          {
+  67   1          usIndentFontIndex = index;
+  68   1      }
+  69          
+  70          //******************************************************************************
+  71          // Prototype:
+  72          //  void OSDAPI_SetIndentIndex(USHRT index)
+  73          // Parameters:
+  74          //  index   : start font index of a indent string
+  75          // Return:
+  76          //  None
+  77          // Purpose:
+  78          //  Set start font index of a indent string
+  79          // Notes:
+  80          //  None
+  81          //******************************************************************************
+  82          /*
+  83          USHRT OSDAPI_GetIndentIndex(void)
+  84          {
+  85              return usIndentFontIndex;
+  86          }
+  87          */
+  88          
+  89          //******************************************************************************
+  90          // Prototype:
+  91          //  void OSDAPI_SetIndentIndex(USHRT index)
+  92          // Parameters:
+  93          //  index   : start font index of a indent string
+  94          // Return:
+  95          //  None
+  96          // Purpose:
+  97          //  Set start font index of a indent string
+  98          // Notes:
+  99          //  None
+ 100          //******************************************************************************
+ 101          /*
+ 102          void OSDAPI_SetIndentStringLen(UCHAR len)
+ 103          {
+ 104              ucIndentStringLen = len;
+ 105          }
+ 106          */
+ 107          
+ 108          //******************************************************************************
+ 109          // Prototype:
+ 110          //  void OSDAPI_SetIndentIndex(USHRT index)
+ 111          // Parameters:
+ 112          //  index   : start font index of a indent string
+ 113          // Return:
+ 114          //  None
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 3   
+
+ 115          // Purpose:
+ 116          //  Set start font index of a indent string
+ 117          // Notes:
+ 118          //  None
+ 119          //******************************************************************************
+ 120          /*
+ 121          UCHAR OSDAPI_GetIndentStringLen(void)
+ 122          {
+ 123              return ucIndentStringLen;
+ 124          }
+ 125          */
+ 126          
+ 127          //******************************************************************************
+ 128          // Prototype:
+ 129          //  void OSDAPI_SetIndentWidth(UCHAR width)
+ 130          // Parameters:
+ 131          //  width   : indent string width
+ 132          // Return:
+ 133          //  None
+ 134          // Purpose:
+ 135          //  Set indent string width
+ 136          // Notes:
+ 137          //  None
+ 138          //******************************************************************************
+ 139          void OSDAPI_SetIndentWidth(UCHAR width)
+ 140          {
+ 141   1          ucIndentWidth = width;
+ 142   1      }
+ 143          
+ 144          //******************************************************************************
+ 145          // Prototype:
+ 146          //  void OSDAPI_SetIndentWidth(UCHAR width)
+ 147          // Parameters:
+ 148          //  width   : indent string width
+ 149          // Return:
+ 150          //  None
+ 151          // Purpose:
+ 152          //  Set indent string width
+ 153          // Notes:
+ 154          //  None
+ 155          //******************************************************************************
+ 156          /*
+ 157          UCHAR OSDAPI_GetIndentWidth(void)
+ 158          {
+ 159              return ucIndentWidth;
+ 160          }
+ 161          */
+ 162          
+ 163          //******************************************************************************
+ 164          // Prototype:
+ 165          //  void OSDAPI_SetIndentFont(USHRT *pfont, UCHAR *pwidth)
+ 166          // Parameters:
+ 167          //  *pfont   : pointer to font table
+ 168          //  *pwidth  : pointer to font width table
+ 169          // Return:
+ 170          //  None
+ 171          // Purpose:
+ 172          //  Set indent font table & width table
+ 173          // Notes:
+ 174          //  None
+ 175          //******************************************************************************
+ 176          void OSDAPI_SetIndentFont(USHRT *pfont, UCHAR *pwidth)
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 4   
+
+ 177          {
+ 178   1          pIndentFontBase = pfont;
+ 179   1          pIndentWidthBase = pwidth;
+ 180   1      }
+ 181          
+ 182          //******************************************************************************
+ 183          // Prototype:
+ 184          //  void OSDAPI_LoadIndentFont(void)
+ 185          // Parameters:
+ 186          //  None
+ 187          // Return:
+ 188          //  None
+ 189          // Purpose:
+ 190          //  Load run-time-gererated OSD font to OSD SRam in scaler
+ 191          // Notes:
+ 192          //  None
+ 193          //******************************************************************************
+ 194          static void OSDAPI_LoadIndentFont(void) small
+ 195          {
+ 196   1          UCHAR i,ch,height;
+ 197   1      
+ 198   1          ResetWDTimer();
+ 199   1          SC_INDEX_CTRL = 0xA0;
+ 200   1          SC_INDEX_ADDR_LO = (UCHAR)usIndentFontIndex; //Index low
+ 201   1          SC_INDEX_ADDR_HI = (UCHAR)(usIndentFontIndex>>8); //Index high
+ 202   1      
+ 203   1      #if ENABLE_OSD_ROTATION == ON
+                  if ((SC_OSD_CTRL1&BIT7) != 0) {
+                      UCHAR buffer[27];
+                      OSDAPI_RotateIdentFont(buffer,usIndentFontBuffer);
+                      for (i=0; i<27; i++) {
+                          SC_INDEX_DATA = buffer[i];
+                      }        
+                  }
+                  else 
+              #endif //ENABLE_OSD_ROTATION == ON
+ 213   1          {
+ 214   2              height = OSDAPI_GetOSDFontHeight();
+ 215   2              for(i=0; i<height; i++) {
+ 216   3                  usIndentFontBuffer[i] >>= 4;
+ 217   3                  SC_INDEX_DATA = (UCHAR)usIndentFontBuffer[i]; //1'st byte
+ 218   3                  ch = (UCHAR)(usIndentFontBuffer[i]>>8) & 0x0F;
+ 219   3                  i++;
+ 220   3                  ch |= ((UCHAR)usIndentFontBuffer[i] & 0xF0);
+ 221   3                  SC_INDEX_DATA = ch; //2'nd byte
+ 222   3                  ch = (UCHAR)((usIndentFontBuffer[i]>>8) & 0x00FF);
+ 223   3                  SC_INDEX_DATA = ch; //3'th byte
+ 224   3              }
+ 225   2          }
+ 226   1          usIndentFontIndex++;
+ 227   1          ucIndentStringLen++;
+ 228   1      }
+ 229          
+ 230          //******************************************************************************
+ 231          // Prototype: 
+ 232          //  void OSDAPI_SetIndentString(UCHAR *ptr) small
+ 233          // Parameters:
+ 234          //  *ptr  : pointer to font index of indent string
+ 235          // Return:
+ 236          //  None
+ 237          // Purpose:
+ 238          //  Pre-load font data of indent string in scaler.
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 5   
+
+ 239          // Notes:
+ 240          //  None
+ 241          //******************************************************************************
+ 242          void OSDAPI_SetIndentString(UCHAR *ptr) small
+ 243          {
+ 244   1          UCHAR i, l, w, k, Row, wd_point, height;
+ 245   1          USHRT m;
+ 246   1          UCHAR table;
+ 247   1      
+ 248   1          table = COMMON_TABLE;//Defualt COMMON_TABLE
+ 249   1          OSDAPI_SetIndentTable(COMMON_TABLE);
+ 250   1      
+ 251   1          ucIndentStringLen = 0;
+ 252   1          //string width
+ 253   1          m = 0;
+ 254   1          l = ptr[0] + 1;
+ 255   1          for (i=1; i<l; i++) {
+ 256   2              if (ptr[i] == CHINESE_TABLE)
+ 257   2                  table = CHINESE_TABLE;
+ 258   2              else if (ptr[i] == COMMON_TABLE)
+ 259   2                  table = COMMON_TABLE;
+ 260   2              //else if ((ptr[i] != CHINESE_TABLE)&&(ptr[i] != COMMON_TABLE)) {
+ 261   2              else {
+ 262   3                  k = ptr[i];
+ 263   3                  if (table == CHINESE_TABLE)
+ 264   3                      m += 16;
+ 265   3                  else
+ 266   3                      m += pIndentWidthBase[k];
+ 267   3              }
+ 268   2          }
+ 269   1          //Alignment
+ 270   1          if (OSDAPI_GetAlignType() == 0) { //Left
+ 271   2              wd_point = 0;
+ 272   2          }
+ 273   1          else if(OSDAPI_GetAlignType() == 1) { //Right
+ 274   2              m = (USHRT)ucIndentWidth * 12 - m;
+ 275   2              wd_point = m % 12;
+ 276   2          }
+ 277   1          else if(OSDAPI_GetAlignType() == 2) { //Center
+ 278   2              m = (USHRT)ucIndentWidth * 12 - m;
+ 279   2              k = m / 12;
+ 280   2              wd_point = m % 12;
+ 281   2              if((k & BIT0) != 0) {
+ 282   3                  wd_point += 12;
+ 283   3              }
+ 284   2              wd_point >>= 1;
+ 285   2          }
+ 286   1      
+ 287   1          height = OSDAPI_GetOSDFontHeight();
+ 288   1          for(Row=0; Row<height; Row++) {
+ 289   2              usIndentFontBuffer[Row] = 0;
+ 290   2          }
+ 291   1      
+ 292   1          table = COMMON_TABLE;//Defualt COMMON_TABLE
+ 293   1          OSDAPI_SetIndentTable(COMMON_TABLE);
+ 294   1              
+ 295   1          //write font
+ 296   1          for (i=1; i<l; i++) {
+ 297   2              if (ptr[i] == CHINESE_TABLE) {
+ 298   3                  OSDAPI_SetIndentTable(CHINESE_TABLE);
+ 299   3                  table = CHINESE_TABLE;
+ 300   3              }
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 6   
+
+ 301   2              else if (ptr[i] == COMMON_TABLE) {
+ 302   3                  OSDAPI_SetIndentTable(COMMON_TABLE);
+ 303   3                  table = COMMON_TABLE;
+ 304   3              }
+ 305   2              else {
+ 306   3                  k = ptr[i];
+ 307   3                  if (table == CHINESE_TABLE)
+ 308   3                      w = 16;
+ 309   3                  else
+ 310   3                      w = pIndentWidthBase[k]; //get font font width
+ 311   3      
+ 312   3                  m = k * height;
+ 313   3      
+ 314   3                  if(wd_point == 0) {
+ 315   4                      for(Row=0; Row<height; Row++) {
+ 316   5                          usIndentFontBuffer[Row] = pIndentFontBase[m+Row];
+ 317   5                      }
+ 318   4                  }
+ 319   3                  else {
+ 320   4                      for(Row=0; Row<height; Row++) {
+ 321   5                          usIndentFontBuffer[Row] |= (pIndentFontBase[m+Row] >> wd_point);
+ 322   5                      }
+ 323   4                  }
+ 324   3                  wd_point += w;
+ 325   3                  do {
+ 326   4      
+ 327   4                      if(wd_point == 12) { //buffer full?
+ 328   5                          OSDAPI_LoadIndentFont();
+ 329   5                          wd_point = 0;
+ 330   5                      }
+ 331   4                      else if(wd_point> 12) {
+ 332   5                          OSDAPI_LoadIndentFont();
+ 333   5                          wd_point -= 12;
+ 334   5                          for(Row=0; Row<height; Row++) {
+ 335   6                              usIndentFontBuffer[Row] =
+ 336   6                              (pIndentFontBase[m+Row] << (w - wd_point));
+ 337   6                          }
+ 338   5                      }
+ 339   4                  }while(wd_point>11);
+ 340   3              }
+ 341   2          }
+ 342   1          ResetWDTimer();
+ 343   1          //write back space
+ 344   1          if(wd_point != 0) {
+ 345   2              OSDAPI_LoadIndentFont();
+ 346   2              wd_point = 0;
+ 347   2          }
+ 348   1      }
+ 349          
+ 350          //******************************************************************************
+ 351          // Prototype: 
+ 352          //  void OSDAPI_ShowIndents(BOOL attr, UCHAR x, UCHAR y) small
+ 353          // Parameters:
+ 354          //  attr: set OSD attributes
+ 355          //  x   : x position on OSD
+ 356          //  y   : y position on OSD
+ 357          // Return:
+ 358          //  None
+ 359          // Purpose:
+ 360          //  Show pre-load indent string.
+ 361          // Notes:
+ 362          //  None
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 7   
+
+ 363          //******************************************************************************
+ 364          void OSDAPI_ShowIndents(BOOL attr, UCHAR x, UCHAR y) small
+ 365          {
+ 366   1          UCHAR i,l;
+ 367   1      
+ 368   1          UCHAR ch;
+ 369   1          USHRT m,temp;
+ 370   1          ResetWDTimer();
+ 371   1      
+ 372   1          temp = usIndentFontIndex - ucIndentStringLen;
+ 373   1      
+ 374   1          m = y * OSDAPI_GetOSDWidth() + x;
+ 375   1      
+ 376   1          if (attr == TRUE) {
+ 377   2              SC_INDEX_CTRL = 0x90;
+ 378   2          }
+ 379   1          else {
+ 380   2              SC_INDEX_CTRL = 0x40;
+ 381   2          }
+ 382   1          SC_INDEX_ADDR_LO = (UCHAR)m;
+ 383   1          SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 384   1      
+ 385   1          //Alignment
+ 386   1          if(OSDAPI_GetAlignType() == 0) { //Left
+ 387   2              l = 0;
+ 388   2          }
+ 389   1          else if(OSDAPI_GetAlignType() == 1) { //Right
+ 390   2              l = ucIndentWidth - ucIndentStringLen;
+ 391   2          }
+ 392   1          else if(OSDAPI_GetAlignType() == 2) { //Center
+ 393   2              l = (ucIndentWidth - ucIndentStringLen) >> 1;
+ 394   2          }
+ 395   1          //write front space
+ 396   1          for(i=0; i<l; i++) {
+ 397   2              SC_INDEX_DATA = 0x00;
+ 398   2          }
+ 399   1          //write font index
+ 400   1          for(i=0; i<ucIndentStringLen; i++) {
+ 401   2              ch = (UCHAR)(temp + i);
+ 402   2              SC_INDEX_DATA = ch;
+ 403   2          }
+ 404   1          //write back space
+ 405   1          i = l + ucIndentStringLen;
+ 406   1          for(i; i<ucIndentWidth; i++) {
+ 407   2              SC_INDEX_DATA = 0x00;
+ 408   2          }
+ 409   1          ResetWDTimer();
+ 410   1      }
+ 411          
+ 412          //******************************************************************************
+ 413          // Prototype:
+ 414          //  void OSDAPI_ShowIndentString(BOOL attr, UCHAR x, UCHAR y, UCHAR len, UCHAR *ptr)
+ 415          // Parameters:
+ 416          //  attr: set OSD attributes
+ 417          //  x   : x position on OSD
+ 418          //  y   : y position on OSD
+ 419          //  len : length of indent string
+ 420          //  *ptr  : pointer to font index of indent string
+ 421          // Return:
+ 422          //  None
+ 423          // Purpose:
+ 424          //  Show indent string
+C51 COMPILER V8.02   OSDAPI_INDENT                                                         08/07/2015 16:22:27 PAGE 8   
+
+ 425          // Notes:
+ 426          //  None
+ 427          //******************************************************************************
+ 428          void OSDAPI_ShowIndentString(BOOL attr, UCHAR x, UCHAR y, UCHAR len, UCHAR *p) small
+ 429          {
+ 430   1          OSDAPI_SetIndentWidth(len);
+ 431   1          OSDAPI_SetIndentString(p);
+ 432   1          OSDAPI_ShowIndents(attr, x, y);
+ 433   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    987    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     42       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      25
+   IDATA SIZE       =     10    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

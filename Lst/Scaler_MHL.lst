@@ -1,0 +1,534 @@
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_MHL
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_MHL.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_MHL.c LARGE OPTIMIZE(9,SPEED) BROWSE INCD
+                    -IR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI
+                    -\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) 
+                    -PRINT(.\Lst\Scaler_MHL.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_MHL.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "include.h"
+  13          
+  14          #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+  15          
+  16          //******************************************************************************
+  17          // M A C R O   D E F I N I T I O N S
+  18          //******************************************************************************
+  19          
+  20          //******************************************************************************
+  21          // G L O B A L   V A R I A B L E S
+  22          //******************************************************************************
+  23          
+  24          //******************************************************************************
+  25          // S T A T I C   V A R I A B L E S
+  26          //******************************************************************************
+  27          #if IS_NT68850_SERIES
+  28          static BOOL bVirtualCBus1 = 0; //Only for NT68850
+  29          #endif
+  30          //******************************************************************************
+  31          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          
+  34          //******************************************************************************
+  35          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  36          //******************************************************************************
+  37          
+  38          //******************************************************************************
+  39          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  40          //******************************************************************************
+  41          
+  42          //******************************************************************************
+  43          // F U N C T I O N   B O D Y S
+  44          //******************************************************************************
+  45          void MHLCDSense1On(void)
+  46          {
+  47   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  UCHAR tmp_reg;
+              
+                  tmp_reg = SC_MCU_IO_CTRL1 & ~(BIT7|BIT6);
+                  SC_MCU_IO_CTRL1 = tmp_reg | BIT6;
+              
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 2   
+
+              #if defined(MHL_CTS_DEBUG_TEST1)
+                  RDPA_REG |= BIT4;
+              #endif
+              #endif
+  57   1      }
+  58          
+  59          void MHLCDSense2On(void)
+  60          {
+  61   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+                  UCHAR tmp_reg;
+              
+                  tmp_reg = SC_MCU_IO_CTRL1 & ~(BIT5|BIT4);
+                  SC_MCU_IO_CTRL1 = tmp_reg | BIT4;
+              
+              #if defined(MHL_CTS_DEBUG_TEST1)
+                  RDPA_REG |= BIT5;
+              #endif
+              #endif
+  71   1      }
+  72          
+  73          #if IS_NT68770_SERIES
+              BOOL MHL_Is_CDSense1_IO_HIGH()
+              {
+              /*
+              #if ENABLE_VBUS_IO_CONTROL == ON || (IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0))
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  if ( ( PortA & BIT0 ) != 0 ) {
+                      return TRUE;
+                  }
+                  else {
+                      return FALSE;
+                  }
+              #else
+                  return FALSE;
+              #endif
+              #else
+                  return FALSE;
+              #endif
+              */
+              }
+              
+              
+              BOOL MHL_Is_CDSense2_IO_HIGH()
+              {
+              /*
+              #if ENABLE_VBUS_IO_CONTROL == ON || (IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1))
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+                  if ( ( PortA & BIT1 ) != 0 ) {
+                      return TRUE;
+                  }
+                  else {
+                      return FALSE;
+                  }
+              #else
+                  return FALSE;
+              #endif
+              #else
+                  return FALSE;
+              #endif
+              */
+              }
+              #endif
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 3   
+
+ 115          
+ 116          void MHLCBus1On(void)
+ 117          {
+ 118   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  UCHAR tmp_reg;
+              
+                  tmp_reg = SC_MCU_IO_CTRL2 & ~(BIT7|BIT6);
+                  SC_MCU_IO_CTRL2 = tmp_reg | BIT6;
+              #elif IS_NT68850_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+ 124   1          bVirtualCBus1 = ON;
+ 125   1      #endif
+ 126   1      }
+ 127          
+ 128          void MHLCBus1Off(void)
+ 129          {
+ 130   1      #if IS_NT68770_SERIES
+                  SC_MCU_IO_CTRL2 &= ~(BIT7|BIT6);
+              #elif IS_NT68850_SERIES
+ 133   1          bVirtualCBus1 = OFF;
+ 134   1      #endif
+ 135   1          ucIsMHLSrcConnected[0] = 0;
+ 136   1      }
+ 137          
+ 138          void MHLCBus2On(void)
+ 139          {
+ 140   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+                  UCHAR tmp_reg;
+              
+                  tmp_reg = SC_MCU_IO_CTRL2 & ~(BIT5|BIT4);
+                  SC_MCU_IO_CTRL2 = tmp_reg | BIT4;
+              #endif
+ 146   1      }
+ 147          
+ 148          void MHLCBus2Off(void)
+ 149          {
+ 150   1      #if IS_NT68770_SERIES
+                  SC_MCU_IO_CTRL2 &= ~(BIT5|BIT4);
+              #endif
+ 153   1          ucIsMHLSrcConnected[1] = 0;
+ 154   1      }
+ 155          
+ 156          BOOL MHLIsCBus1On(void)
+ 157          {
+ 158   1      #if IS_NT68770_SERIES
+                  return ((SC_MCU_IO_CTRL2 & (BIT7|BIT6))==BIT6);
+              #elif IS_NT68850_SERIES
+ 161   1          return bVirtualCBus1;
+ 162   1      #else
+                  return FALSE;
+              #endif
+ 165   1      }
+ 166          
+ 167          BOOL MHLIsCBus2On(void)
+ 168          {
+ 169   1      #if IS_NT68770_SERIES
+                  return ((SC_MCU_IO_CTRL2 & (BIT5|BIT4))==BIT4);
+              #elif IS_NT68850_SERIES
+ 172   1          return FALSE;
+ 173   1      #else
+                  return FALSE;
+              #endif
+ 176   1      }
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 4   
+
+ 177          
+ 178          #if ENABLE_VBUS_IO_CONTROL == OFF
+ 179          void MHL_EnableVBus1(void)
+ 180          {
+ 181   1      /*
+ 182   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+ 183   1      UCHAR tmp_reg;
+ 184   1          tmp_reg = SC_MCU_IO_CTRL4 & ~(BIT5|BIT4);
+ 185   1                  SC_MCU_IO_CTRL4 = tmp_reg | BIT4;
+ 186   1      #elif IS_NT68850_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+ 187   1      //UCHAR tmp_reg;  //FEFANJACKY REMOVE FOR PC5 DP_CABLE_DET
+ 188   1      //    tmp_reg = SC_MCU_IO_CTRL5 & ~(BIT5|BIT4);  //FEFANJACKY REMOVE
+ 189   1      //    SC_MCU_IO_CTRL5 = tmp_reg | BIT5;//FEFANJACKY REMOVE
+ 190   1      #endif
+ 191   1      */
+ 192   1      }
+ 193          #endif
+ 194          
+ 195          #if 0
+              void MHL_DisableVBus1(void)
+              {
+              /*
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  SC_MCU_IO_CTRL4 &= ~(BIT5|BIT4);
+              #elif IS_NT68850_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+              //    SC_MCU_IO_CTRL5 &= ~(BIT5|BIT4);             //FEFANJACKY REMOVE
+              #endif
+              */
+              }
+              #endif
+ 207          
+ 208          #if ENABLE_VBUS_IO_CONTROL == ON
+              void MHL_Set_VBus1_IO_On(void)
+              {
+              /*
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  #if SET_IO_VBUS_ACTIVE==HIGH
+                      PortC |= BIT2;
+                  #else
+                      PortC &= ~BIT2;
+                  #endif
+              #elif IS_NT68850_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  #if SET_IO_VBUS_ACTIVE==HIGH
+                      PortC |= BIT5;
+                  #else
+                      PortC &= ~BIT5;
+                  #endif
+              #endif
+              */
+              }
+              void MHL_Set_VBus1_IO_Off(void)
+              {
+              /*
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  #if SET_IO_VBUS_ACTIVE==HIGH
+                      PortC &= ~BIT2;
+                  #else
+                      PortC |= BIT2;
+                  #endif
+              #elif IS_NT68850_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  #if SET_IO_VBUS_ACTIVE==HIGH
+                      PortC &= ~BIT5;
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 5   
+
+                  #else
+                      PortC |= BIT5;
+                  #endif
+              #endif
+              */
+              }
+              #endif
+ 246          
+ 247          #if ENABLE_VBUS_IO_CONTROL == OFF
+ 248          void MHL_EnableVBus2(void)
+ 249          {
+ 250   1      /*
+ 251   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+ 252   1      UCHAR tmp_reg;
+ 253   1          tmp_reg = SC_MCU_IO_CTRL4 & ~(BIT3|BIT2);
+ 254   1          SC_MCU_IO_CTRL4 = tmp_reg | BIT2;
+ 255   1      #endif
+ 256   1      */
+ 257   1      }
+ 258          #endif
+ 259          
+ 260          #if 0
+              void MHL_DisableVBus2(void)
+              {
+              /*
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+                  SC_MCU_IO_CTRL4 &= ~(BIT3|BIT2);
+              #endif
+              */
+              }
+              #endif
+ 270          
+ 271          #if ENABLE_VBUS_IO_CONTROL == ON
+              void MHL_Set_VBus2_IO_On(void)
+              {
+              /*
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+                  #if SET_IO_VBUS_ACTIVE==HIGH
+                      PortC |= BIT3;
+                  #else
+                      PortC &= ~BIT3;
+                  #endif
+              #endif
+              */
+              }
+              void MHL_Set_VBus2_IO_Off(void)
+              {
+              /*
+              #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+                  #if SET_IO_VBUS_ACTIVE==HIGH
+                      PortC &= ~BIT3;
+                  #else
+                      PortC |= BIT3;
+                  #endif
+              #endif
+              */
+              }
+              #endif
+ 297          
+ 298          BOOL MHLSetInterface(UCHAR interface)
+ 299          {
+ 300   1          if ( (interface==DIGITAL_INPUT0 && IsMHL0CableConnect()) ||
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 6   
+
+ 301   1              (interface==DIGITAL_INPUT1 && IsMHL1CableConnect()) ) {
+ 302   2              SC_MHL_CTRL_2E0 |= BIT7|BIT0;
+ 303   2              PowerDownAnalogInput();
+ 304   2              if ( MHL_IsPackedPixelMode() ) {
+ 305   3                  SC_DISPLAY_CHANNEL &= ~BIT6; //get correct PHY clock 0x016 after set 0x159.6=0
+ 306   3              }
+ 307   2              return TRUE;
+ 308   2          }
+ 309   1          else {
+ 310   2              SC_MHL_CTRL_2E0 = 0x00;
+ 311   2              return FALSE;
+ 312   2          }
+ 313   1      }
+ 314          
+ 315          void MHLPackedPixelMode(BOOL On)
+ 316          {
+ 317   1          if ( On ) {
+ 318   2              MHL_SetPackedPixelMode();
+ 319   2          }
+ 320   1          else {
+ 321   2              MHL_Set24bitMode();
+ 322   2          }
+ 323   1      }
+ 324          
+ 325          UCHAR MHLCbusTx(UCHAR type, UCHAR d) using 1
+ 326          {
+ 327   1          MHL_WaitCBusReady();
+ 328   1          
+ 329   1          bTranCMD = 0;
+ 330   1      
+ 331   1      #if ENABLE_INT_TRANSLATION == ON && ENABLE_HDMI_PRETEST == ON
+              {
+                  UCHAR countlag;
+                  for (countlag = 0;countlag<10;countlag++); //CTS 6.3.6.5, need delay to let 0x280 response abort comma
+             -nd send by source, the count value should be larger than 3, its around 60 micro sec.
+                  
+                  if ((MHL_GetMSCCmd() || MHL_GetDDCCmd()) && (type == TX_MSC_CMD || type == TX_MSC_DATA)) {//130415_223
+             -0_SYS#2
+                      return FALSE;
+                  }
+              }
+              #endif    
+ 341   1      
+ 342   1          switch(type) {
+ 343   2          case TX_MSC_CMD:
+ 344   2              SC_CBUS_MSC_CMD = d;
+ 345   2              ucCmdIndex = 0;//index to cMSCCmd
+ 346   2              bCheckTimeout = 0;
+ 347   2              ucCBUSCMDTxBuffer = d;
+ 348   2              break;
+ 349   2          case TX_MSC_DATA:
+ 350   2              SC_CBUS_MSC_DATA = d;
+ 351   2              ucCBUSCMDTxBuffer = 0;
+ 352   2              break;
+ 353   2          case TX_DDC_CMD:
+ 354   2              SC_CBUS_DDC_CMD = d;
+ 355   2              ucCBUSCMDTxBuffer = d;
+ 356   2              break;
+ 357   2          case TX_DDC_DATA:
+ 358   2              SC_CBUS_DDC_DATA = d;
+ 359   2              ucCBUSCMDTxBuffer = 0;
+ 360   2              break;
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 7   
+
+ 361   2          }
+ 362   1      
+ 363   1          return TRUE;
+ 364   1      }
+ 365          
+ 366          BOOL CBUSTxData(UCHAR type, UCHAR d)
+ 367          {
+ 368   1          UCHAR i = 10;
+ 369   1          do {
+ 370   2          #if ENABLE_INT_TRANSLATION == 0
+                      Sleep(10);
+                  #endif
+ 373   2              MHL_WaitCBusReady();
+ 374   2              bTranCMD = 0;
+ 375   2          if (MHL_GetMSCCmd() || MHL_GetDDCCmd()) {
+ 376   3              return 0;
+ 377   3          }
+ 378   2              if (bCBUSAbort == 0) {//normal
+ 379   3                  switch(type) {
+ 380   4                  case TX_MSC_CMD:
+ 381   4                      SC_CBUS_MSC_CMD = d;
+ 382   4                      ucCmdIndex = 0;//index to cMSCCmd
+ 383   4                      bCheckTimeout = 0;
+ 384   4                  break;
+ 385   4                  case TX_MSC_DATA:
+ 386   4                      SC_CBUS_MSC_DATA = d;
+ 387   4                      break;
+ 388   4                  case TX_DDC_CMD:
+ 389   4                      SC_CBUS_DDC_CMD = d;
+ 390   4                      break;
+ 391   4                  case TX_DDC_DATA:
+ 392   4                      SC_CBUS_DDC_DATA = d;
+ 393   4                      break;
+ 394   4                  }
+ 395   3              }
+ 396   2          #if 1//def E_DEBUG
+ 397   2              Sleep(1);
+ 398   2              if (bCBusArbFailFlag == TRUE) {
+ 399   3                  bCBusArbFailFlag = FALSE;
+ 400   3                  i--;
+ 401   3              }
+ 402   2              else
+ 403   2          #endif
+ 404   2              {
+ 405   3                  i = 0;
+ 406   3              }
+ 407   2          } while (i != 0);
+ 408   1          return !bCBUSAbort;
+ 409   1      }
+ 410          
+ 411          void MHL_SetCBus1DrvCurrent(void)
+ 412          {
+ 413   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0)
+                  PA47_CURR |= 0x03;
+              #elif IS_NT68850_SERIES && (INPUT_INTERFACE&INPUT_MHL0) 
+ 416   1          PD46_CURR |= 0x0C;
+ 417   1      #endif
+ 418   1      }
+ 419          
+ 420          void MHL_SetCBus2DrvCurrent(void)
+ 421          {
+ 422   1      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1)
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 8   
+
+                  PA47_CURR |= 0x0C;
+              #endif
+ 425   1      }
+ 426          
+ 427          void MHL_SetCBus1K(void)
+ 428          {
+ 429   1       UCHAR ucSCID = GetSCID();
+ 430   1      #if IS_NT68770_SERIES
+                  UCHAR i;
+                  if (ucSCID >= SCID_770_G && ucSCID <= SCID_770_FINAL) {
+                      i = SC_CBUS_CONTROL & 0x0F;
+                      SC_CBUS_CONTROL = i | 0x50;
+                  }
+              #elif IS_NT68850_SERIES
+ 437   1          UCHAR i;
+ 438   1          if (ucSCID >= SCID_850_C && ucSCID <= SCID_850_FINAL) {
+ 439   2              i = SC_CBUS_CONTROL & 0x0F;
+ 440   2              SC_CBUS_CONTROL = i | 0x50;
+ 441   2          }
+ 442   1      #endif
+ 443   1      }
+ 444          
+ 445          void MHL_EnhanceCompatibility(void)
+ 446          {
+ 447   1          UCHAR ucSCID = GetSCID();
+ 448   1      #if IS_NT68770_SERIES
+                  // Ignore wake_up criteria
+                  if (ucSCID >= SCID_770_H && ucSCID <= SCID_770_FINAL) {
+                      SC_CBUS_DISCOVERY_TIME |= BIT7;
+                      SC_DISCOVERY2CONN |= BIT7;
+                  }
+              #elif IS_NT68850_SERIES
+ 455   1      // Ignore wake_up criteria
+ 456   1          if (ucSCID >= SCID_850_C && ucSCID <= SCID_850_FINAL) {
+ 457   2              SC_SINK_WAKE &= ~(BIT5|BIT6);
+ 458   2              SC_SINK_WAKE |= BIT5;
+ 459   2              SC_REJECT_CBUS_DISCOVERY_PULSE_MIN = 0x2A;
+ 460   2              SC_REJECT_CBUS_DISCOVERY_PULSE_MAX = 0x70;
+ 461   2              SC_SINK_WAKE &= ~(BIT5|BIT6);
+ 462   2              SC_SINK_WAKE |= BIT6;
+ 463   2              SC_REJECT_CBUS_DISCOVERY_PULSE_MIN = 0x78;
+ 464   2              SC_REJECT_CBUS_DISCOVERY_PULSE_MAX = 0xFF;
+ 465   2              SC_SINK_WAKE &= ~(BIT5|BIT6);
+ 466   2              SC_WAKE_MODE = 0xd5;    
+ 467   2          }
+ 468   1      #endif
+ 469   1      }
+ 470          
+ 471          void MHL_WaitCBusReady(void)
+ 472          {
+ 473   1          USHRT uscount = 0;
+ 474   1      
+ 475   1          while ((SC_CBUS_TRANS_FLAG1 & 0x40) == 0) {//130319_1732_SYS#1
+ 476   2              ResetWDTimer();
+ 477   2              uscount ++;
+ 478   2      
+ 479   2              if (uscount == 0x8000) {//allion cts 4.3.20.1 CBT-sink Response to Ack with different timings (uco
+             -unt = min 256 can pass,ucount = 255 fail)
+ 480   3                  SC_CBUS_CONTROL |= BIT3;
+ 481   3                  SC_CBUS_CONTROL &= ~BIT3;
+ 482   3                  SetCbusConnectStatus(MHL_NONE);   
+ 483   3                  break;
+C51 COMPILER V8.02   SCALER_MHL                                                            08/07/2015 16:22:27 PAGE 9   
+
+ 484   3              }
+ 485   2          }
+ 486   1      
+ 487   1      }
+ 488          
+ 489          #endif //ENABLE_DBC == ON
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    473    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,449 @@
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MCU
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Mcu.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\Mcu.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\User;
+                    -.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Ke
+                    -ypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\Mcu.lst) OBJECT(.\
+                    -Bin\ADS\AXI\104N\Mcu.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          #define IIC_MASK_VALUE 0x83 /*!< IIC mask. */
+  19          
+  20          //******************************************************************************
+  21          // G L O B A L   D E F I N I T I O N S
+  22          //******************************************************************************
+  23          
+  24          //******************************************************************************
+  25          // G L O B A L   V A R I A B L E S
+  26          //******************************************************************************
+  27          BOOL bIsAPLLPowerDown = FALSE; /*! < Status of APLL power down. */
+  28          UCHAR ucTL0_Normal_Power=0,ucTH0_Normal_Power=0;
+  29          UCHAR ucTL0_LOW_POWER=0,ucTH0_LOW_POWER=0,ucTL0_LOW_POWER_3M=0,ucTH0_LOW_POWER_3M=0;
+  30          
+  31          
+  32          //******************************************************************************
+  33          // S T A T I C   V A R I A B L E S
+  34          //******************************************************************************
+  35          static code UCHAR MCU_CLK[9] = CPU_CLK_TABLE;
+  36          
+  37          //******************************************************************************
+  38          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  39          //******************************************************************************
+  40          
+  41          
+  42          //******************************************************************************
+  43          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  44          //******************************************************************************
+  45          static void McuInitIO(void);
+  46          static void McuInitADC(void);
+  47          static void McuInitPWM(void);
+  48          static void McuInitDDC(void);
+  49          static void McuInitIIC(void);
+  50          static void McuInitMisc(void);
+  51          static void McuInitCore(void);
+  52          static BOOL McuCheckPwrStable(void);
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 2   
+
+  53          
+  54          //******************************************************************************
+  55          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  56          //******************************************************************************
+  57          
+  58          //******************************************************************************
+  59          // F U N C T I O N   B O D Y S
+  60          //******************************************************************************
+  61          
+  62          /**************************************************************************//**
+  63           * MCU to Speed.
+  64           ******************************************************************************/
+  65          ULONG GetMCUTimer0Speed(void)
+  66          {
+  67   1       return (ULONG)(((float)MCU_CLK[MCU_CLK_TIMES] / 12 * ((float)REF_CLK / 12000000)) * 1000);
+  68   1      }
+  69          
+  70          /**************************************************************************//**
+  71           * Get CPU Clock.
+  72           ******************************************************************************/
+  73          ULONG GetCPUClcok(void)
+  74          {
+  75   1       return (ULONG)(MCU_CLK[MCU_CLK_TIMES] * 1000000 * ((float)REF_CLK/12000000));
+  76   1      }
+  77          
+  78          /**************************************************************************//**
+  79           * Get UART Time.
+  80           ******************************************************************************/
+  81          UCHAR GetUARTTimer(ULONG speed)
+  82          {
+  83   1          return (UCHAR)((float)speed * 2 / 384 / MCU_UART_BAUD_RATE + 0.5);
+  84   1      }
+  85          
+  86          /**************************************************************************//**
+  87           * MCU Initialization. MCU TIMER, SPEED, UART, I/O, ADC, PWM, ... etc. will be initialized.
+  88           ******************************************************************************/
+  89          void McuInitialize(void)
+  90          {
+  91   1          McuInitIO();
+  92   1          ResetWDTimer();
+  93   1          McuInitADC();
+  94   1          McuInitMisc();
+  95   1      
+  96   1      #if ENABLE_LPD == ON            //george: test-#warning never compiler-here.    
+                  McuInitLPD();
+              #endif
+  99   1      
+ 100   1      #if ENABLE_FE2P == ON           //george: have compiler-here
+ 101   1          FE2P_RamInitialize();
+ 102   1      #endif
+ 103   1      #if USE_INTERNAL_EDID == 1
+ 104   1          NvramLoadEDID();
+ 105   1      #endif
+ 106   1          McuInitDDC();
+ 107   1      //==============140509 mike 
+ 108   1          McuInitIIC();
+ 109   1          McuInitPWM();
+ 110   1          McuInitCore();
+ 111   1          //          printf("ready   5V...... 150127\n");                    
+ 112   1      
+ 113   1      
+ 114   1          while (McuCheckPwrStable() == FALSE)
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 3   
+
+ 115   1          {
+ 116   2              //printf("\n5V Not ready waitting  5V......\n");        
+ 117   2                      ResetWDTimer();
+ 118   2      
+ 119   2          }
+ 120   1         // McuInitIIC();
+ 121   1         // McuInitPWM();
+ 122   1         // McuInitCore();
+ 123   1         //   printf("ready   5V......\n");           
+ 124   1      
+ 125   1      }
+ 126          
+ 127          /**************************************************************************//**
+ 128           * Initialize MCU I/O port A ~ E.
+ 129           ******************************************************************************/
+ 130          static void McuInitIO(void)
+ 131          {
+ 132   1      #if ENABLE_NEW_MCU_IO == 1
+ 133   1          McuCfgIOType(MCU_PORT_A, PORT_A_DEFAULT_PP, PORT_A_DEFAULT_PU);
+ 134   1          McuCfgIOType(MCU_PORT_B, PORT_B_DEFAULT_PP, PORT_B_DEFAULT_PU);
+ 135   1          McuCfgIOType(MCU_PORT_C, PORT_C_DEFAULT_PP, PORT_C_DEFAULT_PU);
+ 136   1          McuCfgIOType(MCU_PORT_D, PORT_D_DEFAULT_PP, PORT_D_DEFAULT_PU);
+ 137   1      #ifdef PORT_E_DEFAULT_PP
+ 138   1          McuCfgIOType(MCU_PORT_E, PORT_E_DEFAULT_PP, PORT_E_DEFAULT_PU);
+ 139   1      #endif
+ 140   1      #ifdef PORT_3_DEFAULT_PP
+ 141   1          McuCfgIOType(MCU_PORT_3, PORT_3_DEFAULT_PP, PORT_3_DEFAULT_PU);
+ 142   1      #endif
+ 143   1      #endif
+ 144   1      
+ 145   1          McuSetIOByte(MCU_PORT_A, PORT_A_DEFAULT_OUT);
+ 146   1          McuSetIOByte(MCU_PORT_B, PORT_B_DEFAULT_OUT);
+ 147   1          McuSetIOByte(MCU_PORT_C, PORT_C_DEFAULT_OUT);
+ 148   1          McuSetIOByte(MCU_PORT_D, PORT_D_DEFAULT_OUT);
+ 149   1          McuSetIOByte(MCU_PORT_E, PORT_E_DEFAULT_OUT);
+ 150   1              
+ 151   1      #ifdef PORT_3_DEFAULT_OUT       
+                  McuSetIOByte(MCU_PORT_3, PORT_3_DEFAULT_OUT);
+              #endif    
+ 154   1          McuSetIODirByte(MCU_PORT_A, PORT_A_DEFAULT_DIR);
+ 155   1          McuSetIODirByte(MCU_PORT_B, PORT_B_DEFAULT_DIR);
+ 156   1          McuSetIODirByte(MCU_PORT_C, PORT_C_DEFAULT_DIR);
+ 157   1          McuSetIODirByte(MCU_PORT_D, PORT_D_DEFAULT_DIR);
+ 158   1          McuSetIODirByte(MCU_PORT_E, PORT_E_DEFAULT_DIR);
+ 159   1      }
+ 160          
+ 161          /**************************************************************************//**
+ 162           * Initialize all MCU ADC channels.
+ 163           ******************************************************************************/
+ 164          static void McuInitADC(void)
+ 165          {
+ 166   1          McuDisableADC(~MCU_ADC_CON_DEFAULT);
+ 167   1          McuEnableADC(MCU_ADC_CON_DEFAULT);
+ 168   1      }
+ 169          
+ 170          /**************************************************************************//**
+ 171           * Initialize all MCU PWM channels.
+ 172           ******************************************************************************/
+ 173          static void McuInitPWM(void)
+ 174          {
+ 175   1          McuDisablePWM(~MCU_PWM_CON_DEFAULT);
+ 176   1          McuSetPWM(MCU_PWM_0, MCU_PWM_0_DEFAULT);
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 4   
+
+ 177   1          McuSetPWM(MCU_PWM_1, MCU_PWM_1_DEFAULT);
+ 178   1          McuSetPWM(MCU_PWM_2, MCU_PWM_2_DEFAULT);
+ 179   1          McuSetPWM(MCU_PWM_3, MCU_PWM_3_DEFAULT);
+ 180   1          McuSetPWM(MCU_PWM_4, MCU_PWM_4_DEFAULT);
+ 181   1          McuSetPWM(MCU_PWM_5, MCU_PWM_5_DEFAULT);
+ 182   1          McuSetPWM(MCU_PWM_6, MCU_PWM_6_DEFAULT);
+ 183   1          McuSetPWM(MCU_PWM_7, MCU_PWM_7_DEFAULT);
+ 184   1          McuSetPWM(MCU_PWM_8, MCU_PWM_8_DEFAULT);
+ 185   1          McuSetPWM(MCU_PWM_9, MCU_PWM_9_DEFAULT);
+ 186   1          McuSetPWM(MCU_PWM_10, MCU_PWM_10_DEFAULT);
+ 187   1          McuSetPWM(MCU_PWM_11, MCU_PWM_11_DEFAULT);
+ 188   1          McuEnablePWM(MCU_PWM_CON_DEFAULT);
+ 189   1      }
+ 190          
+ 191          /**************************************************************************//**
+ 192           * Initialize all MCU DDC channels.
+ 193           ******************************************************************************/
+ 194          static void McuInitDDC(void)
+ 195          {
+ 196   1          McuDisableDDC(~MCU_DDC_CON_DEFAULT);
+ 197   1          McuSetDDC(MCU_DDC_0, MCU_DDC0_ADDRESS, MCU_DDC0_EDIDLEN);
+ 198   1          McuSetDDC(MCU_DDC_1, MCU_DDC1_ADDRESS, MCU_DDC1_EDIDLEN);
+ 199   1          McuSetDDC(MCU_DDC_2, MCU_DDC2_ADDRESS, MCU_DDC2_EDIDLEN);
+ 200   1          McuSetDDC(MCU_DDC_3, MCU_DDC3_ADDRESS, MCU_DDC3_EDIDLEN);
+ 201   1          McuEnableDDC(MCU_DDC_CON_DEFAULT);
+ 202   1      }
+ 203          
+ 204          /**************************************************************************//**
+ 205           * Initialize all MCU IIC channels.
+ 206           ******************************************************************************/
+ 207          static void McuInitIIC(void)
+ 208          {
+ 209   1          McuDisableIIC(~MCU_IIC_CON_DEFAULT);
+ 210   1          McuSetIIC(MCU_IIC_0, MCU_IIC0_ADDRESS);
+ 211   1          McuSetIIC(MCU_IIC_1, MCU_IIC1_ADDRESS);
+ 212   1          McuSetIIC(MCU_IIC_2, MCU_IIC2_ADDRESS);
+ 213   1          McuSetIIC(MCU_IIC_3, MCU_IIC3_ADDRESS);
+ 214   1          McuEnableIIC(MCU_IIC_CON_DEFAULT);
+ 215   1          McuIICPreSendACK(MCU_IIC_CON_DEFAULT);
+ 216   1      }
+ 217          
+ 218          /**************************************************************************//**
+ 219           * Initialize other necessary MCU registers.
+ 220           ******************************************************************************/
+ 221          static void McuInitMisc(void)
+ 222          {
+ 223   1          INT_SRC = 0x00;                                             //Clear interrupt source flags
+ 224   1          INTEXT_FLG = 0xFF; //0xFB;  //0xFF;                                         //Clear all external interrupt flags
+ 225   1          INTEXT_EN = 0x00;                                           //Disable all external interrupts
+ 226   1          SC_HW_RST = 0x90;                                   //Scaler will always stay in reset status
+ 227   1          LDO_ADJ = (LDO_ADJ&0x0F) | 0x00;            //Power down APLL, but Power up MCU ADC for 5V detection
+ 228   1          UART_MUX = MCU_UART_OUTPUT;                 //Uart output: IIC channel
+ 229   1          INTSC_EN = 0x01;                                             //MCU allow scaler interrupt
+ 230   1          HDCP_MUX = DIGITAL_INPUT0_HDCP_MUX;         //Set default HDCP channel
+ 231   1          IIC_MASK = IIC_MASK_VALUE;                  // Set I2C Mask for I2C/DDCCi Compatibilities
+ 232   1      #if ENABLE_LOW_PWR_MODE == ON
+ 233   1          SC_ADC_ZERO_POWER_CTRL |= 0x81;     
+ 234   1      #endif
+ 235   1      
+ 236   1      #if ENABLE_FLASH_IDLE_MODE == ON
+ 237   1          SPI_OPTION |= BIT6;
+ 238   1          SPI_IDLE_CNT = 0x80;
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 5   
+
+ 239   1      #endif
+ 240   1      
+ 241   1      #ifdef AO_DETECT
+              #if MD_ENABLE_AO_DETECT == OFF
+                  AO_DETECT |= BIT3;
+              #endif
+              #endif
+ 246   1      
+ 247   1      
+ 248   1      //150504 George Start
+ 249   1      //      INT_SRC = INT_SRC | INT_EXT;
+ 250   1      //      INTEXT_EN |= (INTE2_EDG | INTE2);
+ 251   1      //150504 George End
+ 252   1      
+ 253   1      }
+ 254          
+ 255          /**************************************************************************//**
+ 256           * Initialize MCU core (basic 8051 SFR).
+ 257           ******************************************************************************/
+ 258          static void McuInitCore(void)
+ 259          {
+ 260   1          CPU_CLK = MCU_CLK_TIMES << 4;
+ 261   1          ucTL0_Normal_Power = (UCHAR)((65536-GetMCUTimer0Speed())%256);
+ 262   1          ucTH0_Normal_Power = (UCHAR)((65536-GetMCUTimer0Speed())/256);  
+ 263   1              
+ 264   1          ucTL0_LOW_POWER = (UCHAR)((65536-(USHRT)((float)REF_CLK/12000000*1000+0.5))%256);
+ 265   1          ucTH0_LOW_POWER = (UCHAR)((65536-(USHRT)((float)REF_CLK/12000000*1000+0.5))/256);
+ 266   1          ucTL0_LOW_POWER_3M = (UCHAR)((65536-(USHRT)((float)REF_CLK/12000000*250+0.5))%256);
+ 267   1          ucTH0_LOW_POWER_3M = (UCHAR)((65536-(USHRT)((float)REF_CLK/12000000*250+0.5))/256);
+ 268   1      
+ 269   1       
+ 270   1          McuPowerUpAPLL(); //Power up APLL after CPU clock was changed by NT68674 MCU APN.
+ 271   1      
+ 272   1          SCON = 0x52; //9-bit UART
+ 273   1          TMOD = 0x21; //Timer0: 16-bit timer, Timer1: 8-bit auto load 
+ 274   1          PCON = 0x80; //UART baud rate double
+ 275   1          TR0 = 1; //Start timer 0
+ 276   1          TR1 = 1; //Start timer 1
+ 277   1      
+ 278   1          //Set interrupt
+ 279   1          EX0 = 1; //Enable External Interrupt 0
+ 280   1          EX1 = 1; //Enable External Interrupt 1
+ 281   1          ET0 = 1; //Enable Timer 0 Interrupt
+ 282   1      #if ENABLE_SERIAL_INT == ON
+ 283   1          ES = 1;  //Enable Serial Port Interrupt    
+ 284   1      #endif
+ 285   1      }
+ 286          
+ 287          /**************************************************************************//**
+ 288           * Check the system power (5V) stable or not.
+ 289           * @return TRUE if system power is stable else FALSE.
+ 290           ******************************************************************************/
+ 291          static BOOL McuCheckPwrStable(void)
+ 292          {
+ 293   1          UCHAR i;
+ 294   1      
+ 295   1          for (i=0; i<=10; i++) 
+ 296   1              {
+ 297   2                      if (McuCheck5V() == FALSE) 
+ 298   2                              {
+ 299   3                                      return FALSE;
+ 300   3                              }
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 6   
+
+ 301   2            }
+ 302   1          
+ 303   1              return TRUE;
+ 304   1      }
+ 305          
+ 306          /**************************************************************************//**
+ 307           * Check system power is present or not.
+ 308           * @return TRUE if system power is present else FALSE.
+ 309           ******************************************************************************/
+ 310          BOOL McuCheck5V(void)
+ 311          {
+ 312   1        #if ENABLE_CHECK_SYS5V == ON
+ 313   1      //                      printf("ENABLE_CHECK_SYS5V.\n");                
+ 314   1              #if ENABLE_LPD == ON
+              
+                      //              printf("ENABLE_LPD = ON.\n");           
+              
+                              if ((INTEXT_FLG & INT_LPD) != 0) 
+                                      {
+              
+                                              INTEXT_FLG = INT_LPD;
+                              //                printf("INTEXT_FLG = INT_LPD.\n");            
+                                              return FALSE;
+                              }
+                      #else
+ 326   1      
+ 327   1                              McuPowerUpADC();
+ 328   1                              McuStartADC();
+ 329   1                              McuWaitADCComplete();
+ 330   1                      //printf(" McuCheck5V.\n");             
+ 331   1       
+ 332   1                      if (McuGetADC(POWER_DETEC_ADC) < POWER_THRESHOLD) 
+ 333   1                              {
+ 334   2                                      return FALSE;
+ 335   2                      }
+ 336   1      
+ 337   1                               McuPowerDownADC();
+ 338   1              #endif
+ 339   1         #endif
+ 340   1                              //        printf("return TRUE.\n");             
+ 341   1               return TRUE;
+ 342   1      }
+ 343          
+ 344          /**************************************************************************//**
+ 345           * Turn on APLL power.
+ 346           ******************************************************************************/
+ 347          void McuPowerUpAPLL(void)
+ 348          {
+ 349   1          bIsAPLLPowerDown = FALSE;
+ 350   1      
+ 351   1          //Setup timer 0
+ 352   1          TL0 = ucTL0_Normal_Power;
+ 353   1          TH0 = ucTH0_Normal_Power;
+ 354   1      
+ 355   1          //Setup timer 1
+ 356   1          TL1 = 256 - GetUARTTimer(GetCPUClcok());
+ 357   1          TH1 = 256 - GetUARTTimer(GetCPUClcok());
+ 358   1      
+ 359   1          CPU_CLK = MCU_CLK_TIMES << 4; // Restore CPU clock
+ 360   1      
+ 361   1      #if 1  
+ 362   1              if (((CPU_CLK & 0xF0) == 0x00) || ((CPU_CLK & 0xF0) == 0x10)) {
+C51 COMPILER V8.02   MCU                                                                   08/07/2015 16:22:21 PAGE 7   
+
+ 363   2              if (!(LDO_ADJ & BIT7)) {
+ 364   3                  SC_ADC_ZERO_POWER_CTRL |= 0x83;
+ 365   3                  SC_MCU_PLL &= ~BIT1;    // APnote: When MCU CLK is 12Mhz,
+ 366   3                                          // we need to set 0xB04[0] as 0 before APLL power up.
+ 367   3              }
+ 368   2          }
+ 369   1      #endif
+ 370   1          LDO_ADJ |= BIT7; //Power up APLL
+ 371   1      
+ 372   1      #if IS_NT68671_SERIES
+                  IIC_MASK = IIC_MASK_VALUE; // Set I2C Mask for I2C/DDCCi Compatibilities
+              #endif
+ 375   1      }
+ 376          
+ 377          /**************************************************************************//**
+ 378           * Turn off APLL power.
+ 379           ******************************************************************************/
+ 380          void McuPowerDownAPLL(void)
+ 381          {
+ 382   1          bIsAPLLPowerDown = TRUE;
+ 383   1      
+ 384   1          //Setup timer 0
+ 385   1          TL0 = ucTL0_LOW_POWER;
+ 386   1          TH0 = ucTH0_LOW_POWER;
+ 387   1      
+ 388   1          //Setup timer 1
+ 389   1          TL1 = 256 - GetUARTTimer(REF_CLK);
+ 390   1          TH1 = 256 - GetUARTTimer(REF_CLK);
+ 391   1      #if (!IS_NT68168_SERIES) && (!IS_NT68668_SERIES) && (!IS_NT68669_SERIES) && (!IS_NT68671_SERIES) && (!IS_N
+             -T68674_SERIES) && (!IS_NT68676_SERIES)
+ 392   1          if (((CPU_CLK & 0xF0) == 0x00) || ((CPU_CLK & 0xF0) == 0x10)) 
+ 393   1              {
+ 394   2              if (LDO_ADJ & BIT7) {
+ 395   3                  SC_MCU_PLL |= BIT1; // APnote: When MCU CLK is 12Mhz,
+ 396   3                                      // we need to set 0xB04[0] as 1 before APLL power down.
+ 397   3              }
+ 398   2          }
+ 399   1      #endif
+ 400   1          LDO_ADJ &= ~BIT7; //Power down APLL for power consumption
+ 401   1      
+ 402   1          CPU_CLK = 0x01 << 4; // Force CPU clock as 12 MHz when APLL power down. This
+ 403   1                               // can solve the issue of low SPI clock frequency under
+ 404   1                               // low power mode.
+ 405   1      
+ 406   1      #if IS_NT68671_SERIES
+                  IIC_MASK = 0x00;
+              #endif
+ 409   1          McuIICPreSendACK(MCU_IIC_CON_DEFAULT);
+ 410   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    853    ----
+   CONSTANT SIZE    =      9    ----
+   XDATA SIZE       =     12       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

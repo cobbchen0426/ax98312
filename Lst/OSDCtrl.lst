@@ -1,0 +1,1727 @@
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE OSDCTRL
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\OSDCtrl.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\OSD\OSDCtrl.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\A
+                    -pp\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\S
+                    -I\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\OSDCtrl.ls
+                    -t) OBJECT(.\Bin\ADS\AXI\104N\OSDCtrl.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "string.h"
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          static code UCHAR ucKey2OSDEventTable[NUM_KEY_EVENTS] = {
+  26              OSD_NONKEY_EVENT,   //KEYEVT_PWR
+  27              OSD_MENUKEY_EVENT,  //KEYEVT_MENU
+  28              OSD_AUTOKEY_EVENT,  //KEYEVT_AUTO
+  29              OSD_NONKEY_EVENT,   //KEYEVT_INPUT,
+  30              OSD_NONKEY_EVENT,   //KEYEVT_FUNC,
+  31              OSD_UPKEY_EVENT,    //KEYEVT_UP
+  32              OSD_DOWNKEY_EVENT,  //KEYEVT_DOWN
+  33              OSD_NONKEY_EVENT,   //KEYEVT_LEFT
+  34              OSD_NONKEY_EVENT,   //KEYEVT_RIGHT
+  35              OSD_NONKEY_EVENT,   //KEYEVT_FACT
+  36              OSD_NONKEY_EVENT,   //KEYEVT_PWLOCK
+  37              OSD_NONKEY_EVENT,   //KEYEVT_OSDLOCK
+  38              OSD_NONKEY_EVENT,   //KEYEVT_TIMING_SWITCH
+  39              OSD_NONKEY_EVENT,    //KEYEVT_NONE
+  40              OSD_NONKEY_EVENT,   //KEYEVT_DEMO
+  41          };
+  42          
+  43          static code UCHAR ucApp2OSDEventTable[NUM_APP_EVENTS] = {
+  44              OSD_OFF_EVENT,      //APPEVT_PW_ON
+  45              OSD_OFF_EVENT,      //APPEVT_PW_OFF
+  46              OSD_OFF_EVENT,      //APPEVT_PW_SAVING
+  47              OSD_NO_SYNC_EVENT,  //APPEVT_NO_SYNC
+  48              OSD_NO_CABLE_EVENT, //APPEVT_NO_CABLE
+  49              OSD_OFF_EVENT,      //APPEVT_UNSTABLE
+  50              OSD_NOP_EVENT,      //APPEVT_PRE
+  51              OSD_NML_EVENT,      //APPEVT_NML
+  52              OSD_OOL_EVENT,      //APPEVT_OOL
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 2   
+
+  53              OSD_OOR_EVENT,      //APPEVT_OOR
+  54              OSD_NOP_EVENT       //APPEVT_NON
+  55          };
+  56          
+  57          static xdata OSDState usOSDState = OSD_OFF_STATE;
+  58          static xdata USHRT usOSDLocalTimer;
+  59          static xdata USHRT usOSDTimer;
+  60          
+  61          //******************************************************************************
+  62          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  63          //******************************************************************************
+  64          static void OSDConfigKeyBehavior(void);
+  65          
+  66          //******************************************************************************
+  67          // Prototype:
+  68          //  void OSDActionDispatcher(OSDEvent event)
+  69          // Parameters:
+  70          //  event   : event to OSD action
+  71          // Return:
+  72          //  None
+  73          // Purpose:
+  74          //  Perform OSD action by input event id
+  75          // Notes:
+  76          //  None
+  77          //******************************************************************************
+  78          void OSDActionDispatcher(UCHAR event)
+  79          {
+  80   1      //printf("0_usOSDState= 0x%x, \t event= 0x%x\n", (USHRT)usOSDState, (USHRT)event);              //150526 george
+  81   1          if ((GetModeHandleState() == SOFT_POWER_OFF) || (GetModeHandleState() == POWER_SAVING_MODE)) 
+  82   1          {
+  83   2      //printf("1_usOSDState= 0x%x, \t event= 0x%x\n", (USHRT)usOSDState, (USHRT)event);              //150526 george
+  84   2              return;
+  85   2          }
+  86   1      
+  87   1              if (GetGlobalEvent(event) == KEY_RELATED_EVENT)         //150526 george-mark: distinction EVENT_Type(this condit
+             -ion KEY_EVENT-type).
+  88   1              {       
+  89   2              event = GetLocalEvent(event);                                   //150526 george-mark: get detal KEY_Event value.
+  90   2      //printf("1_event= 0x%x\n", (USHRT)event);              
+  91   2              event = ucKey2OSDEventTable[event];
+  92   2      //printf("2_usOSDState= 0x%x, \t event= 0x%x\n", (USHRT)usOSDState, (USHRT)event);              //150526 george
+  93   2              if (event != OSD_NONKEY_EVENT) 
+  94   2                      {               
+  95   3      
+  96   3                      if (OSDKeyRoutine[usOSDState][event] != NULL) 
+  97   3                                      {       
+  98   4      //printf("        3_usOSDState= 0x%x, \t event= 0x%x\n", (USHRT)usOSDState, (USHRT)event);              //150526 georg
+             -e                                
+  99   4                              #if ENABLE_INTERNAL_AUDIO_BUZZER == ON
+                                       APPSetAudioBuzzer(100);                                                                                        //150526 george-mark: no compiler here
+                                      #endif
+ 102   4                                              (*OSDKeyRoutine[usOSDState][event])();                                          //george-statement: exe. *[][] funtion.
+ 103   4                                                      usOSDLocalTimer = GetTimerTick();
+ 104   4                                                      OSDConfigKeyBehavior();                                                                 //george: Ex:(Set repeat key by OSD status)
+ 105   4                                      }
+ 106   3                      }
+ 107   2              }
+ 108   1          
+ 109   1              else if (GetGlobalEvent(event) == APP_RELATED_EVENT) 
+ 110   1              {
+ 111   2              event = GetLocalEvent(event);
+ 112   2              event = ucApp2OSDEventTable[event];
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 3   
+
+ 113   2      
+ 114   2              if (event != OSD_NOP_EVENT) 
+ 115   2                      {
+ 116   3      //                              printf("C00_OSDActionDispatcher -> OSDAppRoutine[event] (to OSDEnterNormal)\n");        //150526 george
+ 117   3                                      if (OSDAppRoutine[event] != NULL) 
+ 118   3                                      {
+ 119   4                               (*OSDAppRoutine[event])();
+ 120   4                               usOSDLocalTimer = GetTimerTick();
+ 121   4                                       OSDConfigKeyBehavior();
+ 122   4                                      }
+ 123   3                      }
+ 124   2              }
+ 125   1      
+ 126   1      }
+ 127          
+ 128          //******************************************************************************
+ 129          // Prototype:
+ 130          //  UCHAR OSDActionDemander(void)
+ 131          // Parameters:
+ 132          //  None
+ 133          // Return:
+ 134          //  Return OSD event
+ 135          // Purpose:
+ 136          //  Acquire system action by OSD state
+ 137          // Notes:
+ 138          //  None
+ 139          //******************************************************************************
+ 140          UCHAR OSDActionDemander(void)
+ 141          {
+ 142   1          UCHAR evt;
+ 143   1      
+ 144   1          OSDTimerRoutine();
+ 145   1      
+ 146   1          evt = OSDEVT_NONE;
+ 147   1          
+ 148   1          if (OSDUserUpdate()) 
+ 149   1              {
+ 150   2              evt = OSDEVT_UPD_USR;
+ 151   2          } 
+ 152   1          else if (OSDTmgUpdate()) 
+ 153   1              {
+ 154   2              evt = OSDEVT_UPD_TMG;
+ 155   2          }
+ 156   1          else if (OSDSysUpdate()) 
+ 157   1              {
+ 158   2              evt = OSDEVT_UPD_SYS;
+ 159   2          }
+ 160   1          else if (OSDCalUpdate()) 
+ 161   1              {
+ 162   2              evt = OSDEVT_UPD_CAL;
+ 163   2          }
+ 164   1          else if (OSDFactoryUpdate()) 
+ 165   1              {
+ 166   2              evt = OSDEVT_UPD_CAL;
+ 167   2              }
+ 168   1          
+ 169   1              return evt;
+ 170   1      }
+ 171          
+ 172          //******************************************************************************
+ 173          // Prototype:
+ 174          //  void OSDTimerRoutine(void)
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 4   
+
+ 175          // Parameters:
+ 176          //  None
+ 177          // Return:
+ 178          //  Return OSD event
+ 179          // Purpose:
+ 180          //  
+ 181          // Notes:
+ 182          //  None
+ 183          //******************************************************************************
+ 184          void OSDTimerRoutine(void)
+ 185          {     
+ 186   1      
+ 187   1          //UCHAR buff[32];      
+ 188   1      
+ 189   1          if ((usOSDState == OSD_OFF_STATE) ||(usOSDState == OSD_FACT_STATE) || (usOSDState == OSD_FITM_STATE)) 
+ 190   1              {
+ 191   2                              usOSDLocalTimer = GetTimerTick();
+ 192   2                              return;
+ 193   2              }
+ 194   1      //------------------------------------------------------------//fefanjacky FOR TIMER COUNTER 100 
+ 195   1              if ((usOSDState == OSD_INFO_NOCABLE_STATE))  
+ 196   1              {
+ 197   2                        /*
+ 198   2                              if ((GetTimerTick()-usOSDLocalTimer) > 1000) 
+ 199   2                                      {                   
+ 200   2                                               if (++second == 6) 
+ 201   2                                                      {
+ 202   2                                                      SYSAPI_PowerSaving();
+ 203   2                                                      second = 0;
+ 204   2                                                 if (++minute == 60) 
+ 205   2                                                              {
+ 206   2                                                                      minute = 0;
+ 207   2                                                                      ++hour;
+ 208   2                                                      }
+ 209   2                                                      }
+ 210   2      
+ 211   2                                      OSDAPI_SetIndentIndex(100);
+ 212   2                                      OSDAPI_SetAlignType(OSD_ALIGN_LEFT);  
+ 213   2                                      sprintf(buff + 1,"%d:%02d:%02d",hour,minute,second);    
+ 214   2                                      buff[0] = strlen(buff) - 1;      
+ 215   2                                      OSDAPI_ShowIndentString(FALSE, 10, 5, buff[0], buff);           
+ 216   2                                              OSDMovePosition();
+ 217   2                                              usOSDLocalTimer = GetTimerTick();
+ 218   2                                      }     
+ 219   2                              */
+ 220   2      
+ 221   2                      if ((GetTimerTick()-usOSDLocalTimer) > 100) 
+ 222   2                      {
+ 223   3                                      OSDMovePosition();
+ 224   3                                      usOSDLocalTimer = GetTimerTick();
+ 225   3                      }
+ 226   2                        
+ 227   2          } 
+ 228   1              
+ 229   1          else if (usOSDState == OSD_INFO_NOSYNC_STATE) 
+ 230   1              {
+ 231   2      
+ 232   2              //------------------------//fefanjacky FOR TIMER COUNTER 100
+ 233   2              /*
+ 234   2              if ((GetTimerTick()-usOSDLocalTimer) > 1000) 
+ 235   2                      {        
+ 236   2                               if (++second == 60) 
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 5   
+
+ 237   2                                      {
+ 238   2                                      second = 0;
+ 239   2                              if (++minute == 60) 
+ 240   2                                              {
+ 241   2                                                      minute = 0;
+ 242   2                                                      ++hour;
+ 243   2                                      }
+ 244   2                                      }
+ 245   2      
+ 246   2                                      OSDAPI_SetIndentIndex(100);
+ 247   2                                      OSDAPI_SetAlignType(OSD_ALIGN_LEFT);   
+ 248   2                                      sprintf(buff + 1,"%d:%02d:%02d",hour,minute,second);    
+ 249   2                                      buff[0] = strlen(buff) - 1;    
+ 250   2                                      OSDAPI_ShowIndentString(FALSE, 10, 6, buff[0], buff);
+ 251   2                                      usOSDLocalTimer = GetTimerTick();
+ 252   2                      }
+ 253   2                      */
+ 254   2              //--------------------------------------------------------------  
+ 255   2      
+ 256   2              // Remove the following for keeping "NO Sync" OSD in center 
+ 257   2              // Jude 2009/02/16
+ 258   2             // if ((GetTimerTick()-usOSDLocalTimer) > 100) 
+ 259   2             //       {
+ 260   2             //           OSDMovePosition();
+ 261   2             //           usOSDLocalTimer = GetTimerTick();
+ 262   2             //       }
+ 263   2          } 
+ 264   1          else if (usOSDState == OSD_INFO_OUTOFRANCE_STATE) 
+ 265   1              {
+ 266   2                      if ((GetTimerTick()-usOSDLocalTimer) > 100) 
+ 267   2                              {
+ 268   3                                              OSDMovePosition();
+ 269   3                                              usOSDLocalTimer = GetTimerTick();
+ 270   3                      }
+ 271   2              }
+ 272   1          else if (usOSDState == OSD_INFO_OUTOFLIMIT_STATE) 
+ 273   1              {
+ 274   2                      if ((GetTimerTick()-usOSDLocalTimer) > 3000) 
+ 275   2                              {
+ 276   3                                              OSDCloseAll();
+ 277   3                      }
+ 278   2              } 
+ 279   1          else if (usOSDState == OSD_INFO_NOTICE_STATE) 
+ 280   1              {
+ 281   2                      if ((GetTimerTick()-usOSDLocalTimer) > 3000) 
+ 282   2                              {
+ 283   3                                              OSDCloseAll();
+ 284   3                      }
+ 285   2              }
+ 286   1          else if (usOSDState == OSD_OPT1_STATE) 
+ 287   1              {
+ 288   2                      if ((GetTimerTick()-usOSDLocalTimer) > usOSDTimer) 
+ 289   2                              {
+ 290   3                                              OSDExitOpt1();
+ 291   3                      }
+ 292   2              }
+ 293   1          else if (usOSDState == OSD_OPT2_STATE) 
+ 294   1              {
+ 295   2                      if ((GetTimerTick()-usOSDLocalTimer) > usOSDTimer) 
+ 296   2                              {
+ 297   3                                              OSDExitOpt2();
+ 298   3                      }
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 6   
+
+ 299   2              }
+ 300   1          else 
+ 301   1              {
+ 302   2               if ((GetTimerTick()-usOSDLocalTimer) > usOSDTimer) 
+ 303   2                              {
+ 304   3                                      OSDCloseAll();
+ 305   3                                      OSDConfigKeyBehavior(); // Reset key behavior after OSD time out.
+ 306   3                              }
+ 307   2              }
+ 308   1      }
+ 309          
+ 310          //******************************************************************************
+ 311          // Prototype: 
+ 312          //  void OSDConfigTimeout(USHRT timer)
+ 313          // Parameters:
+ 314          //  timer   : OSD time out counter
+ 315          // Return:
+ 316          //  None
+ 317          // Purpose:
+ 318          //  Set OSD time out counter
+ 319          // Notes:
+ 320          //  None
+ 321          //******************************************************************************
+ 322          void OSDConfigTimeout(USHRT timer)
+ 323          {
+ 324   1          usOSDTimer = timer;
+ 325   1      }
+ 326          
+ 327          //******************************************************************************
+ 328          // Prototype: 
+ 329          //  void OSDCloseAll(void)
+ 330          // Parameters:
+ 331          //  None
+ 332          // Return:
+ 333          //  None
+ 334          // Purpose:
+ 335          //  Close all OSE
+ 336          // Notes:
+ 337          //  None
+ 338          //******************************************************************************
+ 339          void OSDCloseAll(void)
+ 340          {       
+ 341   1            OSD_color_level= OSD_state= usOSDState = OSD_OFF_STATE;           //140304 mike factory mode
+ 342   1          OSDClosed();
+ 343   1      }
+ 344          
+ 345          //******************************************************************************
+ 346          // Prototype: 
+ 347          //  void OSDUpdateAutoTune(UCHAR pnt)
+ 348          // Parameters:
+ 349          //  pnt : percentage of AutoTune
+ 350          // Return:
+ 351          //  None
+ 352          // Purpose:
+ 353          //  Update AutoTune Progress
+ 354          // Notes:
+ 355          //  None
+ 356          //******************************************************************************
+ 357          void OSDUpdateAutoTune(UCHAR pnt)
+ 358          {
+ 359   1          OSDUpdateAutoTuneBar(pnt);
+ 360   1      }
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 7   
+
+ 361          
+ 362          //******************************************************************************
+ 363          // Prototype:
+ 364          //  static void OSDConfigKeyBehavior(void)
+ 365          // Parameters:
+ 366          //  None
+ 367          // Return:
+ 368          //  None
+ 369          // Purpose:
+ 370          //  Set repeat key by OSD status
+ 371          // Notes:
+ 372          //  None
+ 373          //*****************************************************************************
+ 374          static void OSDConfigKeyBehavior(void)
+ 375          {
+ 376   1          if ((usOSDState == OSD_OFF_STATE) ||(usOSDState == OSD_INFO_OUTOFLIMIT_STATE) ||
+ 377   1              (usOSDState == OSD_INFO_OUTOFRANCE_STATE) ||(usOSDState == OSD_INFO_NOSYNC_STATE) ||
+ 378   1              (usOSDState == OSD_INFO_NOCABLE_STATE) ||(usOSDState == OSD_INFO_NOTICE_STATE) ||
+ 379   1              (usOSDState == OSD_INFO_SOURCE_STATE)) 
+ 380   1              {
+ 381   2                      KeySetRepeatEvent(0xFF, OFF);
+ 382   2                      KeySetMFuncEvent(KEYEVT_AUTO, KEYEVT_INPUT);
+ 383   2          }
+ 384   1          else 
+ 385   1              {
+ 386   2                      KeySetRepeatEvent(KEYEVT_UP, ON);
+ 387   2                      KeySetRepeatEvent(KEYEVT_DOWN, ON);
+ 388   2                      KeySetMFuncEvent(0xFF, 0x00);
+ 389   2          }
+ 390   1      }
+ 391          
+ 392          //******************************************************************************
+ 393          // The following are OSD actions
+ 394          //******************************************************************************
+ 395          #define NextState(a,b,c) (((USHRT)c-a+1)%(b-a)+a)
+ 396          #define PrevState(a,b,c) (((USHRT)c+b-2*a-1)%(b-a)+a)
+ 397          #define CursorPos(a,b)   (b-a)
+ 398          
+ 399          #define MP1CursorPos()   (CursorPos(OSD_MAIN_BEG,OSD_MAIN_1_STATE))
+ 400          #define MP2CursorPos()   (CursorPos(OSD_MAIN_BEG,OSD_MAIN_2_STATE))
+ 401          #define MP3CursorPos()   (CursorPos(OSD_MAIN_BEG,OSD_MAIN_3_STATE))
+ 402          #define MP4CursorPos()   (CursorPos(OSD_MAIN_BEG,OSD_MAIN_4_STATE))
+ 403          #define MP5CursorPos()   (CursorPos(OSD_MAIN_BEG,OSD_MAIN_5_STATE))
+ 404          
+ 405          //******************************************************************************
+ 406          // Main menu operation
+ 407          //******************************************************************************
+ 408          void OSDEnterMainMenu(void)  //jacky for factory 
+ 409          {
+ 410   1          if (SystemData.bFactory == FALSE) 
+ 411   1              { 
+ 412   2                      //printf("OSDEnterMainMenu\n\r");
+ 413   2                      OSD_state=usOSDState = OSD_MAIN_1_STATE;        //140304 mike factory mode
+ 414   2                      OSDShowMainMenu();
+ 415   2              } 
+ 416   1              else 
+ 417   1              {
+ 418   2                      OSD_state=usOSDState = OSD_FACT_STATE;  //140304 mike factory mode
+ 419   2                      OSDShowFactory();
+ 420   2              }
+ 421   1      }
+ 422          
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 8   
+
+ 423          void OSDExitMainMenu(void)
+ 424          {
+ 425   1          //printf("OSDExitMainMenu\n\r");
+ 426   1          OSD_color_level= OSD_state=usOSDState = OSD_OFF_STATE;              //140304 mike factory mode
+ 427   1          OSDCloseMainMenu();
+ 428   1      }
+ 429          
+ 430          void OSDMainMenuUp(void)
+ 431          {
+ 432   1          //printf("OSDMainMenuUp\n\r");
+ 433   1          OSDUnselectMainItem(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 434   1          while (1) 
+ 435   1              {
+ 436   2               OSD_state=usOSDState = NextState(OSD_MAIN_BEG,OSD_MAIN_END,usOSDState);  //MBEG=1 , MEND=8 ,if us
+             -OSDState =3
+ 437   2                      if (OSDIsMainItemValid(CursorPos(OSD_MAIN_BEG,usOSDState)) == TRUE)
+ 438   2                      {
+ 439   3                                      break;
+ 440   3                      }                  
+ 441   2              }
+ 442   1              OSDSelectMainItem(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 443   1      }
+ 444          
+ 445          void OSDMainMenuDown(void)
+ 446          {
+ 447   1          //printf("OSDMainMenuDown\n\r");
+ 448   1          OSDUnselectMainItem(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 449   1          while (1) 
+ 450   1              {
+ 451   2                      OSD_state=usOSDState = PrevState(OSD_MAIN_BEG,OSD_MAIN_END,usOSDState);
+ 452   2              if (OSDIsMainItemValid(CursorPos(OSD_MAIN_BEG,usOSDState)) == TRUE)
+ 453   2                  break;
+ 454   2          }
+ 455   1          OSDSelectMainItem(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 456   1      }
+ 457          //******************************************************************************
+ 458          // Submenu 1 Operation
+ 459          //******************************************************************************
+ 460          void OSDEnterSubMenu1(void)
+ 461          {
+ 462   1          //printf("\t OSDEnterSubMenu1\n\r");
+ 463   1          OSD_state=usOSDState = OSD_MAIN_1_1_STATE;
+ 464   1          OSDFocusSub(CursorPos(OSD_MAIN_END,usOSDState));
+ 465   1      }
+ 466          
+ 467          void OSDExitSubMenu1(void)
+ 468          {
+ 469   1          //printf("\t OSDExitSubMenu1\n\r");
+ 470   1          OSD_state=usOSDState = OSD_MAIN_1_STATE;
+ 471   1          OSDFocusMain(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 472   1      }
+ 473          
+ 474          void OSDSubMenuUp1(void)
+ 475          {
+ 476   1          //printf("\t OSDSubMenuUp1\n\r");
+ 477   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_END,usOSDState));
+ 478   1          while (1) 
+ 479   1              {
+ 480   2               OSD_state= usOSDState = NextState(OSD_MAIN_END,OSD_MAIN_1_END,usOSDState);
+ 481   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_END,usOSDState)) == TRUE)
+ 482   2                  break;
+ 483   2              }
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 9   
+
+ 484   1          OSDSelectSubItem(CursorPos(OSD_MAIN_END,usOSDState));
+ 485   1      }
+ 486          
+ 487          void OSDSubMenuDown1(void)
+ 488          {
+ 489   1          //printf("\t OSDSubMenuDown1\n\r");
+ 490   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_END,usOSDState));
+ 491   1          while (1) 
+ 492   1              {
+ 493   2                 OSD_state=usOSDState = PrevState(OSD_MAIN_END,OSD_MAIN_1_END,usOSDState);
+ 494   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_END,usOSDState)) == TRUE)
+ 495   2                  break;
+ 496   2              }
+ 497   1          OSDSelectSubItem(CursorPos(OSD_MAIN_END,usOSDState));
+ 498   1      }
+ 499          
+ 500          //******************************************************************************
+ 501          // Submenu 2 Operation
+ 502          //******************************************************************************
+ 503          void OSDEnterSubMenu2(void)
+ 504          {
+ 505   1          //printf("\t OSDEnterSubMenu2\n\r");
+ 506   1          OSD_state=usOSDState = OSD_MAIN_2_1_STATE;
+ 507   1          OSDFocusSub(CursorPos(OSD_MAIN_1_END,usOSDState));
+ 508   1      }
+ 509          
+ 510          void OSDExitSubMenu2(void)
+ 511          {
+ 512   1          //printf("\t OSDExitSubMenu2\n\r");
+ 513   1              OSD_state= usOSDState = OSD_MAIN_2_STATE;
+ 514   1          OSDFocusMain(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 515   1      }
+ 516          
+ 517          void OSDSubMenuUp2(void)
+ 518          {
+ 519   1              //printf("\t OSDSubMenuUp2\n\r");
+ 520   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_1_END,usOSDState));
+ 521   1          while (1) {
+ 522   2              OSD_state=usOSDState = NextState(OSD_MAIN_1_END,OSD_MAIN_2_END,usOSDState);
+ 523   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_1_END,usOSDState)) == TRUE)
+ 524   2                  break;
+ 525   2          }
+ 526   1          OSDSelectSubItem(CursorPos(OSD_MAIN_1_END,usOSDState));
+ 527   1      }
+ 528          
+ 529          void OSDSubMenuDown2(void)
+ 530          {
+ 531   1              //printf("\t OSDSubMenuDown2\n\r");
+ 532   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_1_END,usOSDState));
+ 533   1          while (1) {
+ 534   2              OSD_state=usOSDState = PrevState(OSD_MAIN_1_END,OSD_MAIN_2_END,usOSDState);
+ 535   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_1_END,usOSDState)) == TRUE)
+ 536   2                  break;
+ 537   2          }
+ 538   1          OSDSelectSubItem(CursorPos(OSD_MAIN_1_END,usOSDState));
+ 539   1      }
+ 540          
+ 541          //******************************************************************************
+ 542          // Submenu 3 Operation entry to color sub menu 
+ 543          //******************************************************************************
+ 544          void OSDEnterSubMenu3(void)
+ 545          {
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 10  
+
+ 546   1       #ifdef colortemp                                                       //140509 mike           
+                    //printf("OSDEnterSubMenu3\n\r");
+               #endif
+ 549   1              //printf("OSDEnterSubMenu3\n\r");
+ 550   1              OSD_color_level=1;  
+ 551   1              OSD_state=usOSDState = OSD_MAIN_3_1_STATE;
+ 552   1              OSDFocusSub(CursorPos(OSD_MAIN_2_END,usOSDState));
+ 553   1              OSDFocusItm31();                                //140425 mike  #define OSDFocusItm31 OSDFocusClrTmp
+ 554   1      }
+ 555          
+ 556          void OSDExitSubMenu3(void)
+ 557          {
+ 558   1        #ifdef colortemp                                                      //140509 mike           
+                      //printf("\OSDExitSubMenu3\n\r");
+                #endif
+ 561   1              //printf("\OSDExitSubMenu3\n\r");
+ 562   1              OSD_color_level=0;                                                                                              //140507 mike   
+ 563   1              OSD_state=usOSDState = OSD_MAIN_3_STATE;        
+ 564   1              OSDClearSubmenu();
+ 565   1              OSDShowSubMenu(02);                             //140422 mike 
+ 566   1      }
+ 567          //=====================140508 mike 
+ 568          void OSDSubMenuUp3(void)
+ 569          {
+ 570   1       #ifdef colortemp                                                       //140509 mike           
+                      //printf("OSDSubMenuUp3\n\r");
+               #endif
+ 573   1          OSDColorTempUp();
+ 574   1        
+ 575   1      }
+ 576          
+ 577          void OSDSubMenuDown3(void)
+ 578          {
+ 579   1       #ifdef colortemp                                                       //140509 mike           
+                      //printf("OSDSubMenuDown3\n\r");
+               #endif
+ 582   1          OSDColorTempDown();
+ 583   1      }
+ 584          //---------------------------140508 mike 
+ 585          
+ 586          //================================140509 mike
+ 587          void OSDColorUserRGBUp(void)
+ 588          {
+ 589   1       #ifdef colortemp                                                       //140509 mike           
+                     //printf("140509 OSDColorUserRGBUp\n\r");                //140509 mike           
+               #endif      
+ 592   1      
+ 593   1              if(UserData.ucColorTemp==3)                                                                     //140508 mike  
+ 594   1              {
+ 595   2              OSD_color_level=2;                                                                      //140507 mike 
+ 596   2              OSD_color_RGB++;
+ 597   2      
+ 598   2                      if (( OSD_color_RGB > MAXIMUM_CLR_TEMP) ||( OSD_color_RGB < 0))
+ 599   2              {
+ 600   3                                 OSD_color_RGB  = 1;
+ 601   3              }               
+ 602   2                      OSDExitItms(MP3CursorPos(), CursorPos(0,OSD_color_RGB));
+ 603   2              }
+ 604   1      }
+ 605          //-----------------------------140509 mike 
+ 606          void OSDColorUserRGBDown(void)
+ 607          {
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 11  
+
+ 608   1       #ifdef colortemp                                                       //140509 mike           
+                     //printf("140509 OSDColorUserRGBDown\n\r");      //140509 mike   
+               #endif      
+ 611   1      
+ 612   1              if(UserData.ucColorTemp==3)                                                                     //140508 mike  
+ 613   1              {
+ 614   2                      OSD_color_level=2;                                                                      //140507 mike 
+ 615   2              OSD_color_RGB--;
+ 616   2      
+ 617   2                      if (( OSD_color_RGB > MAXIMUM_CLR_TEMP) ||( OSD_color_RGB < 1))
+ 618   2              {
+ 619   3                                 OSD_color_RGB  = 3;
+ 620   3              }               
+ 621   2                      OSDExitItms(MP3CursorPos(), CursorPos(0,OSD_color_RGB));
+ 622   2              }       
+ 623   1      }
+ 624          //================================140509 mike 
+ 625          /*
+ 626          void OSDSubMenuUp3(void)
+ 627          {
+ 628                          printf("OSDSubMenuUp3\n\r");
+ 629              OSDUnselectSubItem(CursorPos(OSD_MAIN_2_END,usOSDState));
+ 630              while (1) 
+ 631                          {
+ 632                      OSD_state=usOSDState = NextState(OSD_MAIN_2_END,OSD_MAIN_3_END,usOSDState);
+ 633          //                  printf("140421 OSDSubMenuUp3===>while (1)=======>OSD_state=%x ;\n\r",(unsigned short)OSD_state);            
+             -//140421 mike                                        
+ 634                   if (OSDIsSubItemValid(CursorPos(OSD_MAIN_2_END,usOSDState)) == TRUE)
+ 635                                          break;
+ 636                          }
+ 637                  OSDSelectSubItem(CursorPos(OSD_MAIN_2_END,usOSDState));
+ 638          }
+ 639          
+ 640          void OSDSubMenuDown3(void)
+ 641          {
+ 642              printf("OSDSubMenuDown3\n\r");
+ 643              OSDUnselectSubItem(CursorPos(OSD_MAIN_2_END,usOSDState));
+ 644              while (1) 
+ 645                          {
+ 646                                  OSD_state=usOSDState = PrevState(OSD_MAIN_2_END,OSD_MAIN_3_END,usOSDState);
+ 647          //                      printf("140421 OSDSubMenuDown3===>while (1)=======>OSD_state=%x ;\n\r",(unsigned short)OSD_state)
+             -;                //140421 mike                                   
+ 648                           if (OSDIsSubItemValid(CursorPos(OSD_MAIN_2_END,usOSDState)) == TRUE)
+ 649                                  break;
+ 650                          }
+ 651              OSDSelectSubItem(CursorPos(OSD_MAIN_2_END,usOSDState));
+ 652          }
+ 653          */
+ 654          //====================140508 mike 
+ 655          //******************************************************************************
+ 656          // Submenu 4 Operation
+ 657          //******************************************************************************
+ 658          void OSDEnterSubMenu4(void)
+ 659          {
+ 660   1          OSD_state=usOSDState = OSD_MAIN_4_1_STATE;
+ 661   1          OSDFocusSub(CursorPos(OSD_MAIN_3_END,usOSDState));
+ 662   1      }
+ 663          
+ 664          void OSDExitSubMenu4(void)
+ 665          {
+ 666   1          OSD_state=usOSDState = OSD_MAIN_4_STATE;
+ 667   1          OSDFocusMain(CursorPos(OSD_MAIN_BEG,usOSDState));
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 12  
+
+ 668   1      }
+ 669          
+ 670          void OSDSubMenuUp4(void)
+ 671          {
+ 672   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_3_END,usOSDState));
+ 673   1          while (1) {
+ 674   2              OSD_state=usOSDState = NextState(OSD_MAIN_3_END,OSD_MAIN_4_END,usOSDState);
+ 675   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_3_END,usOSDState)) == TRUE)
+ 676   2                  break;
+ 677   2          }
+ 678   1          OSDSelectSubItem(CursorPos(OSD_MAIN_3_END,usOSDState));
+ 679   1      }
+ 680          
+ 681          void OSDSubMenuDown4(void)
+ 682          {
+ 683   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_3_END,usOSDState));
+ 684   1          while (1) {
+ 685   2              OSD_state=usOSDState = PrevState(OSD_MAIN_3_END,OSD_MAIN_4_END,usOSDState);
+ 686   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_3_END,usOSDState)) == TRUE)
+ 687   2                  break;
+ 688   2          }
+ 689   1          OSDSelectSubItem(CursorPos(OSD_MAIN_3_END,usOSDState));
+ 690   1      }
+ 691          
+ 692          //******************************************************************************
+ 693          // Submenu 5 Operation
+ 694          //******************************************************************************
+ 695          void OSDEnterSubMenu5(void)
+ 696          {
+ 697   1          OSD_state=usOSDState = OSD_MAIN_5_1_STATE;
+ 698   1          OSDFocusSub(CursorPos(OSD_MAIN_4_END,usOSDState));
+ 699   1      }
+ 700          
+ 701          void OSDExitSubMenu5(void)
+ 702          {
+ 703   1          OSD_state=usOSDState = OSD_MAIN_5_STATE;
+ 704   1          OSDFocusMain(CursorPos(OSD_MAIN_BEG,usOSDState));
+ 705   1      }
+ 706          
+ 707          void OSDSubMenuUp5(void)
+ 708          {
+ 709   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_4_END,usOSDState));
+ 710   1          while (1) 
+ 711   1                      {
+ 712   2                         OSD_state=usOSDState = NextState(OSD_MAIN_4_END,OSD_MAIN_5_END,usOSDState);
+ 713   2                      if (OSDIsSubItemValid(CursorPos(OSD_MAIN_4_END,usOSDState)) == TRUE)
+ 714   2                           break;
+ 715   2                    }
+ 716   1          OSDSelectSubItem(CursorPos(OSD_MAIN_4_END,usOSDState));
+ 717   1      }
+ 718          
+ 719          void OSDSubMenuDown5(void)
+ 720          {
+ 721   1          OSDUnselectSubItem(CursorPos(OSD_MAIN_4_END,usOSDState));
+ 722   1          while (1)
+ 723   1              {
+ 724   2                  OSD_state=usOSDState = PrevState(OSD_MAIN_4_END,OSD_MAIN_5_END,usOSDState);
+ 725   2              if (OSDIsSubItemValid(CursorPos(OSD_MAIN_4_END,usOSDState)) == TRUE)
+ 726   2                  break;
+ 727   2             }
+ 728   1               OSDSelectSubItem(CursorPos(OSD_MAIN_4_END,usOSDState));
+ 729   1      }
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 13  
+
+ 730          
+ 731          //******************************************************************************
+ 732          // Operations of sub-items in submenu 1
+ 733          //******************************************************************************
+ 734          void OSDEnterItm11(void)
+ 735          {
+ 736   1      printf("OSDEnterItem11\n");
+ 737   1          OSD_state=usOSDState = OSD_ITEM_1_1_STATE;
+ 738   1          OSDFocusItm11();
+ 739   1      }
+ 740          
+ 741          void OSDExitItm11(void)
+ 742          {
+ 743   1          OSDConfirmItm11();
+ 744   1          OSD_state=usOSDState = OSD_MAIN_1_1_STATE;
+ 745   1          OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 746   1      }
+ 747          
+ 748          void OSDEnterItm12(void)
+ 749          {
+ 750   1          OSD_state=usOSDState = OSD_ITEM_1_2_STATE;
+ 751   1          OSDFocusItm12();
+ 752   1      }
+ 753          
+ 754          void OSDExitItm12(void)
+ 755          {
+ 756   1      printf("_OSDExitItm12_\n");
+ 757   1          OSDConfirmItm12();
+ 758   1          OSD_state= usOSDState = OSD_MAIN_1_2_STATE;
+ 759   1          OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 760   1      }
+ 761          
+ 762          void OSDEnterItm13(void)
+ 763          {
+ 764   1      printf("_OSDEnterItm13_: Sharp\n");
+ 765   1          OSD_state=usOSDState = OSD_ITEM_1_3_STATE;
+ 766   1          OSDFocusItm13();
+ 767   1      }
+ 768          
+ 769          void OSDExitItm13(void)
+ 770          {
+ 771   1      printf("_OSDExitItm13_: Sharp\n");
+ 772   1              usOSDState = OSD_MAIN_1_3_STATE;
+ 773   1          OSDConfirmItm13();
+ 774   1      
+ 775   1          OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 776   1      }
+ 777          
+ 778          
+ 779          
+ 780          #if ALS_EnDis == ALSMODE
+                      void OSDEnterItm14(void)                                // george: F_ALSOnOff_04A
+                      {
+                          OSD_state=usOSDState = OSD_ITEM_1_4_STATE;  
+                          OSDFocusItm14();
+                      }
+                      
+                      void OSDExitItm14(void)                                 //george: F_ALSOnOff_04B
+                      {
+                              usOSDState = OSD_MAIN_1_4_STATE;                        
+                          OSDConfirmItm14();
+                          OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 14  
+
+                      }
+              #elif ALS_EnDis == ALSOffSET    
+                      void OSDEnterItm14(void)                                // george: F_ALSOnOff_04A
+                      {
+                          OSD_state=usOSDState = OSD_ITEM_1_4_STATE;  
+                          OSDFocusItm14();
+                      }
+                      
+                      void OSDExitItm14(void)                                 //george: F_ALSOnOff_04B
+                      {
+                              usOSDState = OSD_MAIN_1_4_STATE;                        
+                          OSDConfirmItm14();
+                          OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+                      }
+              #elif ALS_EnDis == ALSRange
+                      void OSDEnterItm14(void)                                // george: F_ALSOnOff_04A
+                      {
+                          OSD_state=usOSDState = OSD_ITEM_1_4_STATE;  
+                          OSDFocusItm14();
+                      }
+                      
+                      void OSDExitItm14(void)                                 //george: F_ALSOnOff_04B
+                      {
+                              usOSDState = OSD_MAIN_1_4_STATE;                        
+                          OSDConfirmItm14();
+                          OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+                      }
+              #else   //Normal
+ 820          
+ 821          #endif  //#if ALS_EnDis == ENABLE
+ 822          
+ 823          
+ 824          
+ 825          /* void OSDEnterItm15(void)                             //george: F_ALSBV_04A
+ 826          {
+ 827                  OSD_state=usOSDState = OSD_ITEM_1_5_STATE;       
+ 828              OSDFocusItm15();
+ 829          }
+ 830          
+ 831          void OSDExitItm15(void)                                 //george: F_ALSBV_04B
+ 832          {
+ 833                  OSDConfirmItm15();
+ 834              OSD_state=usOSDState = OSD_MAIN_1_5_STATE;  
+ 835              OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 836          } */
+ 837          
+ 838          
+ 839          //----------------------------------------- george_Item16 ,  george_Item17
+ 840          //gg_old
+ 841          /*
+ 842          void OSDEnterItm16(void)                                //george: F_Touch_04A
+ 843          {
+ 844          // old    OSD_state=usOSDState = OSD_ITEM_1_6_STATE;
+ 845          // old   OSDFocusItm16(); 
+ 846              OSD_state=usOSDState = OSD_ITEM_1_6_STATE;  //george: F_Touch_04A1 -> OSD_ITEM_1_5_STATE
+ 847              OSDFocusItm16();
+ 848          }
+ 849          
+ 850          void OSDExitItm16(void)                                 //george: F_Touch_04B
+ 851          {
+ 852          //old    OSDConfirmItm16();
+ 853          //old    OSD_state=usOSDState = OSD_MAIN_1_6_STATE;
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 15  
+
+ 854          //old    OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 855          
+ 856              OSDConfirmItm16();
+ 857              OSD_state=usOSDState = OSD_MAIN_1_6_STATE;  //george: F_Touch_04B1 -> OSD_MAIN_1_6_STATE
+ 858              OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 859          }  */
+ 860          
+ 861          
+ 862          /*
+ 863          void OSDEnterItm17(void)
+ 864          {
+ 865              OSD_state=usOSDState = OSD_ITEM_1_7_STATE;
+ 866              OSDFocusItm17();
+ 867          }
+ 868          
+ 869          void OSDExitItm17(void)
+ 870          {
+ 871              OSDConfirmItm17();
+ 872              OSD_state=usOSDState = OSD_MAIN_1_7_STATE;
+ 873              OSDExitItms(MP1CursorPos(), CursorPos(OSD_MAIN_END,usOSDState));
+ 874          }
+ 875          */
+ 876          
+ 877          
+ 878          //******************************************************************************
+ 879          // Operations of sub-items in submenu 2
+ 880          //******************************************************************************
+ 881          void OSDEnterItm21(void)
+ 882          {
+ 883   1          OSD_state=usOSDState = OSD_ITEM_2_1_STATE;
+ 884   1          OSDFocusItm21();
+ 885   1      }
+ 886          
+ 887          void OSDExitItm21(void)
+ 888          {
+ 889   1          OSDConfirmItm21();
+ 890   1          OSD_state=usOSDState = OSD_MAIN_2_1_STATE;
+ 891   1          OSDExitItms(MP2CursorPos(), CursorPos(OSD_MAIN_1_END,usOSDState));
+ 892   1      }
+ 893          
+ 894          void OSDEnterItm22(void)
+ 895          {
+ 896   1          OSD_state=usOSDState = OSD_ITEM_2_2_STATE;
+ 897   1          OSDFocusItm22();
+ 898   1      }
+ 899          
+ 900          void OSDExitItm22(void)
+ 901          {
+ 902   1          OSDConfirmItm22();
+ 903   1          OSD_state=usOSDState = OSD_MAIN_2_2_STATE;
+ 904   1          OSDExitItms(MP2CursorPos(), CursorPos(OSD_MAIN_1_END,usOSDState));
+ 905   1      }
+ 906          
+ 907          void OSDEnterItm23(void)
+ 908          {
+ 909   1          OSD_state=usOSDState = OSD_ITEM_2_3_STATE;
+ 910   1          OSDFocusItm23();
+ 911   1      }
+ 912          
+ 913          void OSDExitItm23(void)
+ 914          {
+ 915   1          OSDConfirmItm23();
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 16  
+
+ 916   1         OSD_state= usOSDState = OSD_MAIN_2_3_STATE;
+ 917   1          OSDExitItms(MP2CursorPos(), CursorPos(OSD_MAIN_1_END,usOSDState));
+ 918   1      }
+ 919          
+ 920          void OSDEnterItm24(void)
+ 921          {
+ 922   1          OSD_state=usOSDState = OSD_ITEM_2_4_STATE;
+ 923   1          OSDFocusItm24();
+ 924   1      }
+ 925          
+ 926          void OSDExitItm24(void)
+ 927          {
+ 928   1          OSDConfirmItm24();
+ 929   1          OSD_state=usOSDState = OSD_MAIN_2_4_STATE;
+ 930   1          OSDExitItms(MP2CursorPos(), CursorPos(OSD_MAIN_1_END,usOSDState));
+ 931   1      }
+ 932          
+ 933          //******************************************************************************
+ 934          // Operations of sub-items in submenu 3
+ 935          //******************************************************************************
+ 936          void OSDEnterItm31(void)
+ 937          {
+ 938   1      /*   //140507 mike 
+ 939   1        if( OSD_color_level==1)  
+ 940   1        {
+ 941   1          OSD_color_level++;
+ 942   1          printf("140429 OSDEnterItm31=%x ;\n\r",(unsigned short)OSD_state);          //140421 mike                                   
+ 943   1          OSD_state=usOSDState = OSD_ITEM_3_1_STATE;
+ 944   1          OSDFocusItm31();                            //140425 mike  #define OSDFocusItm31 OSDFocusClrTmp
+ 945   1          printf("140421 OSDEnterItm31=%x , color = %x;\n\r",(unsigned short)OSD_state,(unsigned short)OSD_color
+             -_level);                //140421 mike
+ 946   1              }
+ 947   1      */
+ 948   1      //============================140507 mike       OSD_color_level=1;  
+ 949   1          OSDConfirmItm31();
+ 950   1              
+ 951   1              if(UserData.ucColorTemp==3)                                                                     //140508 mike  
+ 952   1              {
+ 953   2              OSD_color_level=2;                                                                      //140507 mike 
+ 954   2              OSD_state=usOSDState = OSD_ITEM_3_1_STATE;
+ 955   2              OSDExitItms(MP3CursorPos(), CursorPos(OSD_ITEM_3_1_STATE,usOSDState)+1);
+ 956   2                      OSD_color_RGB=1;
+ 957   2              }
+ 958   1              else
+ 959   1              {
+ 960   2              
+ 961   2              }
+ 962   1       #ifdef colortemp                                                       //140509 mike           
+                      printf("140429 OSDEnterItm 31 RGB=%x  color = %x;\n\r",(unsigned short)OSD_state,(unsigned short)OSD_colo
+             -r_level);                //140421 mike                                   
+              #endif
+ 965   1      //============================
+ 966   1      }
+ 967          //=================140508 
+ 968          void OSDExitItm31(void)
+ 969          { 
+ 970   1      
+ 971   1              if(OSD_color_level==2)                                                                  //140508 mike 
+ 972   1                      OSD_color_level--;                                      //140508 mike 
+ 973   1          OSDConfirmItm31();
+ 974   1          OSD_state=usOSDState = UserData.ucColorTemp;
+ 975   1          OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 17  
+
+ 976   1       #ifdef colortemp                                                       //140509 mike                   
+                  printf("140429 OSDExitItm31=%x ;\n\r",(unsigned short)OSD_state);           //140421 mike   
+               #endif   
+ 979   1      }
+ 980          //----------------------140508
+ 981          /*
+ 982          void OSDExitItm31(void)
+ 983          {  
+ 984            if(OSD_color_level==2)                                                                        //140508 mike 
+ 985               OSD_color_level--;                                                         //140508 mike 
+ 986              OSDConfirmItm31();
+ 987              OSD_state=usOSDState = OSD_MAIN_3_1_STATE;
+ 988              OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+ 989              printf("140429 OSDExitItm31=%x ;\n\r",(unsigned short)OSD_state);           //140421 mike                                   
+ 990          }
+ 991          */
+ 992          //=================140508
+ 993          void OSDEnterItm32(void)
+ 994          {
+ 995   1              if( OSD_color_level==2)  
+ 996   1              {
+ 997   2              //  OSD_color_level++;
+ 998   2                      OSD_state=usOSDState = OSD_ITEM_3_2_STATE;
+ 999   2              OSDFocusItm32();
+1000   2               #ifdef colortemp                                                       //140509 mike           
+                              printf("140429 OSDEnterItm32=%x ;\n\r",(unsigned short)OSD_state);              //140421 mike           
+                       #endif
+1003   2              }
+1004   1      }
+1005          
+1006          void OSDExitItm32(void)
+1007          {
+1008   1              if(UserData.ucColorTemp==3)                                                                     //140508 mike  
+1009   1              {
+1010   2              OSD_color_level=2;                                                                      //140507 mike 
+1011   2              OSD_state=usOSDState = OSD_ITEM_3_1_STATE;
+1012   2                      OSDExitItms(MP3CursorPos(), CursorPos(0,OSD_color_RGB));
+1013   2              }
+1014   1       #ifdef colortemp                                                       //140509 mike           
+                  printf("140421 OSDExitItm32=%x ;\n\r",(unsigned short)OSD_state);           //140421 mike   
+               #endif   
+1017   1      }
+1018          
+1019          void OSDEnterItm33(void)
+1020          {
+1021   1        if( OSD_color_level==2)  
+1022   1        {
+1023   2          OSD_state=usOSDState = OSD_ITEM_3_3_STATE;
+1024   2          OSDFocusItm33();
+1025   2       #ifdef colortemp                                                       //140509 mike           
+                  printf("140421 OSDEnterItm33=%x , color = %x;\n\r",(unsigned short)OSD_state,(unsigned short)OSD_color
+             -_level);                //140421 mike                                   
+              #endif
+1028   2        }
+1029   1      }
+1030          //-------------------------OSDEnterItm331  140430 mike for color 
+1031          void OSDEnterItm331(void)
+1032          {  
+1033   1          OSDConfirmItm31();
+1034   1      
+1035   1              if (OSD_color_RGB ==1)
+1036   1              {
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 18  
+
+1037   2              OSD_state=usOSDState =     OSD_ITEM_3_2_STATE;
+1038   2                      OSDFocusRGain();                                                //140509 mike 
+1039   2              }
+1040   1              else if(OSD_color_RGB ==2)
+1041   1              {
+1042   2                      OSD_state=usOSDState =     OSD_ITEM_3_3_STATE;
+1043   2                      OSDFocusGGain();                                                //140509 mike 
+1044   2              }
+1045   1              else if(OSD_color_RGB ==3)
+1046   1              {
+1047   2                      OSD_state=usOSDState =     OSD_ITEM_3_4_STATE;
+1048   2                      OSDFocusBBain();                                                //140509 mike 
+1049   2              }
+1050   1       #ifdef colortemp                                                       //140509 mike           
+                  printf("140429 OSDEnterItm331=%x  color = %x;\n\r",(unsigned short)OSD_state,(unsigned short)OSD_color
+             -_level);                //140421 mike                                   
+              #endif
+1053   1      }
+1054          void OSDEnterItm332(void)
+1055          {
+1056   1        /*  //140509 mike 
+1057   1          OSDConfirmItm32();
+1058   1          OSD_state=usOSDState = OSD_MAIN_3_2_STATE;
+1059   1          OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+1060   1         */
+1061   1       #ifdef colortemp                                                       //140509 mike           
+                 printf("140429 OSDEnterItm332=%x ;\n\r",(unsigned short)OSD_state);          //140421 mike                                   
+              #endif
+1064   1      }
+1065          void OSDEnterItm333(void)
+1066          {
+1067   1      /*   //140509 mike 
+1068   1          OSDConfirmItm31();
+1069   1          OSD_state=usOSDState = OSD_MAIN_3_1_STATE;
+1070   1          OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+1071   1      */
+1072   1       #ifdef colortemp                                                       //140509 mike           
+                      printf("140429 OSDEnterItm333=%x ;\n\r",(unsigned short)OSD_state);             //140421 mike                                   
+              #endif
+1075   1      }
+1076          void OSDEnterItm334(void)
+1077          {
+1078   1      /*   //140509 mike 
+1079   1          OSDConfirmItm34();
+1080   1          OSD_state=usOSDState = OSD_MAIN_3_4_STATE;
+1081   1          OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+1082   1      */
+1083   1       #ifdef colortemp                                                       //140509 mike           
+                  printf("140429 OSDEnterItm334=%x ;\n\r",(unsigned short)OSD_state);         //140421 mike                                   
+              #endif
+1086   1      }
+1087          
+1088          //-------------------------
+1089          
+1090          void OSDExitItm33(void)
+1091          {
+1092   1      /*
+1093   1           OSD_color_level--;
+1094   1          OSDConfirmItm33();
+1095   1          OSD_state=usOSDState = OSD_MAIN_3_3_STATE;
+1096   1          OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+1097   1      */
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 19  
+
+1098   1      if(UserData.ucColorTemp==3)                                                                     //140508 mike  
+1099   1              {
+1100   2                      OSD_color_level=2;                                                                      //140507 mike 
+1101   2                      OSD_state=usOSDState = OSD_ITEM_3_1_STATE;
+1102   2                      OSDExitItms(MP3CursorPos(), CursorPos(0,OSD_color_RGB));
+1103   2              }
+1104   1       #ifdef colortemp                                                       //140509 mike           
+                  printf("140421 OSDExitItm33=%x ;\n\r",(unsigned short)OSD_state);           //140421 mike   
+               #endif   
+1107   1      }
+1108          
+1109          void OSDEnterItm34(void)
+1110          {
+1111   1          OSD_state=usOSDState = OSD_ITEM_3_4_STATE;
+1112   1          OSDFocusItm34();
+1113   1       #ifdef colortemp                                                       //140509 mike           
+                  printf("140421 OSDEnterItm34=%x ;\n\r",(unsigned short)OSD_state);          //140421 mike                                           
+              #endif  
+1116   1      }
+1117          
+1118          void OSDExitItm34(void)
+1119          {
+1120   1      /*
+1121   1           OSD_color_level--;
+1122   1          OSDConfirmItm34();
+1123   1          OSD_state=usOSDState = OSD_MAIN_3_4_STATE;
+1124   1          OSDExitItms(MP3CursorPos(), CursorPos(OSD_MAIN_2_END,usOSDState));
+1125   1      */
+1126   1              if(UserData.ucColorTemp==3)                                                                     //140508 mike  
+1127   1              {
+1128   2                      OSD_color_level=2;                                                                      //140507 mike 
+1129   2                      OSD_state=usOSDState = OSD_ITEM_3_1_STATE;
+1130   2        
+1131   2                      OSDExitItms(MP3CursorPos(), CursorPos(0,OSD_color_RGB));
+1132   2              }
+1133   1       #ifdef colortemp                                                       //140509 mike           
+                  printf("140421 OSDExitItm34=%x ;\n\r",(unsigned short)OSD_state);           //140421 mike   
+               #endif   
+1136   1              
+1137   1      }
+1138          
+1139          //******************************************************************************
+1140          // Operations of sub-items in submenu 4
+1141          //******************************************************************************
+1142          void OSDEnterItm41(void)
+1143          {
+1144   1          OSD_state=usOSDState = OSD_ITEM_4_1_STATE;
+1145   1          OSDFocusItm41();
+1146   1      }
+1147          
+1148          void OSDExitItm41(void)
+1149          {
+1150   1          OSDConfirmItm41();
+1151   1         OSD_state= usOSDState = OSD_MAIN_4_1_STATE;
+1152   1          OSDExitItms(MP4CursorPos(), CursorPos(OSD_MAIN_3_END,usOSDState));
+1153   1      }
+1154          
+1155          void OSDEnterItm42(void)
+1156          {
+1157   1          OSD_state=usOSDState = OSD_ITEM_4_2_STATE;
+1158   1          OSDFocusItm42();
+1159   1      }
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 20  
+
+1160          
+1161          void OSDExitItm42(void)
+1162          {
+1163   1          OSDConfirmItm42();
+1164   1          OSD_state=usOSDState = OSD_MAIN_4_2_STATE;
+1165   1          OSDExitItms(MP4CursorPos(), CursorPos(OSD_MAIN_3_END,usOSDState));
+1166   1      }
+1167          
+1168          void OSDEnterItm43(void)
+1169          {
+1170   1          OSD_state=usOSDState = OSD_ITEM_4_3_STATE;
+1171   1          OSDFocusItm43();
+1172   1      }
+1173          
+1174          void OSDExitItm43(void)
+1175          {
+1176   1          OSDConfirmItm43();
+1177   1          OSD_state=usOSDState = OSD_MAIN_4_3_STATE;
+1178   1          OSDExitItms(MP4CursorPos(), CursorPos(OSD_MAIN_3_END,usOSDState));
+1179   1      }
+1180          
+1181          void OSDEnterItm44(void)
+1182          {
+1183   1          OSD_state=usOSDState = OSD_ITEM_4_4_STATE;
+1184   1          OSDFocusItm44();
+1185   1      }
+1186          
+1187          void OSDExitItm44(void)
+1188          {
+1189   1          OSDConfirmItm44();
+1190   1          OSD_state=usOSDState = OSD_MAIN_4_4_STATE;
+1191   1          OSDExitItms(MP4CursorPos(), CursorPos(OSD_MAIN_3_END,usOSDState));
+1192   1      }
+1193          
+1194          //void OSDEnterItm45(void)
+1195          //{
+1196          //    OSD_state=usOSDState = OSD_ITEM_4_5_STATE;
+1197          //    OSDFocusItm45();
+1198          //}
+1199          //
+1200          //void OSDExitItm45(void)
+1201          //{
+1202          //    OSDConfirmItm45();                // (at OSDView.h) #define OSDConfirmItm45   OSDConfirmOSDRotation
+1203          //    OSDExitItms(MP4CursorPos(), CursorPos(OSD_MAIN_3_END,usOSDState));
+1204          //}
+1205          
+1206          //******************************************************************************
+1207          // Operations of sub-items in submenu 5
+1208          //******************************************************************************
+1209          void OSDEnterItm51(void)                                                                //140325 mike language
+1210          {
+1211   1          OSD_state=usOSDState = OSD_ITEM_5_1_STATE;
+1212   1          OSDFocusItm51();
+1213   1      }
+1214          
+1215          void OSDExitItm51(void)                                                         //140325 mike language
+1216          {
+1217   1          OSDConfirmItm51();
+1218   1          OSD_state=usOSDState = OSD_MAIN_5_1_STATE;
+1219   1          OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1220   1      }
+1221          
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 21  
+
+1222          void OSDEnterItm52(void)                                                                //140325 mike volume                                                    
+1223          {
+1224   1          OSD_state=usOSDState = OSD_ITEM_5_2_STATE;
+1225   1          OSDFocusItm52();
+1226   1      }
+1227          
+1228          void OSDExitItm52(void)                                                         //140325 mke volume 
+1229          {
+1230   1          OSDConfirmItm52();
+1231   1          OSD_state=usOSDState = OSD_MAIN_5_2_STATE;                                                                  
+1232   1          OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1233   1      }
+1234          
+1235          void OSDEnterItm53(void)                                                                                        //140317 mike for mute                                                                  
+1236          {
+1237   1          OSD_state=usOSDState = OSD_ITEM_5_3_STATE;
+1238   1          OSDFocusItm53();
+1239   1      }
+1240          
+1241          void OSDExitItm53(void)
+1242          {
+1243   1          OSDConfirmItm53();
+1244   1          OSD_state=usOSDState = OSD_MAIN_5_3_STATE;
+1245   1          OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1246   1      }
+1247          
+1248          void OSDEnterItm54(void)                                                                                //140318 mike input 
+1249          {
+1250   1          OSD_state=usOSDState = OSD_ITEM_5_4_STATE;
+1251   1          OSDFocusItm54();
+1252   1      }
+1253          
+1254          void OSDExitItm54(void)                                                                         //140318 mike input 
+1255          {
+1256   1          OSDConfirmItm54();
+1257   1          OSD_state=usOSDState = OSD_MAIN_5_4_STATE;                                                                  
+1258   1          OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1259   1      }
+1260          
+1261          //void OSDEnterItm55(void)
+1262          //{
+1263          //   OSD_state=usOSDState = OSD_ITEM_5_5_STATE;
+1264          //    OSDFocusItm55();
+1265          //}
+1266          //
+1267          //void OSDExitItm55(void)
+1268          //{
+1269          //    OSDConfirmItm55();
+1270          //    OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1271          //}
+1272          //
+1273          //void OSDEnterItm56(void)
+1274          //{
+1275          //    OSD_state=usOSDState = OSD_ITEM_5_6_STATE;
+1276          //    OSDFocusItm56();
+1277          //}
+1278          //
+1279          //void OSDExitItm56(void)
+1280          //{
+1281          //    OSDConfirmItm56();
+1282          //    OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1283          //}
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 22  
+
+1284          
+1285          void OSDEnterItm57(void)
+1286          {
+1287   1          OSD_state=usOSDState = OSD_ITEM_5_7_STATE;
+1288   1          OSDFocusItm57();
+1289   1      }
+1290          
+1291          void OSDExitItm57(void)
+1292          {
+1293   1          OSDConfirmItm57();
+1294   1         OSD_state=usOSDState = OSD_MAIN_5_7_STATE;
+1295   1          OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+1296   1      }
+1297          
+1298          #if TOUCH_EnDis == ENABLE
+                      void OSDEnterItm58(void)        //gg_new                        //george: F_Touch_04A
+                      {
+                          OSD_state=usOSDState = OSD_ITEM_5_8_STATE;  //george: F_Touch_04A1 -> OSD_ITEM_1_5_STATE
+                          OSDFocusItm58();
+                      }
+                      
+                      void OSDExitItm58(void)         //gg_new                        //george: F_Touch_04B
+                      {
+                          OSDConfirmItm58();
+                          OSD_state=usOSDState = OSD_MAIN_5_8_STATE;  //george: F_Touch_04B1 -> OSD_MAIN_1_6_STATE
+                          OSDExitItms(MP5CursorPos(), CursorPos(OSD_MAIN_4_END,usOSDState));
+                      }
+              #endif //#if TOUCH_EnDis == ENABLE
+1312          
+1313          #if ENABLE_FUNC_OSD == ON
+              //******************************************************************************
+              // Function Menu Operations
+              //******************************************************************************
+              void OSDEnterFuncMenu(void)
+              {
+                  OSD_state=usOSDState = OSD_FUNC_1_STATE;
+                  while (1) {
+                      if (OSDIsFuncItemValid(CursorPos(OSD_FUNC_BEG,usOSDState)) == TRUE)
+                          break;
+                      OSD_state=usOSDState = NextState(OSD_FUNC_BEG,OSD_FUNC_END,usOSDState);
+                  }    
+                  OSDShowFuncMenu();
+                  OSDSelectFuncItem(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+              void OSDExitFuncMenu(void)
+              {
+                  OSD_state=usOSDState = OSD_OFF_STATE;
+                  OSDCloseFuncMenu();
+              }
+              
+              void OSDFuncMenuUp(void)
+              {
+                  OSDUnselectFuncItem(CursorPos(OSD_FUNC_BEG,usOSDState));
+                  while (1) {
+                      OSD_state=usOSDState = NextState(OSD_FUNC_BEG,OSD_FUNC_END,usOSDState);
+                      if (OSDIsFuncItemValid(CursorPos(OSD_FUNC_BEG,usOSDState)) == TRUE)
+                          break;
+                  }
+                  OSDSelectFuncItem(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 23  
+
+              void OSDFuncMenuDown(void)
+              {
+                  OSDUnselectFuncItem(CursorPos(OSD_FUNC_BEG,usOSDState));
+                  while (1) {
+                      OSD_state=usOSDState = PrevState(OSD_FUNC_BEG,OSD_FUNC_END,usOSDState);
+                      if (OSDIsFuncItemValid(CursorPos(OSD_FUNC_BEG,usOSDState)) == TRUE)
+                          break;
+                  }
+                  OSDSelectFuncItem(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+              void OSDEnterFunc1(void)
+              {
+                  OSD_state=usOSDState = OSD_FNITM_1_STATE;
+                  OSDFocusFunc1();
+              }
+              
+              void OSDExitFunc1(void)
+              {
+                  OSDConfirmFunc1();
+                  OSD_state=usOSDState = OSD_FUNC_1_STATE;
+                  OSDFocusFuncMenu(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+              void OSDEnterFunc2(void)
+              {
+                  OSD_state=usOSDState = OSD_FNITM_2_STATE;
+                  OSDFocusFunc2();
+              }
+              
+              void OSDExitFunc2(void)
+              {
+                  OSDConfirmFunc2();
+                  OSD_state=usOSDState = OSD_FUNC_2_STATE;
+                  OSDFocusFuncMenu(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+              void OSDEnterFunc3(void)
+              {
+                  OSD_state=usOSDState = OSD_FNITM_3_STATE;
+                  OSDFocusFunc3();
+              }
+              
+              void OSDExitFunc3(void)
+              {
+                  OSDConfirmFunc3();
+                  OSD_state=usOSDState = OSD_FUNC_3_STATE;
+                  OSDFocusFuncMenu(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+              void OSDEnterFunc4(void)
+              {
+                  OSD_state=usOSDState = OSD_FNITM_4_STATE;
+                  OSDFocusFunc4();
+              }
+              
+              void OSDExitFunc4(void)
+              {
+                  OSD_state=usOSDState = OSD_FUNC_4_STATE;
+                  OSDFocusFuncMenu(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 24  
+
+              void OSDEnterFunc5(void)
+              {
+                  OSD_state=usOSDState = OSD_FNITM_5_STATE;
+                  OSDFocusFunc5();
+              }
+              
+              void OSDExitFunc5(void)
+              {
+                  OSD_state=usOSDState = OSD_FUNC_5_STATE;
+                  OSDFocusFuncMenu(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              
+              void OSDEnterFunc6(void)
+              {
+                  OSD_state=usOSDState = OSD_FNITM_6_STATE;
+                  OSDFocusFunc6();
+              }
+              
+              void OSDExitFunc6(void)
+              {
+                  OSD_state=usOSDState = OSD_FUNC_6_STATE;
+                  OSDFocusFuncMenu(CursorPos(OSD_FUNC_BEG,usOSDState));
+              }
+              #endif
+1432          
+1433          void OSDEnterAuto(void)
+1434          {
+1435   1      
+1436   1          OSD_state=usOSDState = OSD_AUTOTUNE_STATE;  //george: OSD_AUTOTUNE_STATE=0x38
+1437   1      
+1438   1      #if AutoTune_Debug == ENABLE
+              printf("\tOSDEnterAuto_S, usOSDState=0x%x\n", (USHRT)usOSDState);       //150526 george
+              #endif
+1441   1      
+1442   1          OSDPerformAuto();
+1443   1          OSD_state=usOSDState = OSD_OFF_STATE;
+1444   1      
+1445   1      #if AutoTune_Debug == ENABLE
+              printf("\tOSDEnterAuto_E, usOSDState=0x%x\n", (USHRT)usOSDState);       //150526 george
+              #endif
+1448   1      }
+1449          
+1450          void OSDEnterDir1(void)                                         //140317 mike brightness
+1451          {
+1452   1          OSD_state=usOSDState = OSD_DIRECT_1_STATE;
+1453   1          OSDShowDir1();
+1454   1      }
+1455          
+1456          void OSDEnterDir2(void)                                         //140317 mike contrast
+1457          {
+1458   1          OSD_state=usOSDState = OSD_DIRECT_2_STATE;                          
+1459   1          OSDShowDir2();
+1460   1      }
+1461          
+1462          void OSDEnterDir3(void)                                         //140317 mike volume
+1463          {
+1464   1          OSD_state=usOSDState = OSD_DIRECT_3_STATE;
+1465   1          OSDShowDir3();                                                              
+1466   1      }
+1467          
+1468          void OSDExitDir(void)
+1469          {
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 25  
+
+1470   1          OSD_state=usOSDState = OSD_OFF_STATE;
+1471   1          OSDCloseDir();
+1472   1      }
+1473          void OSDEnterOpt1(void)
+1474          {
+1475   1          OSD_state=usOSDState = OSD_OPT1_STATE;
+1476   1          OSDShowOpt1();
+1477   1      }
+1478          
+1479          void OSDExitOpt1(void)
+1480          {
+1481   1          OSDConfirmOpt1();
+1482   1          OSD_state=usOSDState = OSD_OFF_STATE;
+1483   1          OSDCloseOpt1();
+1484   1      }
+1485          
+1486          void OSDEnterOpt2(void)
+1487          {
+1488   1          OSD_state=usOSDState = OSD_OPT2_STATE;
+1489   1          OSDShowOpt2();
+1490   1      }
+1491          
+1492          void OSDExitOpt2(void)
+1493          {
+1494   1          OSD_state=usOSDState = OSD_OFF_STATE;
+1495   1          OSDCloseOpt2();
+1496   1          OSDConfirmOpt2();
+1497   1      }
+1498          
+1499          void OSDEnterNormal(void)
+1500          {
+1501   1      
+1502   1          OSD_state=usOSDState = OSD_INFO_NOTICE_STATE;
+1503   1          OSDPerformNormal();
+1504   1      
+1505   1      #if OSD_Debug == ENABLE
+              printf("OSDEnterNormal_E\n");           //150526 george
+              #endif
+1508   1      }
+1509          
+1510          void OSDEnterNoSync(void)
+1511          {
+1512   1              
+1513   1          second = 0;     //FEFANJACKY FOR TIMERCOUNTER
+1514   1          minute = 0;
+1515   1          hour = 0;
+1516   1      
+1517   1          OSD_state=usOSDState = OSD_INFO_NOSYNC_STATE;
+1518   1          OSDShowNoSync();
+1519   1      }
+1520          
+1521          void OSDEnterNoCable(void)
+1522          {
+1523   1              
+1524   1          second = 0;     //FEFANJACKY FOR TIMERCOUNTER
+1525   1          minute = 0;
+1526   1          hour = 0;
+1527   1      
+1528   1         OSD_state= usOSDState = OSD_INFO_NOCABLE_STATE;
+1529   1          OSDShowNoCable();
+1530   1      }
+1531          
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 26  
+
+1532          void OSDEnterOOL(void)
+1533          {       
+1534   1          OSD_state=usOSDState = OSD_INFO_OUTOFLIMIT_STATE;
+1535   1          OSDShowOOL();
+1536   1      }
+1537          
+1538          void OSDEnterOOR(void)
+1539          {       
+1540   1          OSD_state=usOSDState = OSD_INFO_OUTOFRANCE_STATE;
+1541   1          OSDShowOOR();
+1542   1      }
+1543          
+1544          void OSDEnterFactory(void)
+1545          {
+1546   1      
+1547   1          OSD_state=OSD_state=usOSDState = OSD_FACT_STATE;
+1548   1          OSDShowFactory();
+1549   1      }
+1550          
+1551          void OSDUpFactory(void)
+1552          {
+1553   1      
+1554   1          OSD_state=usOSDState = OSD_FACT_STATE;
+1555   1          OSDFactoryUp();
+1556   1      }
+1557          
+1558          void OSDDnFactory(void)
+1559          {
+1560   1          
+1561   1          OSD_state=usOSDState = OSD_FACT_STATE;
+1562   1          OSDFactoryDown();
+1563   1      }
+1564          
+1565          void OSDEnterFItm(void)
+1566          {
+1567   1         
+1568   1         OSD_state= usOSDState = OSD_FITM_STATE;
+1569   1          OSDFactoryEnterItm();
+1570   1      }
+1571          
+1572          void OSDExitFItm(void)
+1573          {
+1574   1         
+1575   1          OSD_state=usOSDState = OSD_FACT_STATE;
+1576   1          OSDFactoryExitItm();
+1577   1      }
+1578          
+1579          void OSDUpFItm(void)
+1580          {
+1581   1      
+1582   1          OSD_state=usOSDState = OSD_FITM_STATE;
+1583   1          OSDFactoryItmUp();
+1584   1      }
+1585          
+1586          void OSDDnFItm(void)
+1587          {
+1588   1      
+1589   1          OSD_state=usOSDState = OSD_FITM_STATE;
+1590   1          OSDFactoryItmDown();
+1591   1      }
+1592          
+1593          void OSDEnterDemo(void)
+C51 COMPILER V8.02   OSDCTRL                                                               08/07/2015 16:22:28 PAGE 27  
+
+1594          {
+1595   1        
+1596   1          OSD_state=usOSDState = OSD_DEMO_STATE;
+1597   1          OSDShowDemo();
+1598   1      }
+1599          void OSDUpDemo(void)
+1600          {
+1601   1       
+1602   1          OSD_state=usOSDState = OSD_DEMO_STATE;
+1603   1          OSDDemoUp();
+1604   1      }
+1605          
+1606          void OSDDnDemo(void)
+1607          {
+1608   1       
+1609   1          OSD_state=usOSDState = OSD_DEMO_STATE;
+1610   1          OSDDemoDown();
+1611   1      }
+1612          void OSDEnterDItm(void)
+1613          {
+1614   1          
+1615   1          OSD_state=usOSDState = OSD_DITM_STATE;
+1616   1          OSDDemoEnterItm();
+1617   1      }
+1618          void OSDExitDItm(void)
+1619          {
+1620   1        
+1621   1          OSD_state=usOSDState = OSD_DEMO_STATE;
+1622   1          OSDDemoExitItm();
+1623   1      }
+1624          void OSDUpDItm(void)
+1625          {
+1626   1       
+1627   1         OSD_state= usOSDState = OSD_DITM_STATE;
+1628   1          OSDDemoItmUp();
+1629   1      }
+1630          
+1631          void OSDDnDItm(void)
+1632          {
+1633   1         
+1634   1          OSD_state=usOSDState = OSD_DITM_STATE;
+1635   1          OSDDemoItmDown();
+1636   1      }
+1637          void OSDDummyFunction(void)
+1638          {
+1639   1         
+1640   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2433    ----
+   CONSTANT SIZE    =    105    ----
+   XDATA SIZE       =     11       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

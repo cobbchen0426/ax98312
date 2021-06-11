@@ -1,0 +1,455 @@
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_PWM
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_PWM.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_PWM.c LARGE OPTIMIZE(9,SPEED) BROWSE INCD
+                    -IR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI
+                    -\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) 
+                    -PRINT(.\Lst\Scaler_PWM.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_PWM.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          
+  23          //******************************************************************************
+  24          // S T A T I C   V A R I A B L E S
+  25          //******************************************************************************
+  26          
+  27          //******************************************************************************
+  28          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  29          //******************************************************************************
+  30          
+  31          //******************************************************************************
+  32          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  33          //******************************************************************************
+  34          
+  35          //******************************************************************************
+  36          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  37          //******************************************************************************
+  38          
+  39          //******************************************************************************
+  40          // F U N C T I O N   B O D Y S
+  41          //******************************************************************************
+  42          
+  43          #if ENABLE_PWM_SMOOTH == ON
+              /**************************************************************************//**
+               * Configure the smooth of the PWM duty.
+               * @param port PWM output port.
+               * @param step PWM value change step. (00=1 step, 01=2 steps, 10=4 steps, 11=8 steps)
+               * @param repeat Repeat times of each step. (00=disable, 01=1 time, 10=2 times, 11=4 times)
+               ******************************************************************************/
+              void SmoothScalerPWM(UCHAR port, UCHAR step, UCHAR repeat)
+              {
+                  UCHAR ch;
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 2   
+
+              
+                  if (step > 3) {
+                      step = 3;
+                  }
+                  if (repeat > 3) {
+                      repeat = 3;
+                  }
+                  if (port == PWM_A) {
+                      SC_PWMA_CTRL6 &= 0xF0;
+                      ch = (step << 2 | repeat);
+                      SC_PWMA_CTRL6 |= ch;
+                  }
+                  else if (port == PWM_B) {
+                      SC_PWMB_CTRL6 &= 0xF0;
+                      ch = (step << 2 | repeat);
+                      SC_PWMB_CTRL6 |= ch;
+                  }
+                  else if (port == PWM_C) {
+                      SC_PWMC_CTRL6 &= 0xF0;
+                      ch = (step << 2 | repeat);
+                      SC_PWMC_CTRL6 |= ch;
+                  }
+                  else if (port == PWM_D) {
+                      SC_PWMD_CTRL6 &= 0xF0;
+                      ch = (step << 2 | repeat);
+                      SC_PWMD_CTRL6 |= ch;
+                  }
+              }
+              #endif
+  82          
+  83          /**************************************************************************//**
+  84           * Configure the PWM output frequency.
+  85           * @param port PWM output port. (e.x. PWMA, PWMB etc...)
+  86           * @param pin PWM output pin.
+  87           * @param freq Output frequency of PWM.
+  88           ******************************************************************************/
+  89          void ConfigScalerPWM(UCHAR port, UCHAR pin, ULONG freq)
+  90          {
+  91   1          ULONG total_div;
+  92   1          UCHAR div_hi, div_lo, pwm_ctrl;
+  93   1          USHRT base_div;
+  94   1          UCHAR reg = 0x00;
+  95   1          //=============
+  96   1          //check freq
+  97   1          //=============
+  98   1          total_div = (float)REF_CLK / freq - 0.5;
+  99   1          if (total_div >= 1024) 
+ 100   1              {
+ 101   2               pwm_ctrl = 10;
+ 102   2               base_div = 1024;
+ 103   2              }
+ 104   1          else if (total_div >= 256) 
+ 105   1              {
+ 106   2               pwm_ctrl = 8;
+ 107   2               base_div = 256;
+ 108   2              }
+ 109   1          else 
+ 110   1              {
+ 111   2              pwm_ctrl = 4;
+ 112   2              base_div = 16;
+ 113   2              }
+ 114   1          total_div = (float)REF_CLK / base_div / freq - 0.5;
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 3   
+
+ 115   1          for (pwm_ctrl; pwm_ctrl<15; pwm_ctrl++) 
+ 116   1              {
+ 117   2                      if (total_div > 1023) 
+ 118   2                      {
+ 119   3                              total_div >>= 1;
+ 120   3                      }
+ 121   2              else 
+ 122   2                      {
+ 123   3                              break;
+ 124   3              }
+ 125   2              }
+ 126   1              //----------------------------------- 
+ 127   1      
+ 128   1          switch (port) 
+ 129   1              {
+ 130   2                              case PWM_A:
+ 131   2                                                      reg = SC_PWMA_CTRL2 & 0xC0;
+ 132   2                                                      break;
+ 133   2                              case PWM_B:
+ 134   2                                                      reg = SC_PWMB_CTRL2 & 0xC0;
+ 135   2                                                      break;
+ 136   2                              case PWM_C:
+ 137   2                                                      reg = SC_PWMC_CTRL2 & 0xC0;
+ 138   2                                                      break;
+ 139   2                              case PWM_D:
+ 140   2                                                      reg = SC_PWMD_CTRL2 & 0xC0;
+ 141   2                                                      break;
+ 142   2                              default:
+ 143   2                                                      reg = 0x00;//error
+ 144   2                                              return;
+ 145   2                                      break;
+ 146   2              }
+ 147   1      //----------------------------------------
+ 148   1          //if (total_div != 0)
+ 149   1              //total_div = total_div - 1; //00h->1, 01h->2,...
+ 150   1          
+ 151   1          div_hi = ((total_div >> 4) & 0x30);
+ 152   1          div_lo = (UCHAR)total_div;
+ 153   1          reg = reg | pwm_ctrl | div_hi; 
+ 154   1                  
+ 155   1          switch (port) 
+ 156   1              {
+ 157   2                              case PWM_A:
+ 158   2                                                      SC_PWMA_CTRL2 = reg;
+ 159   2                                                      SC_PWMA_CTRL3 = div_lo;
+ 160   2                                                      break;
+ 161   2                              case PWM_B:
+ 162   2                                                      SC_PWMB_CTRL2 = reg;
+ 163   2                                                      SC_PWMB_CTRL3 = div_lo;
+ 164   2                                                      break;
+ 165   2                              case PWM_C:
+ 166   2                                                      SC_PWMC_CTRL2 = reg;
+ 167   2                                                      SC_PWMC_CTRL3 = div_lo;
+ 168   2                                                      break;
+ 169   2                              case PWM_D:
+ 170   2                                                      SC_PWMD_CTRL2 = reg;
+ 171   2                                                      SC_PWMD_CTRL3 = div_lo;
+ 172   2                                                      break;
+ 173   2                                      default:                                                                //error
+ 174   2                                                      break;
+ 175   2              }
+ 176   1              //----------------------------------
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 4   
+
+ 177   1               //select PWM PORT ENBALE 
+ 178   1              //-----------------------------------
+ 179   1          switch (pin)                                        //
+ 180   1              {
+ 181   2                                      case PWMA_PIN_69:
+ 182   2                                                                      SC_MCU_IO_CTRL3 &= ~(BIT7|BIT6);
+ 183   2                                                                      SC_MCU_IO_CTRL3 |= BIT6;
+ 184   2                                                                      break;
+ 185   2                                      case PWMB_PIN_65:
+ 186   2                                                                      SC_MCU_IO_CTRL5 &= ~(BIT5|BIT4);
+ 187   2                                                                      SC_MCU_IO_CTRL5 |= BIT4;
+ 188   2                                                                      break;
+ 189   2                                      case PWMB_PIN_66:
+ 190   2                                                                      SC_MCU_IO_CTRL4 &= ~(BIT7|BIT6);
+ 191   2                                                                      SC_MCU_IO_CTRL4 |= BIT6;
+ 192   2                                                                       break;
+ 193   2                               case PWMC_PIN_121:
+ 194   2      #if IS_NT68770_SERIES
+                                              SC_MCU_IO_CTRL4 &= ~(BIT1|BIT0);
+                                              SC_MCU_IO_CTRL4 |= BIT1;
+                              #else
+ 198   2                                      SC_MCU_IO_CTRL4 &= ~(BIT1|BIT0);
+ 199   2                                      SC_MCU_IO_CTRL4 |= BIT0;
+ 200   2      #endif
+ 201   2                                                                      break;
+ 202   2              case PWMC_PIN_124:
+ 203   2                                                      SC_MCU_IO_CTRL3 &= ~(BIT3|BIT2);
+ 204   2                                                      SC_MCU_IO_CTRL3 |= BIT2;
+ 205   2                                                                      break;
+ 206   2              case PWMD_PIN_43:
+ 207   2                                                       SC_MCU_IO_CTRL5 &= ~(BIT7|BIT6);
+ 208   2                                                      SC_MCU_IO_CTRL5 |= BIT7;
+ 209   2                                                                       break;
+ 210   2              case PWMD_PIN_50:
+ 211   2                                                       SC_MCU_IO_CTRL1 &= ~(BIT1|BIT0);
+ 212   2                                                      SC_MCU_IO_CTRL1 |= BIT0;
+ 213   2                                                                      break;
+ 214   2                  
+ 215   2                  
+ 216   2              case PWMA_PIN_67:
+ 217   2                  SC_MCU_IO_CTRL3 &= ~(BIT7|BIT6);
+ 218   2                  SC_MCU_IO_CTRL3 |= BIT6;
+ 219   2                  break;
+ 220   2              case PWMA_PIN_109:
+ 221   2                  SC_MCU_IO_CTRL4 &= ~(BIT7|BIT6);
+ 222   2                  SC_MCU_IO_CTRL4 |= BIT6;
+ 223   2                  break;
+ 224   2              case PWMA_PIN_127:
+ 225   2                  SC_MCU_IO_CTRL3 &= ~(BIT3|BIT2);
+ 226   2                  SC_MCU_IO_CTRL3 |= BIT2;
+ 227   2                  break;
+ 228   2              case PWMB_PIN_27:
+ 229   2                  SC_MCU_IO_CTRL2 &= ~(BIT7|BIT6);
+ 230   2                  SC_MCU_IO_CTRL2 |= BIT6;
+ 231   2                  break;
+ 232   2              case PWMB_PIN_42:
+ 233   2                  SC_MCU_IO_CTRL3 &= ~(BIT1|BIT0);
+ 234   2                  SC_MCU_IO_CTRL3 |= BIT0;
+ 235   2                  break;
+ 236   2              case PWMC_PIN_6:
+ 237   2                  SC_MCU_IO_CTRL2 &= ~(BIT5|BIT4);
+ 238   2                  SC_MCU_IO_CTRL2 |= BIT4;
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 5   
+
+ 239   2                  break;
+ 240   2              case PWMC_PIN_104:
+ 241   2                  SC_MCU_IO_CTRL1 &= ~(BIT7|BIT6);
+ 242   2                  SC_MCU_IO_CTRL1 |= BIT6;
+ 243   2                  break;
+ 244   2              case PWMD_PIN_125:                                                                      
+ 245   2                                                      SC_MCU_IO_CTRL1 &= ~(BIT3|BIT2);
+ 246   2                                                      SC_MCU_IO_CTRL1 |= BIT2;                        //george-mark: set_PA2*/PWMD*
+ 247   2                                                      break;
+ 248   2              case PWMD_PIN_66:
+ 249   2                  SC_MCU_IO_CTRL1 &= ~(BIT5|BIT4);
+ 250   2                  SC_MCU_IO_CTRL1 |= BIT4;
+ 251   2                  break;
+ 252   2              case PWMA_PIN_22:
+ 253   2                  SC_MCU_IO_CTRL1 &= ~(BIT5|BIT4);
+ 254   2                  SC_MCU_IO_CTRL1 |= BIT4;
+ 255   2                  break;
+ 256   2              case PWMB_PIN_64:
+ 257   2                  SC_MCU_IO_CTRL1 &= ~(BIT3|BIT2);
+ 258   2                  SC_MCU_IO_CTRL1 |= BIT2;
+ 259   2                  break;
+ 260   2      
+ 261   2      
+ 262   2          }
+ 263   1      
+ 264   1          pin = 0; // Disable compile warning only.
+ 265   1      }
+ 266          
+ 267          /**************************************************************************//**
+ 268           * Set PWM duty.
+ 269           * @param port PWM output port. (e.x. PWMA, PWMB etc...)
+ 270           * @param value PWM duty.
+ 271           ******************************************************************************/
+ 272          void SetScalerPWM(UCHAR port, USHRT value)    
+ 273          {
+ 274   1          switch (port) {
+ 275   2              case PWM_A:
+ 276   2                  SC_PWMA_CTRL5 = ((UCHAR)value & 0x03);
+ 277   2                  SC_PWMA_CTRL4 = (value >> 2);
+ 278   2                  break;
+ 279   2              case PWM_B:
+ 280   2                  SC_PWMB_CTRL5 = ((UCHAR)value & 0x03);
+ 281   2                  SC_PWMB_CTRL4 = (value >> 2);
+ 282   2                  break;
+ 283   2              case PWM_C:
+ 284   2                  SC_PWMC_CTRL5 = ((UCHAR)value & 0x03);
+ 285   2                  SC_PWMC_CTRL4 = (value >> 2);
+ 286   2                  break;
+ 287   2              case PWM_D:
+ 288   2                  SC_PWMD_CTRL5 = ((UCHAR)value & 0x03);
+ 289   2                  SC_PWMD_CTRL4 = (value >> 2);
+ 290   2                  break;  
+ 291   2          }
+ 292   1      }
+ 293          
+ 294          #if ENABLE_SET_PWM_MAX_BUFFER == ON
+ 295          /**************************************************************************//**
+ 296           * Get current PWM duty setting.
+ 297           * @return PWM duty setting.
+ 298           ******************************************************************************/
+ 299          USHRT GetScalerPWM(UCHAR port)
+ 300          {
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 6   
+
+ 301   1          USHRT pwm;
+ 302   1          UCHAR ch;
+ 303   1      
+ 304   1          switch (port) {
+ 305   2              case PWM_A:
+ 306   2                  pwm = SC_PWMA_CTRL4;
+ 307   2                  ch = SC_PWMA_CTRL5 & 0x03;
+ 308   2                  pwm = (pwm << 2) | ch;
+ 309   2                  break;
+ 310   2              case PWM_B:
+ 311   2                  pwm = SC_PWMB_CTRL4;
+ 312   2                  ch = SC_PWMB_CTRL5 & 0x03;
+ 313   2                  pwm = (pwm << 2) | ch;
+ 314   2                  break;
+ 315   2              case PWM_C:
+ 316   2                  pwm = SC_PWMC_CTRL4;
+ 317   2                  ch = SC_PWMC_CTRL5 & 0x03;
+ 318   2                  pwm = (pwm << 2) | ch;
+ 319   2                  break;
+ 320   2              case PWM_D:
+ 321   2                  pwm = SC_PWMD_CTRL4;
+ 322   2                  ch = SC_PWMD_CTRL5 & 0x03;
+ 323   2                  pwm = (pwm << 2) | ch;
+ 324   2                  break;
+ 325   2              default:
+ 326   2                  pwm = 0;//error
+ 327   2                  break;
+ 328   2          }
+ 329   1      
+ 330   1          return pwm;
+ 331   1      }
+ 332          #endif
+ 333          
+ 334          /**************************************************************************//**
+ 335           * Enable PWM function.
+ 336           * @param port PWM output port. (e.x. PWMA, PWMB etc...)
+ 337           ******************************************************************************/
+ 338          void EnableScalerPWM(UCHAR port)
+ 339          {
+ 340   1          switch (port) {
+ 341   2              case PWM_A:
+ 342   2                  SC_PWMA_CTRL1 = (SC_PWMA_CTRL1 & 0xFC) | BIT7;
+ 343   2                  break;
+ 344   2              case PWM_B:
+ 345   2                  SC_PWMB_CTRL1 = (SC_PWMB_CTRL1 & 0xFC) | BIT7;
+ 346   2                  break;
+ 347   2              case PWM_C:
+ 348   2                  SC_PWMC_CTRL1 = (SC_PWMC_CTRL1 & 0xFC) | BIT7;
+ 349   2                  break;
+ 350   2              case PWM_D:
+ 351   2                  SC_PWMD_CTRL1 = (SC_PWMD_CTRL1 & 0xFC) | BIT7;
+ 352   2                  break;
+ 353   2              default:
+ 354   2              case PWM_ALL:
+ 355   2                  SC_PWMA_CTRL1 = (SC_PWMA_CTRL1 & 0xFC) | BIT7;
+ 356   2                  SC_PWMB_CTRL1 = (SC_PWMB_CTRL1 & 0xFC) | BIT7;
+ 357   2                  SC_PWMC_CTRL1 = (SC_PWMC_CTRL1 & 0xFC) | BIT7;
+ 358   2                  SC_PWMD_CTRL1 = (SC_PWMD_CTRL1 & 0xFC) | BIT7;
+ 359   2                  break;
+ 360   2          }
+ 361   1      }
+ 362          
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 7   
+
+ 363          /**************************************************************************//**
+ 364           * Disable PWM function.
+ 365           * @param port PWM output port. (e.x. PWMA, PWMB etc...)
+ 366           ******************************************************************************/
+ 367          void DisableScalerPWM(UCHAR port)
+ 368          {
+ 369   1          switch (port) {
+ 370   2              case PWM_A:
+ 371   2          SC_PWMA_CTRL1 = (SC_PWMA_CTRL1 & 0x7C) | 0x03; //clock off
+ 372   2                  break;
+ 373   2              case PWM_B:
+ 374   2          SC_PWMB_CTRL1 = (SC_PWMB_CTRL1 & 0x7C) | 0x03; //clock off
+ 375   2                  break;
+ 376   2              case PWM_C:
+ 377   2          SC_PWMC_CTRL1 = (SC_PWMC_CTRL1 & 0x7C) | 0x03; //clock off
+ 378   2                  break;
+ 379   2              case PWM_D:
+ 380   2          SC_PWMD_CTRL1 = (SC_PWMD_CTRL1 & 0x7C) | 0x03; //clock off
+ 381   2                  break;
+ 382   2              default:
+ 383   2              case PWM_ALL:
+ 384   2                  SC_PWMA_CTRL1 = (SC_PWMA_CTRL1 & 0x7C) | 0x03; //clock off
+ 385   2                  SC_PWMB_CTRL1 = (SC_PWMB_CTRL1 & 0x7C) | 0x03; //clock off
+ 386   2                  SC_PWMC_CTRL1 = (SC_PWMC_CTRL1 & 0x7C) | 0x03; //clock off
+ 387   2                  SC_PWMD_CTRL1 = (SC_PWMD_CTRL1 & 0x7C) | 0x03; //clock off
+ 388   2                  break;
+ 389   2          }
+ 390   1      }
+ 391          
+ 392          /**************************************************************************//**
+ 393           * Set the function of VSync-reset PWM duty.
+ 394           * @param port PWM output port.
+ 395           * @param on TRUE to turn on VSync-reset function else FALSE.
+ 396           ******************************************************************************/
+ 397          void SetVSyncResetPWM(UCHAR port, UCHAR on)
+ 398          {
+ 399   1          on &= BIT0;
+ 400   1      
+ 401   1          switch (port) {
+ 402   2              case PWM_A:
+ 403   2                  SC_PWMA_CTRL1 = (SC_PWMA_CTRL1 & 0xDF) | (on << 5);
+ 404   2                  break;
+ 405   2              case PWM_B:
+ 406   2                  SC_PWMB_CTRL1 = (SC_PWMB_CTRL1 & 0xDF) | (on << 5);
+ 407   2                  break;
+ 408   2              case PWM_C:
+ 409   2                  SC_PWMC_CTRL1 = (SC_PWMC_CTRL1 & 0xDF) | (on << 5);
+ 410   2                  break;
+ 411   2              case PWM_D:
+ 412   2                  SC_PWMD_CTRL1 = (SC_PWMD_CTRL1 & 0xDF) | (on << 5);
+ 413   2                  break;
+ 414   2          }
+ 415   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1048    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6      14
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V8.02   SCALER_PWM                                                            08/07/2015 16:22:26 PAGE 8   
+
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

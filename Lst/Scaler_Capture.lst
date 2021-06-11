@@ -1,0 +1,214 @@
+C51 COMPILER V8.02   SCALER_CAPTURE                                                        08/07/2015 16:22:24 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_CAPTURE
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_Capture.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_Capture.c LARGE OPTIMIZE(9,SPEED) BROWSE 
+                    -INCDIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Ph
+                    -y\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X2
+                    -15) PRINT(.\Lst\Scaler_Capture.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_Capture.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          
+  23          //******************************************************************************
+  24          // S T A T I C   V A R I A B L E S
+  25          //******************************************************************************
+  26          static xdata USHRT usVPOffset = 0; /*!< Offset of vertical position of the even field of interlace timing 
+             -*/
+  27          
+  28          //******************************************************************************
+  29          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  30          //******************************************************************************
+  31          
+  32          //******************************************************************************
+  33          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  34          //******************************************************************************
+  35          
+  36          //******************************************************************************
+  37          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  38          //******************************************************************************
+  39          
+  40          //******************************************************************************
+  41          // F U N C T I O N   B O D Y S
+  42          //******************************************************************************
+  43          
+  44          /**************************************************************************//**
+  45           * Initialize capture-related registers.
+  46           ******************************************************************************/
+  47          void CAPInit(void)
+  48          {
+  49   1          SC_GI_PHS_MASK = 0x00;
+  50   1      
+  51   1          SC_CAP_SWAP = 0x00;
+C51 COMPILER V8.02   SCALER_CAPTURE                                                        08/07/2015 16:22:24 PAGE 2   
+
+  52   1          SC_GI_V_DE_DLY = 0x21;
+  53   1          SC_GI_CAP_VBEGO_LO = 0x20;
+  54   1          SC_GI_CAP_VBEGO_HI = 0x00;
+  55   1          SC_GI_CAP_VBEGE_LO = 0x00;
+  56   1          SC_GI_CAP_VBEGE_HI = 0x00;
+  57   1          SC_GI_CAP_VLEN_LO = 0xE0;
+  58   1          SC_GI_CAP_VLEN_HI = 0x01;
+  59   1          SC_GI_CAP_HBEG_LO = 0x88;
+  60   1          SC_GI_CAP_HBEG_HI = 0x00;
+  61   1          SC_GI_CAP_HWID_LO = 0x80;
+  62   1          SC_GI_CAP_HWID_HI = 0x02;
+  63   1          SC_GI_ALT_CTRL = 0x00;
+  64   1      
+  65   1          SC_GPORT_CTRL = 0xA1;
+  66   1          SC_DIGITAL_CTRL = 0x00;
+  67   1      }
+  68          
+  69          /**************************************************************************//**
+  70           * Get input capture horizontal start position.
+  71           * @return Input capture h-start.
+  72           ******************************************************************************/
+  73          USHRT GetInputHStart(void)
+  74          {
+  75   1          return ReadShortScaler(&SC_GI_CAP_HBEG_LO);
+  76   1      }
+  77          
+  78          /**************************************************************************//**
+  79           * Get input capture vertical start position.
+  80           * @return Input capture v-start.
+  81           ******************************************************************************/
+  82          USHRT GetInputVStart(void)
+  83          {
+  84   1          return ReadShortScaler(&SC_GI_CAP_VBEGO_LO);
+  85   1      }
+  86          
+  87          /**************************************************************************//**
+  88           * Set input capture window size.
+  89           * @param width Capture width.
+  90           * @param height Capture height.
+  91           ******************************************************************************/
+  92          void SetCaptureSize(USHRT width, USHRT height)
+  93          {
+  94   1          WriteShortScaler(&SC_GI_CAP_HWID_LO, width);
+  95   1          WriteShortScaler(&SC_GI_CAP_VLEN_LO, height);
+  96   1      }
+  97          
+  98          /**************************************************************************//**
+  99           * Get input capture width.
+ 100           * @return Capture width.
+ 101           ******************************************************************************/
+ 102          USHRT GetHCaptureSize(void)
+ 103          {
+ 104   1          return ReadShortScaler(&SC_GI_CAP_HWID_LO);
+ 105   1      }
+ 106          
+ 107          /**************************************************************************//**
+ 108           * Get input capture height.
+ 109           * @return Capture height.
+ 110           ******************************************************************************/
+ 111          USHRT GetVCaptureSize(void)
+ 112          {
+ 113   1          return ReadShortScaler(&SC_GI_CAP_VLEN_LO);
+C51 COMPILER V8.02   SCALER_CAPTURE                                                        08/07/2015 16:22:24 PAGE 3   
+
+ 114   1      }
+ 115          
+ 116          /**************************************************************************//**
+ 117           * Set horizontal capture start.
+ 118           * @param pos Horizontal capture start.
+ 119           ******************************************************************************/
+ 120          void SetHP(USHRT pos)
+ 121          {
+ 122   1          WriteShortScaler(&SC_GI_CAP_HBEG_LO, pos);
+ 123   1      }
+ 124          
+ 125          /**************************************************************************//**
+ 126           * Set the offset of vertical position of even field.
+ 127           * @param offset Offset of vertical position.
+ 128           ******************************************************************************/
+ 129          void SetEvenFieldOffset(USHRT offset)
+ 130          {
+ 131   1          usVPOffset = offset;
+ 132   1      }
+ 133          
+ 134          /**************************************************************************//**
+ 135           * Set vertical capture start.
+ 136           * @param pos Vertical capture start.
+ 137           ******************************************************************************/
+ 138          void SetVP(USHRT pos)
+ 139          {
+ 140   1          //Setup odd field after even field because of double-buffer structure
+ 141   1          WriteShortScaler(&SC_GI_CAP_VBEGE_LO, pos + usVPOffset);
+ 142   1          WriteShortScaler(&SC_GI_CAP_VBEGO_LO, pos);
+ 143   1          ucVstart100 = (((USHRT)pos-InputTiming.usVStartMin)*100 + ((InputTiming.usVStartMax-InputTiming.usVSta
+             -rtMin)>>1)) / (InputTiming.usVStartMax-InputTiming.usVStartMin);
+ 144   1      }
+ 145          
+ 146          #if ENABLE_OVERSCAN == ON
+ 147          /**************************************************************************//**
+ 148           * Enable over-sampling.
+ 149           * This function is only available when input interface is TMDS.
+ 150           ******************************************************************************/
+ 151          void EnableOverSample(void)
+ 152          {
+ 153   1          SC_CAP_SWAP |= BIT6;
+ 154   1      }
+ 155          
+ 156          /**************************************************************************//**
+ 157           * Disable over-sampling.
+ 158           * This function is only available when input interface is TMDS.
+ 159           ******************************************************************************/
+ 160          void DisableOverSample(void)
+ 161          {
+ 162   1          SC_CAP_SWAP &= ~BIT6;
+ 163   1          WaitDisVSync();
+ 164   1      }
+ 165          
+ 166          /**************************************************************************//**
+ 167           * Check the over-sampling is on or not.
+ 168           * This function is only available when input interface is TMDS.
+ 169           * @return TRUE if over-sampling is on else FALSE.
+ 170           ******************************************************************************/
+ 171          BOOL IsOverSample(void)
+ 172          {
+ 173   1          if ((SC_CAP_SWAP & BIT6) != 0) {
+ 174   2              return TRUE;
+C51 COMPILER V8.02   SCALER_CAPTURE                                                        08/07/2015 16:22:24 PAGE 4   
+
+ 175   2          }
+ 176   1          else {
+ 177   2              return FALSE;
+ 178   2          }
+ 179   1      }
+ 180          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    330    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      8       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

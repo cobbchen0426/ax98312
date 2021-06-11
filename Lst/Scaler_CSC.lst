@@ -1,0 +1,519 @@
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_CSC
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_CSC.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_CSC.c LARGE OPTIMIZE(9,SPEED) BROWSE INCD
+                    -IR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI
+                    -\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) 
+                    -PRINT(.\Lst\Scaler_CSC.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_CSC.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          #define CSC_SIM_CTRL BIT7 //0x055
+  19          
+  20          //******************************************************************************
+  21          // G L O B A L   V A R I A B L E S
+  22          //******************************************************************************
+  23          
+  24          //******************************************************************************
+  25          // S T A T I C   V A R I A B L E S
+  26          //******************************************************************************
+  27          static xdata CSCColorSpace ucCSCClrSpace = CSC_HDMI_AUTO_CLR_SPACE; /*!< Variable of CSC mode. */
+  28          
+  29          //******************************************************************************
+  30          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  31          //******************************************************************************
+  32          
+  33          //******************************************************************************
+  34          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  35          //******************************************************************************
+  36          static xdata UCHAR ucAVIClrSpace = 0xFF;
+  37          
+  38          //******************************************************************************
+  39          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  40          //******************************************************************************
+  41          
+  42          //******************************************************************************
+  43          // F U N C T I O N   B O D Y S
+  44          //******************************************************************************
+  45          static void SetHDMISRCSC(void);
+  46          static void SetVGADVISRCSC(void);
+  47          #if (INPUT_INTERFACE&INPUT_DP) && ENABLE_SR == ON
+  48          static void SetDPSRCSC(void);
+  49          #endif
+  50          
+  51          #if ENABLE_HDMI == ON
+  52          //******************************************************************************
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 2   
+
+  53          // Prototype: 
+  54          //  void GetScalerColorSpace(void)
+  55          // Parameters:
+  56          //  None
+  57          // Return:
+  58          //  None
+  59          // Purpose:
+  60          //  None
+  61          // Notes:
+  62          //******************************************************************************
+  63          UCHAR GetScalerColorSpace(void)
+  64          {
+  65   1         return ucAVIClrSpace;
+  66   1      }
+  67          
+  68          /**************************************************************************//**
+  69           * Configure the CSC mode.
+  70           * @param csc CSC mode.
+  71           ******************************************************************************/
+  72          void SetCSCColorSpace(CSCColorSpace csc)
+  73          {
+  74   1          ucCSCClrSpace = csc;
+  75   1          SetColorSpace();
+  76   1      }
+  77          
+  78          #endif
+  79          
+  80          /**************************************************************************//**
+  81           * According to ucCSCClrSpace, set color space automatically.
+  82           * If CSC mode is auto:
+  83           *  - If input interface is HDMI, the color space is configured automatically according to AVI packets.
+  84           *  - If input interface is DVI, forcing the color space as RGB.
+  85           *  - If input interface is YPbPr, the color space is configured automatically according to input resoluti
+             -on.
+  86           *  - If input interface is DSub, forcing the color space as RGB.
+  87           * If CSC mode is manual:
+  88           *  - If input interface is HDMI, the color space is configured manually.
+  89           *  - If input interface is DVI, the color space is configured manually.
+  90           *  - If input interface is YPbPr, the color space is configured manually.
+  91           *  - If input interface is DSub, forcing the color space as RGB.
+  92           ******************************************************************************/
+  93          void SetColorSpace(void)
+  94          {
+  95   1      #if !IS_NT68150_SERIES
+  96   1          UCHAR current_input_interface, ch, repeat;
+  97   1          USHRT input_hactive, input_vactive;
+  98   1      
+  99   1      
+ 100   1          current_input_interface = GetCurrInputInterface();
+ 101   1          if ((current_input_interface == DIGITAL_INPUT0) || (current_input_interface == DIGITAL_INPUT1)) {
+ 102   2              
+ 103   2               ucAVIClrSpace = (SC_HDMI_AVI[0] & 0x60); 
+ 104   2               
+ 105   2              if (ucCSCClrSpace == CSC_OFF) {
+ 106   3                  SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+ 107   3                  SC_CSC_CTRL1 = 0x00;
+ 108   3                  SC_CSC_CTRL2 = 0x00;
+ 109   3                  // Set video mute data for AVMute
+ 110   3                  SC_VIDEO_BLANK_BLUE = 0x00;
+ 111   3                  SC_VIDEO_BLANK_GREEN = 0x00;
+ 112   3                  SC_VIDEO_BLANK_RED = 0x00;
+ 113   3              }
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 3   
+
+ 114   2              else if (ucCSCClrSpace == CSC_HDMI_AUTO_CLR_SPACE) {
+ 115   3                  if (IsHDMIVideo()) { //HDMI & YCbCr color
+ 116   4                      // --------------------------
+ 117   4                      // Auto IN_CSC with SR mode
+ 118   4      #if ENABLE_SR == ON
+ 119   4                      SetHDMISRCSC();
+ 120   4      #else
+                              SC_HDMI_AUTO_CTRL |= BIT2; //set auto csc
+                              SC_TMDS_AUTO_CSC = 0x0E;
+              #endif
+ 124   4                      // Set video mute data for AVMute
+ 125   4                      SC_VIDEO_BLANK_BLUE = 0x80;
+ 126   4                      SC_VIDEO_BLANK_GREEN = 0x00;
+ 127   4                      SC_VIDEO_BLANK_RED = 0x80;
+ 128   4                  }
+ 129   3                  else { //DVI | HDMI RGB color
+ 130   4                      SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC  
+ 131   4      #if ENABLE_SR == ON
+ 132   4                      if ((SC_HDMI_DET & BIT1) != 0) { //HDMI RGB color
+ 133   5                          SetHDMISRCSC();
+ 134   5                      }
+ 135   4                      else { //dvi
+ 136   5                          SetVGADVISRCSC();
+ 137   5                      }
+ 138   4      #else
+              //                SC_HDMI_AUTO_CTRL |= BIT2; //set auto csc
+              //                SC_TMDS_AUTO_CSC = 0x0E;
+                              SC_HDMI_AUTO_CTRL &= ~BIT2; //set auto csc
+                              SC_TMDS_AUTO_CSC = 0x0E;
+                              if ((SC_HDMI_DET & BIT1) != 0) {
+                                  if ((SC_HDMI_AVI[2] & 0x0C) == 0x04) { // Limit RGB to Full RGB
+                                      SC_CSC_CTRL1 = 0xB8;
+                                      SC_CSC_CTRL2 = 0x19;
+                                  }
+                                  else {
+                                      SC_CSC_CTRL1 = 0x00;
+                                      SC_CSC_CTRL2 = 0x00;
+                                  }
+                              }
+                              else {
+                                  SC_CSC_CTRL1 = 0x00;
+                                  SC_CSC_CTRL2 = 0x00;
+                              }
+              #endif
+ 158   4                      // Set video mute data for AVMute
+ 159   4                      SC_VIDEO_BLANK_BLUE = 0x00;
+ 160   4                      SC_VIDEO_BLANK_GREEN = 0x00;
+ 161   4                      SC_VIDEO_BLANK_RED = 0x00;
+ 162   4                  }
+ 163   3              }
+ 164   2              else {
+ 165   3                  SC_VI_AUTO_CTRL |= BIT5; // Set auto-detection data path after CSC
+ 166   3                  SC_CSC_CTRL1 = BIT7 | ((ucCSCClrSpace & 0x0F) << 3);
+ 167   3                  SC_CSC_CTRL2 = 0x19;
+ 168   3      
+ 169   3                  // Set video mute data for AVMute
+ 170   3                  switch(ucCSCClrSpace) {
+ 171   4                      case CSC_YPbPr601_TO_RGB:
+ 172   4                      case CSC_YPbPr601_TO_RGB_FULL:
+ 173   4                      case CSC_YPbPr709_TO_RGB:
+ 174   4                      case CSC_YPbPr709_TO_RGB_FULL:
+ 175   4                      case CSC_YPbPr_TO_YPbPr_FULL:
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 4   
+
+ 176   4                      case CSC_xvYCC601_TO_RGB:
+ 177   4                      case CSC_xvYCC601_TO_RGB_FULL:
+ 178   4                      case CSC_xvYCC709_TO_RGB:
+ 179   4                      case CSC_xvYCC709_TO_RGB_FULL:
+ 180   4                          SC_VIDEO_BLANK_BLUE = 0x80;
+ 181   4                          SC_VIDEO_BLANK_GREEN = 0x00;
+ 182   4                          SC_VIDEO_BLANK_RED = 0x80;
+ 183   4                          break;
+ 184   4                      default :
+ 185   4                          SC_VIDEO_BLANK_BLUE = 0x00;
+ 186   4                          SC_VIDEO_BLANK_GREEN = 0x00;
+ 187   4                          SC_VIDEO_BLANK_RED = 0x00;
+ 188   4                          break;
+ 189   4                  }
+ 190   3              }
+ 191   2      //////////////////////////////////////////////////////////////////////////
+ 192   2              if ((SC_HDMI_DET & BIT1) != 0) {
+ 193   3                  if (ucAVIClrSpace == BIT5) {//4:2:2
+ 194   4                      SC_CSC_CTRL2 |= BIT5;
+ 195   4                  }
+ 196   3                  //Set repeat for Manual CSC mode
+ 197   3                  ch = SC_HDMI_AVI[4] & 0x0F;
+ 198   3                  repeat = SC_HDMI_CLK_INT & 0x0F;//default: No Repetition
+ 199   3                  if (ch == 0x01) {//pixel sent 2 times
+ 200   4                      repeat |= 0x50;
+ 201   4                  }
+ 202   3                  else if (ch == 0x03) {//pixel sent 4 times
+ 203   4                      repeat |= 0xF0;
+ 204   4                  }
+ 205   3                  SC_HDMI_CLK_INT = repeat;
+ 206   3              }
+ 207   2              else {
+ 208   3                  SC_HDMI_CLK_INT &= 0x0F;
+ 209   3              }
+ 210   2      ///////////////////////////////////////////////////////////////////////////
+ 211   2          }
+ 212   1          else if ((current_input_interface == ANALOG_YPBPR_INPUT0) || (current_input_interface == ANALOG_YPBPR_
+             -INPUT1)) {
+ 213   2              input_hactive = ReadShortScaler(&SC_GI_CAP_HWID_LO);
+ 214   2              input_vactive = ReadShortScaler(&SC_GI_CAP_VLEN_LO);
+ 215   2              if (((input_hactive == 1920) && (input_vactive == 1080)) || ((input_hactive == 1280) && (input_vactiv
+             -e == 720))){
+ 216   3                      SC_CLAMP_BEGIN = 0x24;
+ 217   3              }
+ 218   2              else{
+ 219   3                      SC_CLAMP_BEGIN = 0x01;
+ 220   3              }
+ 221   2              Sleep(20);
+ 222   2              
+ 223   2              if (ucCSCClrSpace == CSC_OFF) {
+ 224   3                  SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+ 225   3                  SC_CSC_CTRL1 = 0x00;
+ 226   3                  SC_CSC_CTRL2 = 0x00;
+ 227   3              }
+ 228   2              else if (ucCSCClrSpace == CSC_HDMI_AUTO_CLR_SPACE) {
+ 229   3                  SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+ 230   3      
+ 231   3                  SC_DEI_CSC_CTRL = 0x19;
+ 232   3                  SC_CSC_CTRL2 = 0x00;//|CSC_SIM_CTRL;
+ 233   3                  SC_CSC_CTRL1 = 0x00;
+ 234   3                  if (((input_hactive == 1920) && (input_vactive == 1080)) || ((input_hactive == 1280) && (input
+             -_vactive == 720))){ //ITU709
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 5   
+
+ 235   4                      SC_SR_AUTO_CSC_CTRL = 0x31;
+ 236   4                  }
+ 237   3                  else { //ITU601
+ 238   4                      SC_SR_AUTO_CSC_CTRL = 0x01;
+ 239   4                  }
+ 240   3              }
+ 241   2              else {
+ 242   3                  SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+ 243   3                  SC_CSC_CTRL1 = BIT7 | ((ucCSCClrSpace & 0x0F) << 3);
+ 244   3                  SC_CSC_CTRL2 = 0x19;
+ 245   3              }
+ 246   2          }
+ 247   1      #if (INPUT_INTERFACE&INPUT_DP)
+ 248   1          else if (current_input_interface == DISPLAY_PORT_INPUT) {
+ 249   2      #if ENABLE_SR == ON
+ 250   2              SetDPSRCSC();
+ 251   2      #else
+                      SC_DP_CSC_AUTO_CONF |= BIT0;
+              #endif
+ 254   2          }
+ 255   1      #endif
+ 256   1          else { // VGA
+ 257   2              SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC    
+ 258   2      #if ENABLE_SR == ON
+ 259   2              SetVGADVISRCSC();
+ 260   2      #else
+                      SC_CSC_CTRL2 = 0x00|CSC_SIM_CTRL;
+                      SC_DEI_CSC_CTRL = 0x00;
+                      SC_CSC_CTRL1 = 0x00;
+                      SC_TMDS_AUTO_CSC = 0x00;
+                      SC_SR_AUTO_CSC_CTRL |= BIT0;
+              #endif
+ 267   2          }
+ 268   1      #else
+                  code int SDTVcolorTab[] = {
+                      1.371*1024+0.5,0.698*1024+0.5,0.336*1024+0.5,1.732*1024+0.5,
+                  };
+              
+                  code int HDTVcolorTab[] = {
+                      1.540*1024+0.5,0.459*1024+0.5,0.183*1024+0.5,1.816*1024+0.5,
+                  };
+              
+                  UCHAR current_input_interface;
+                  USHRT input_hactive, input_vactive;
+              
+                  current_input_interface = GetCurrInputInterface();
+                  if ((current_input_interface == ANALOG_YPBPR_INPUT0) || (current_input_interface == ANALOG_YPBPR_INPUT
+             -1)) {
+                      input_hactive = ReadShortScaler(&SC_GI_CAP_HWID_LO);
+                      input_vactive = ReadShortScaler(&SC_GI_CAP_VLEN_LO);
+                      if (((input_hactive == 1920) && (input_vactive == 1080)) || ((input_hactive == 1280) && (input_vactiv
+             -e == 720))){
+                              SC_CLAMP_BEGIN = 0x24;
+                      }
+                      else{
+                              SC_CLAMP_BEGIN = 0x01;
+              }
+                      Sleep(20);
+                      
+                      if (ucCSCClrSpace == CSC_OFF) {
+                          SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+                          SC_CSC_CTRL1 = 0x00;
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 6   
+
+                          SC_CSC_CTRL2 = 0x00;
+                      }
+                      else if (ucCSCClrSpace == CSC_HDMI_AUTO_CLR_SPACE) {
+                          SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+                          SC_DEI_CSC_CTRL = 0x09;
+                          SC_CSC_CTRL1 = 0x00;
+                          SC_CSC_CTRL2 = 0x00;
+                          if (((input_hactive == 1920) && (input_vactive == 1080)) || ((input_hactive == 1280) && (input
+             -_vactive == 720))){ //ITU709
+                              WriteShortScaler(&SC_DEI_COLOR_COFFA_LO,HDTVcolorTab[0]);
+                              WriteShortScaler(&SC_DEI_COLOR_COFFB_LO,HDTVcolorTab[1]);
+                              WriteShortScaler(&SC_DEI_COLOR_COFFC_LO,HDTVcolorTab[2]);
+                              WriteShortScaler(&SC_DEI_COLOR_COFFD_LO,HDTVcolorTab[3]);
+                          }
+                          else {//ITU 601
+                              WriteShortScaler(&SC_DEI_COLOR_COFFA_LO,SDTVcolorTab[0]);
+                              WriteShortScaler(&SC_DEI_COLOR_COFFB_LO,SDTVcolorTab[1]);
+                              WriteShortScaler(&SC_DEI_COLOR_COFFC_LO,SDTVcolorTab[2]);
+                              WriteShortScaler(&SC_DEI_COLOR_COFFD_LO,SDTVcolorTab[3]);
+                          }
+                      }
+                      else {
+                          SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC
+                          SC_CSC_CTRL1 = BIT7 | ((ucCSCClrSpace & 0x0F) << 3);
+                          SC_CSC_CTRL2 = 0x19;
+                      }
+                  }
+                  else { // VGA
+                      SC_VI_AUTO_CTRL &= ~BIT5; // Set auto-detection data path before CSC    
+                      SC_DEI_CSC_CTRL = 0x00;
+                      SC_CSC_CTRL1 = 0x00;
+                      SC_CSC_CTRL2 = 0x00;
+                  }
+              #endif
+ 328   1      
+ 329   1          //CSCDitherManualModeEn();
+ 330   1      }
+ 331          
+ 332          #if ENABLE_HDMI == ON
+ 333          /**************************************************************************//**
+ 334           * Set HDMI SR CSC
+ 335           ******************************************************************************/
+ 336          void SetHDMISRCSC(void)
+ 337          {
+ 338   1          UCHAR Reg0x1ED, ch, Reg0x600, Reg0x649;
+ 339   1      //    if ((SC_DISPLAY_MUTE_CTRL & 0x03) != 0) { //when mute
+ 340   1          if (((SC_DISPLAY_MUTE_CTRL & 0x03) != 0) || ((SC_HDMI_INT_STATE1[3] & BIT0) != 0)) { //when mute
+ 341   2              ch = SC_SR_CTRL; //set SR on
+ 342   2              Reg0x1ED = SC_ADC_BAND_GAP;
+ 343   2              SC_ADC_BAND_GAP &= ~BIT0;
+ 344   2              SC_SR_CTRL = 0x51;
+ 345   2              SC_HDMI_AUTO_CTRL |= BIT2; //set auto csc
+ 346   2              SC_TMDS_AUTO_CSC = 0x0E;
+ 347   2              SC_HDMI_RESET_CTRL &= ~BIT3;
+ 348   2              Sleep(50); //wait one frame
+ 349   2              Reg0x649 = SC_ICPCSC_AUTOSTATUS; //read Reg0x600 & Reg0x649
+ 350   2              Reg0x600 = SC_TMDS_AUTO_CSC;
+ 351   2              SC_HDMI_AUTO_CTRL &= ~BIT2;//set manual csc
+ 352   2              SC_TMDS_AUTO_CSC &= ~BIT1;
+ 353   2              SC_SR_CTRL = ch; //restore SR
+ 354   2              SC_ADC_BAND_GAP = Reg0x1ED;
+ 355   2              ch = SC_CSC_CTRL1 & 0x87; //fill Reg0x054
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 7   
+
+ 356   2              SC_CSC_CTRL1 = ch | ((Reg0x649 & 0xF0) >> 1) | BIT7;
+ 357   2              ch = SC_SR_AUTO_CSC_CTRL & 0x0F; //fill Reg0x601
+ 358   2              SC_SR_AUTO_CSC_CTRL = ch | (Reg0x600 & 0xF0) | BIT0;
+ 359   2              if ((Reg0x600 & BIT0) == 0) { //set Reg0x053[0]
+ 360   3                  SC_DEI_CSC_CTRL = 0x19;
+ 361   3              }
+ 362   2              else {
+ 363   3                  SC_DEI_CSC_CTRL = 0x18;
+ 364   3              }
+ 365   2              if ((Reg0x649 & BIT0) == 0) { //set Reg0x055[0]
+ 366   3                  SC_CSC_CTRL2 = 0x19;
+ 367   3              }
+ 368   2              else {
+ 369   3                  SC_CSC_CTRL2 = 0x18;
+ 370   3              }
+ 371   2      ///////////////////////////////////////////////////////////////////////////////
+ 372   2      #if 1//TPV Limited RGB
+ 373   2              if (!IsHDMIVideo())                                                                     //HDMI RGB color
+ 374   2                      { 
+ 375   3                      if ((SC_HDMI_AVI[2] & 0x0C) == 0x04)                            // Limited RGB
+ 376   3                     {
+ 377   4                              if(GetSCID() == SCID_770_E)
+ 378   4                                {
+ 379   5                               SC_CSC_CTRL1 = 0xF0;                                           //limited RGB to Ycbcr601
+ 380   5                             }
+ 381   4                      else 
+ 382   4                               {
+ 383   5                                      SC_CSC_CTRL1 = 0x88;                                    //RGB to Ycbcr601
+ 384   5                               }
+ 385   4                       }
+ 386   3                  else 
+ 387   3                        {
+ 388   4                              if(GetSCID() == SCID_770_E)
+ 389   4                                {
+ 390   5                                      SC_CSC_CTRL1 = 0x88;                                    //Full RGB to Ycbcr601
+ 391   5                                }
+ 392   4                      else 
+ 393   4                               {
+ 394   5                                 SC_CSC_CTRL1 = 0xF8;                                         //Full RGB to limited Ycbcr601
+ 395   5                             }
+ 396   4                       }      
+ 397   3       
+ 398   3                  if(GetSCID() == SCID_770_E)
+ 399   3                       {
+ 400   4                         SC_SR_AUTO_CSC_CTRL = 0x03;                                  //Ycbcr601 to RGB           
+ 401   4                     }
+ 402   3                  else 
+ 403   3                         {
+ 404   4                               SC_SR_AUTO_CSC_CTRL = 0x23; //limited Ycbcr601 to RGB           
+ 405   4                        }
+ 406   3           }
+ 407   2      #endif
+ 408   2      ///////////////////////////////////////////////////////////////////////////////
+ 409   2          }
+ 410   1      }
+ 411          #endif
+ 412          
+ 413          /**************************************************************************//**
+ 414           * Set VGA DVI SR CSC.
+ 415           ******************************************************************************/
+ 416          void SetVGADVISRCSC(void)
+ 417          {
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 8   
+
+ 418   1          if ((SC_DISPLAY_MUTE_CTRL & 0x03) != 0) { //when mute
+ 419   2              SC_HDMI_AUTO_CTRL &= ~BIT2;//set manual csc
+ 420   2              SC_TMDS_AUTO_CSC &= ~BIT1;
+ 421   2              SC_DEI_CSC_CTRL = 0x19;
+ 422   2              SC_CSC_CTRL1 = 0x88;
+ 423   2              SC_CSC_CTRL2 = 0x99;
+ 424   2              SC_SR_AUTO_CSC_CTRL = 0x03;
+ 425   2          }
+ 426   1      }
+ 427          
+ 428          #if (INPUT_INTERFACE&INPUT_DP) && ENABLE_SR == ON
+ 429          /**************************************************************************//**
+ 430           * Set DP SR CSC.
+ 431           ******************************************************************************/
+ 432          void SetDPSRCSC(void)
+ 433          {
+ 434   1          UCHAR Reg0x1ED, ch, Reg0x109D, Reg0x109E;
+ 435   1          if ((SC_DISPLAY_MUTE_CTRL & 0x03) != 0) { //when mute
+ 436   2              ch = SC_SR_CTRL; //set SR on
+ 437   2              Reg0x1ED = SC_ADC_BAND_GAP;
+ 438   2              SC_ADC_BAND_GAP &= ~BIT0;
+ 439   2              SC_SR_CTRL = 0x51;
+ 440   2              SC_DP_CSC_AUTO_CONF |= BIT0; //DP CSC auto
+ 441   2              SC_HDMI_RESET_CTRL &= ~BIT3;
+ 442   2              Sleep(50); //wait one frame
+ 443   2              Reg0x109D = SC_DP_109D; //read Reg0x109D & Reg0x109E
+ 444   2              Reg0x109E = SC_DP_109E;
+ 445   2              SC_DP_CSC_AUTO_CONF &= ~BIT0; //DP CSC manual
+ 446   2              SC_SR_CTRL = ch; //restore SR
+ 447   2              SC_ADC_BAND_GAP = Reg0x1ED;
+ 448   2      
+ 449   2              ch = SC_CSC_CTRL1 & 0x87; //fill Reg0x054
+ 450   2              SC_CSC_CTRL1 = ch | ((Reg0x109D & 0x0F) << 3) | BIT7;
+ 451   2              ch = SC_SR_AUTO_CSC_CTRL & 0x0F; //fill Reg0x601
+ 452   2              SC_SR_AUTO_CSC_CTRL = ch | ((Reg0x109E & 0x0F) << 4) | BIT0;
+ 453   2              if ((Reg0x109E & BIT6) == 0) { //set Reg0x053[0]
+ 454   3                  SC_DEI_CSC_CTRL = 0x1A;
+ 455   3              }
+ 456   2              else {
+ 457   3                  SC_DEI_CSC_CTRL = 0x1B;
+ 458   3              }
+ 459   2              if ((Reg0x109E & BIT4) == 0) { //set Reg0x055[0]
+ 460   3                  SC_CSC_CTRL2 = 0x1A;
+ 461   3              }
+ 462   2              else {
+ 463   3                  SC_CSC_CTRL2 = 0x1B;
+ 464   3              }
+ 465   2              if ((Reg0x109E & BIT7) != 0) {//4:2:2
+ 466   3                  SC_CSC_CTRL2 |= BIT5;
+ 467   3              }
+ 468   2          }
+ 469   1      }
+ 470          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    987    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      8       9
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V8.02   SCALER_CSC                                                            08/07/2015 16:22:23 PAGE 9   
+
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

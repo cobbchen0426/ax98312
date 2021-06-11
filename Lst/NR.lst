@@ -1,0 +1,141 @@
+C51 COMPILER V8.02   NR                                                                    08/07/2015 16:22:21 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE NR
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\NR.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\NR.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\User;.
+                    -\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Key
+                    -pad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\NR.lst) OBJECT(.\Bi
+                    -n\ADS\AXI\104N\NR.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          #if ENABLE_NR_BYTIMING == ON
+  15          
+  16          //******************************************************************************
+  17          // M A C R O   D E F I N I T I O N S
+  18          //******************************************************************************
+  19          
+  20          //******************************************************************************
+  21          // S T A T I C   V A R I A B L E S
+  22          //******************************************************************************
+  23          
+  24          //******************************************************************************
+  25          // G L O B A L   V A R I A B L E S
+  26          //******************************************************************************
+  27          
+  28          //******************************************************************************
+  29          // S T A T I C   V A R I A B L E S
+  30          //******************************************************************************
+  31          static code NRTiming NRTimingList[] = {
+  32              {
+  33                  0xFFFF,
+  34                  {
+  35                      ADC_BW_AUTO,
+  36                      ON,
+  37                      NR_MODE_1,
+  38                      NR_CFG_NR2_EN|NR_CFG_ROUND|NR_CFG_EDGE_DET|NR_CFG_NR_DITH_EN|NR_CFG_JC_EN|NR_CFG_GC_EN,
+  39                      0x04,
+  40                      0x03,
+  41                      0x02,
+  42                      0x03,
+  43                      0x01,
+  44                      0x0A,
+  45                      0x04
+  46                  },
+  47                  {
+  48                      DITH_TP_VRDM,
+  49                      0x00,
+  50                      0x00
+  51                  }
+  52              }
+C51 COMPILER V8.02   NR                                                                    08/07/2015 16:22:21 PAGE 2   
+
+  53          };
+  54          
+  55          //******************************************************************************
+  56          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  57          //******************************************************************************
+  58          
+  59          //******************************************************************************
+  60          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  61          //******************************************************************************
+  62          
+  63          //******************************************************************************
+  64          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  65          //******************************************************************************
+  66          
+  67          //******************************************************************************
+  68          // F U N C T I O N   B O D Y S
+  69          //******************************************************************************
+  70          
+  71          /**************************************************************************//**
+  72           * Set the NR of the analog input timing (mode index).
+  73           ******************************************************************************/
+  74          void SetNRByAnalogTiming(void)
+  75          {
+  76   1          USHRT i, num;
+  77   1      
+  78   1          num = sizeof(NRTimingList)/sizeof(NRTiming);
+  79   1      
+  80   1          for (i = 0; i < num; i++) {
+  81   2              if ((NRTimingList[i].usModeIndex == InputTiming.usModeIndex) ||
+  82   2                  (NRTimingList[i].usModeIndex == 0xFFFF)) {
+  83   3                  // Set ADC bandwidth & ground sampling
+  84   3                  SetADCBandWidth(NRTimingList[i].NR.ucADCBandwidth);
+  85   3                  EnableADCGndSampling(NRTimingList[i].NR.ucGndSampling);
+  86   3                  // Set ADC NR
+  87   3                  NRSetNRType(NRTimingList[i].NR.ucNRType, NRTimingList[i].NR.ucNRCfg);
+  88   3                  NRSetEdgeThr(NRTimingList[i].NR.ucNREdgeThr);
+  89   3                  NRSetNRThr(NRTimingList[i].NR.ucNRTh);
+  90   3                  NRSetJCLvl(NRTimingList[i].NR.ucJCLvl);
+  91   3                  NRSetNR2Thr(NRTimingList[i].NR.ucNR2Th);
+  92   3                  NRSetGCCfg(NRTimingList[i].NR.ucGCWin, NRTimingList[i].NR.ucGCPkThr, NRTimingList[i].NR.ucGCLp
+             -Thr);
+  93   3                  // Set dithering type
+  94   3                  DithSetDitherMode(NRTimingList[i].Dither.ucDitherType, NRTimingList[i].Dither.ucMode_10, NRTim
+             -ingList[i].Dither.ucMode_01);
+  95   3      
+  96   3                  break;
+  97   3              }
+  98   2          }
+  99   1      }
+ 100          
+ 101          /**************************************************************************//**
+ 102           * Set the NR of the digital input timing (mode index).
+ 103           ******************************************************************************/
+ 104          void SetNRByDigitalTiming(void)
+ 105          {
+ 106   1          NRSetNRType(NR_MODE_OFF, 0x00);
+ 107   1          DithSetDitherMode(DITH_TP_VRDM, 0x00, 0x00);
+ 108   1      }
+ 109          #endif //ENABLE_NR_BYTIMING == ON
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V8.02   NR                                                                    08/07/2015 16:22:21 PAGE 3   
+
+   CODE SIZE        =    445    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =      6       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

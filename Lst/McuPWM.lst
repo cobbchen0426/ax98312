@@ -1,0 +1,218 @@
+C51 COMPILER V8.02   MCUPWM                                                                08/07/2015 16:22:22 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MCUPWM
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\McuPWM.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\McuPWM.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\Us
+                    -er;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT
+                    -\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\McuPWM.lst) OBJ
+                    -ECT(.\Bin\ADS\AXI\104N\McuPWM.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          
+  30          //******************************************************************************
+  31          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          
+  34          //******************************************************************************
+  35          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  36          //******************************************************************************
+  37          
+  38          //******************************************************************************
+  39          // F U N C T I O N   B O D Y S
+  40          //******************************************************************************
+  41          
+  42          /**************************************************************************//**
+  43           * Turn on MCU PWM.
+  44           * @param mask Each bit indicates one PWM channel, Bit 0: PWM0, Bit 1: PWM1, ..., Bit 11: PWM11.
+  45           ******************************************************************************/
+  46          void McuEnablePWM(USHRT mask)
+  47          {
+  48   1          if (mask & BIT0) {
+  49   2              ENPWM_LB |= BIT0; //Enable PWM 0
+  50   2          }
+  51   1          if (mask & BIT1) {
+  52   2              ENPWM_LB |= BIT1; //Enable PWM 1
+C51 COMPILER V8.02   MCUPWM                                                                08/07/2015 16:22:22 PAGE 2   
+
+  53   2          }
+  54   1          if (mask & BIT2) {
+  55   2              ENPWM_HB |= BIT0; //Enable PWM 2
+  56   2          }
+  57   1          if (mask & BIT3) {
+  58   2              ENPWM_HB |= BIT1; //Enable PWM 3
+  59   2          }
+  60   1          if (mask & BIT4) {
+  61   2              ENPWM_HB |= BIT2; //Enable PWM 4
+  62   2          }
+  63   1          if (mask & BIT5) {
+  64   2              ENPWM_HB |= BIT3; //Enable PWM 5
+  65   2          }
+  66   1          if (mask & BIT6) {
+  67   2              ENPWM_HB |= BIT4; //Enable PWM 6
+  68   2          }
+  69   1          if (mask & BIT7) {
+  70   2              ENPWM_HB |= BIT5; //Enable PWM 7
+  71   2          }
+  72   1          if (mask & (BIT0<<8)) {
+  73   2              ENPWM_HB |= BIT6; //Enable PWM 8
+  74   2          }
+  75   1          if (mask & (BIT1<<8)) {
+  76   2              ENPWM_HB |= BIT7; //Enable PWM 9
+  77   2          }
+  78   1          if (mask & (BIT2<<8)) {
+  79   2              ENPWM_UB |= BIT0; //Enable PWM 10
+  80   2          }
+  81   1          if (mask & (BIT3<<8)) {
+  82   2              ENPWM_UB |= BIT1; //Enable PWM 11
+  83   2          }
+  84   1      }
+  85          
+  86          /**************************************************************************//**
+  87           * Turn off MCU PWM.
+  88           * @param mask Each bit indicates one PWM channel, Bit 0: PWM0, Bit 1: PWM1, ..., Bit 11: PWM11.
+  89           ******************************************************************************/
+  90          void McuDisablePWM(USHRT mask)
+  91          {
+  92   1          if (mask & BIT0) {
+  93   2              ENPWM_LB &= ~BIT0; //Disable PWM 0
+  94   2          }
+  95   1          if (mask & BIT1) {
+  96   2              ENPWM_LB &= ~BIT1; //Disable PWM 1
+  97   2          }
+  98   1          if (mask & BIT2) {
+  99   2              ENPWM_HB &= ~BIT0; //Disable PWM 2
+ 100   2          }
+ 101   1          if (mask & BIT3) {
+ 102   2              ENPWM_HB &= ~BIT1; //Disable PWM 3
+ 103   2          }
+ 104   1          if (mask & BIT4) {
+ 105   2              ENPWM_HB &= ~BIT2; //Disable PWM 4
+ 106   2          }
+ 107   1          if (mask & BIT5) {
+ 108   2              ENPWM_HB &= ~BIT3; //Disable PWM 5
+ 109   2          }
+ 110   1          if (mask & BIT6) {
+ 111   2              ENPWM_HB &= ~BIT4; //Disable PWM 6
+ 112   2          }
+ 113   1          if (mask & BIT7) {
+ 114   2              ENPWM_HB &= ~BIT5; //Disable PWM 7
+C51 COMPILER V8.02   MCUPWM                                                                08/07/2015 16:22:22 PAGE 3   
+
+ 115   2          }
+ 116   1          if (mask & (BIT0<<8)) {
+ 117   2              ENPWM_HB &= ~BIT6; //Disable PWM 8
+ 118   2          }
+ 119   1          if (mask & (BIT1<<8)) {
+ 120   2              ENPWM_HB &= ~BIT7; //Disable PWM 9
+ 121   2          }
+ 122   1          if (mask & (BIT2<<8)) {
+ 123   2              ENPWM_UB &= ~BIT0; //Disable PWM 10
+ 124   2          }
+ 125   1          if (mask & (BIT3<<8)) {
+ 126   2              ENPWM_UB &= ~BIT1; //Disable PWM 11
+ 127   2          }
+ 128   1      }
+ 129          
+ 130          /**************************************************************************//**
+ 131           * Set the duty of MCU PWM.
+ 132           * @param channel PWM channel.
+ 133           * @param value PWM duty. The range is 0x00 ~ 0xFF.
+ 134           ******************************************************************************/
+ 135          void McuSetPWM(UCHAR channel, UCHAR value)
+ 136          {
+ 137   1          switch (channel) {
+ 138   2              case MCU_PWM_0:
+ 139   2                  PWM_REG0 = value;
+ 140   2                  break;
+ 141   2      
+ 142   2              case MCU_PWM_1:
+ 143   2                  PWM_REG1 = value;
+ 144   2                  break;
+ 145   2      
+ 146   2              case MCU_PWM_2:
+ 147   2                  PWM_REG2 = value;
+ 148   2                  break;
+ 149   2      
+ 150   2              case MCU_PWM_3:
+ 151   2                  PWM_REG3 = value;
+ 152   2                  break;
+ 153   2      
+ 154   2              case MCU_PWM_4:
+ 155   2                  PWM_REG4 = value;
+ 156   2                  break;
+ 157   2      
+ 158   2              case MCU_PWM_5:
+ 159   2                  PWM_REG5 = value;
+ 160   2                  break;
+ 161   2      
+ 162   2              case MCU_PWM_6:
+ 163   2                  PWM_REG6 = value;
+ 164   2                  break;
+ 165   2      
+ 166   2              case MCU_PWM_7:
+ 167   2                  PWM_REG7 = value;
+ 168   2                  break;
+ 169   2      
+ 170   2              case MCU_PWM_8:
+ 171   2                  PWM_REG8 = value;
+ 172   2                  break;
+ 173   2      
+ 174   2              case MCU_PWM_9:
+ 175   2                  PWM_REG9 = value;
+ 176   2                  break;
+C51 COMPILER V8.02   MCUPWM                                                                08/07/2015 16:22:22 PAGE 4   
+
+ 177   2      
+ 178   2              case MCU_PWM_10:
+ 179   2                  PWM_REG10 = value;
+ 180   2                  break;
+ 181   2      
+ 182   2              case MCU_PWM_11:
+ 183   2                  PWM_REG11 = value;
+ 184   2                  break;
+ 185   2          }
+ 186   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    403    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

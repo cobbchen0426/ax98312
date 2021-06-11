@@ -1,0 +1,600 @@
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE KEYPAD
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\KeyPad.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Phy\SI\NVT\Keypad\KeyPad.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\Ap
+                    -p\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Componen
+                    -t;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\K
+                    -eyPad.lst) OBJECT(.\Bin\ADS\AXI\104N\KeyPad.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          #define KEY_MIN_LEVEL0 ((KEY_TYP_LEVEL0+KEY_TYP_LEVEL1)/2)      // (0x00+0x0d)/2 = 13/2 = 6
+  19          #define KEY_MIN_LEVEL1 ((KEY_TYP_LEVEL1+KEY_TYP_LEVEL2)/2)      // (0x0d+0x1E)/2 = 43/2 = 21
+  20          #define KEY_MIN_LEVEL2 ((KEY_TYP_LEVEL2+KEY_TYP_LEVEL3)/2)      // (0x1e+0x35)/2 = 83/2 = 41
+  21          #define KEY_MIN_LEVEL3 ((KEY_TYP_LEVEL3+KEY_TYP_LEVEL4)/2)      // (0x35+0x54)/2 = 137/2 = 68
+  22          #define KEY_MIN_LEVEL4 ((KEY_TYP_LEVEL4+KEY_TYP_LEVEL5)/2)      // (0x54+0x7F)/2 = 211/2 = 105
+  23          
+  24          
+  25          //******************************************************************************
+  26          // G L O B A L   V A R I A B L E S
+  27          //******************************************************************************
+  28          #if MD_ENABLE_AO_DETECT == ON
+              bit bWaitPowerKeyRelease;
+              xdata USHRT usAOTimer;
+              #endif
+  32          
+  33          bit bKeyAutoTuneFlag=0;         //150526 george
+  34          //******************************************************************************
+  35          // S T A T I C   V A R I A B L E S
+  36          //******************************************************************************
+  37          
+  38          //******************************************************************************
+  39          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  40          //******************************************************************************
+  41          #if Key_Debug == ENABLE
+              //extern xdata UCHAR KeyComp;   //150526 george test
+              xdata UCHAR KeyComp;    //150526 george : avert the same key-value to always print("...");
+              #endif
+  45          //******************************************************************************
+  46          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  47          //******************************************************************************
+  48          
+  49          //******************************************************************************
+  50          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  51          //******************************************************************************
+  52          
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 2   
+
+  53          //******************************************************************************
+  54          // Prototype: 
+  55          //  static UCHAR GetIOKeyCode(UCHAR btn)
+  56          // Parameters:
+  57          //  None
+  58          // Return:
+  59          //  Key Code
+  60          // Purpose:
+  61          //  Get key code
+  62          // Notes:
+  63          //  None
+  64          //******************************************************************************
+  65          /* gg static UCHAR GetIOKeyCode(UCHAR btn)
+  66          {
+  67              static code UCHAR ucIOKeyMap[9][3] = {
+  68                  {IOBTN_1_PORT,  IOBTN_1_BIT,  IOBTN_1_ACTIVE},
+  69                  {IOBTN_2_PORT,  IOBTN_2_BIT,  IOBTN_2_ACTIVE},
+  70                  {IOBTN_3_PORT,  IOBTN_3_BIT,  IOBTN_3_ACTIVE},
+  71                  {IOBTN_4_PORT,  IOBTN_4_BIT,  IOBTN_4_ACTIVE},
+  72                  {IOBTN_5_PORT,  IOBTN_5_BIT,  IOBTN_5_ACTIVE},
+  73                  {IOBTN_6_PORT,  IOBTN_6_BIT,  IOBTN_6_ACTIVE},
+  74                  {IOBTN_7_PORT,  IOBTN_7_BIT,  IOBTN_7_ACTIVE},
+  75                  {IOBTN_8_PORT,  IOBTN_8_BIT,  IOBTN_8_ACTIVE},
+  76                  {MCU_PORT_NULL, 0,            0             },
+  77              };
+  78          
+  79              UCHAR port, pin, act, i;
+  80          
+  81              // Decode btn id to IOKeyMap order
+  82              port = btn;
+  83              for (i = 0; i < 8; i++) {
+  84                  if (port & BIT0) {
+  85                      break;
+  86                  }
+  87                  port >>= 1;
+  88              }
+  89          
+  90              port = ucIOKeyMap[i][0];
+  91              pin  = ucIOKeyMap[i][1];
+  92              act  = ucIOKeyMap[i][2];
+  93          
+  94              if ((port != MCU_PORT_NULL) &&
+  95                  (McuGetIOBit(port, pin) == act)) {
+  96                  return btn;
+  97              }
+  98              else {
+  99                  return 0x00;
+ 100              }
+ 101          } */
+ 102          
+ 103          //******************************************************************************
+ 104          // Prototype: 
+ 105          //  UCHAR ScanKeyPad(void)
+ 106          // Parameters:
+ 107          //  None
+ 108          // Return:
+ 109          //  Key value
+ 110          // Purpose:
+ 111          //  Scan the keypad
+ 112          // Notes:
+ 113          //  None
+ 114          //******************************************************************************
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 3   
+
+ 115          UCHAR ScanKeyPad(void)
+ 116          {
+ 117   1          static UCHAR key_buffer;
+ 118   1          USHRT local_timer;
+ 119   1          UCHAR key_temp, key_stable_time;
+ 120   1      
+ 121   1          local_timer = GetTimerTick();
+ 122   1          key_stable_time = 0;
+ 123   1          do 
+ 124   1              {    
+ 125   2                       ResetWDTimer();                                //150526 george-add, can't delete this, If del will reboot again... again... again.
+ 126   2               key_temp = GetKey();
+ 127   2      
+ 128   2                      if(  (bKeyAutoTuneFlag == 1) && (key_temp != key_buffer) && (key_temp==ADGRP1_CODE_5) ) 
+ 129   2                      {               //150536 george-create-condition-block (include-var: bKeyAutoTuneFlag)
+ 130   3                              bKeyAutoTuneFlag = 0;
+ 131   3                              key_buffer = key_temp;
+ 132   3                              break;
+ 133   3                      }
+ 134   2      
+ 135   2              if (key_temp != key_buffer)     //george-statement, (key_temp as key_buffer) have-different condition
+             -: true, run-update-key-value.
+ 136   2                  {                                                           //george, ***(this condition for key-press-down:valid); (if key-press-up: key_temp=zero, ret
+             -urn key_buffer will be zero)*** 
+ 137   3                              {       //150526 george
+ 138   4                                      #if Key_Debug == ENABLE
+                                                      if(key_temp!=0)
+                                                              printf("    key2_temp= 0x%x\n", (USHRT)key_temp);       //150526 george
+                                              #endif
+ 142   4                              }
+ 143   3                              key_buffer = key_temp;
+ 144   3                              local_timer = GetTimerTick();
+ 145   3                              key_stable_time = KEY_STABLE_TIME;                              //150526 george-statement: check-ok_KEY-stable.
+ 146   3              }
+ 147   2          } 
+ 148   1      while ((key_stable_time!=0) && ((GetTimerTick()-local_timer) < key_stable_time));
+ 149   1      //-----------------------------------------------------------------------
+ 150   1      //AO DETECT : Power key detect///////
+ 151   1      #if MD_ENABLE_AO_DETECT == ON
+              //150526 george-statement: this block-cod no compiler.
+                  if (bWaitPowerKeyRelease == TRUE) {//wait release
+                      key_buffer &= ~KEYCODE_PWR;
+                      if ((GetTimerTick() - usAOTimer) > AO_KEY_DEBOUNCE_TIME) {//AO timeout
+                          if ((AO_DETECT & BIT2) != 0) {
+                              AO_DETECT |= BIT2;
+                              usAOTimer = GetTimerTick();
+                          }
+                          else {
+                              bWaitPowerKeyRelease = FALSE;
+                          }
+                      }
+                  }
+                  else {
+                      if ((key_buffer & KEYCODE_PWR) != 0x00) {
+                          Sleep(AO_KEY_DEBOUNCE_TIME); //wait HW debounce
+                      }
+                      if ((AO_DETECT & BIT2) != 0) {
+                          key_buffer |= KEYCODE_PWR;
+              //            printf("key\r\n");
+                      }
+                  }
+              #endif
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 4   
+
+ 175   1      /////////////////////////////////////
+ 176   1      
+ 177   1      
+ 178   1          return key_buffer;
+ 179   1      }
+ 180          
+ 181          //******************************************************************************
+ 182          // Prototype: 
+ 183          //  UCHAR GetKey(void)
+ 184          // Parameters:
+ 185          //  None
+ 186          // Return:
+ 187          //  Key value
+ 188          // Purpose:
+ 189          //  Scan the keypad
+ 190          // Notes:
+ 191          //  None
+ 192          //******************************************************************************
+ 193          UCHAR GetKey(void)
+ 194          {
+ 195   1          UCHAR key, adc_level;
+ 196   1      
+ 197   1          key = 0;
+ 198   1      
+ 199   1          // Perform AD Key decode
+ 200   1          McuPowerUpADC();
+ 201   1          McuStartADC();
+ 202   1          McuWaitADCComplete();
+ 203   1          McuPowerDownADC();
+ 204   1          adc_level = McuGetADC(KEY_GROUP1_ADC);
+ 205   1      
+ 206   1      //===================================== power key,  (ADGRP1_CODE_1:0x02, "Power key") ====================
+             -=================================
+ 207   1          if (adc_level < KEY_MIN_LEVEL0)                                                                             //( x < 6)      set ===> 
+ 208   1              {
+ 209   2                      key |= ADGRP1_CODE_1;
+ 210   2      
+ 211   2                      #if Key_Debug == ENABLE
+                                      printf("__key= 'power-key'__\n");
+                                      //printf("Power-Key_KEY_MIN_LEVEL0   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL0);           //140304 MIKE  0
+                              #endif
+ 215   2          }
+ 216   1      
+ 217   1      //===================================== ADS:(ADGRP1_CODE_2,"menu");  AXI:(factory-mode)or(ADGRP1_CODE_5,"a
+             -uto key")========================
+ 218   1          else if (adc_level > KEY_MIN_LEVEL0 && adc_level < KEY_MIN_LEVEL1)  //( 6 < x < 21) 
+ 219   1      #ifdef X_ADS                                                                                                            
+ 220   1              {       // ----------------------------- For ADS set= key is (ADGRP1_CODE_2:0x04, "menu")
+ 221   2                              key |= ADGRP1_CODE_2;
+ 222   2                            
+ 223   2                              #if Key_Debug == ENABLE                                                                         
+                                              if(KeyComp != key){
+                                                      printf("__ADS-key= 'menu'__\n");    //140304 MIKE  2                            
+                                                      //printf("KEY_MIN_LEVEL2   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL2);    //140304 MIKE  2
+                                              }
+                                              KeyComp = key;
+                                      #endif                                                  
+ 230   2          }
+ 231   1      #elif X_AXI==1          //george-create: for AX98310  "the same: #ifdef X_ADS"
+              
+                      {       // ----------------------------- For AXI_AX98310 set= key is (ADGRP1_CODE_2:0x04, "menu")
+                                      key |= ADGRP1_CODE_2;
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 5   
+
+                                    
+                                      #if Key_Debug == ENABLE                                                                         
+                                              if(KeyComp != key){
+                                                      printf("__AXI-key= 'menu'__\n");    //140304 MIKE  2                            
+                                                      //printf("KEY_MIN_LEVEL2   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL2);    //140304 MIKE  2
+                                              }
+                                              KeyComp = key;
+                                      #endif                                                  
+                  }   
+              #else  
+                  {   // ----------------------------- For Axiomtek set= key is (factory-mode) or (ADGRP1_CODE_5:0x20, "au
+             -to key")
+                              if (OSD_state==0)
+                              {
+                                              Factory_key_time=GetTimerTick();                                               //140304 mike 
+                                              
+                                              while (((adc_level > KEY_MIN_LEVEL0) && (adc_level < KEY_MIN_LEVEL1)) && ((GetTimerTick() - Factory_k
+             -ey_time)<2500 ))
+                                      {
+                                              Sleep(10);
+                                                      McuPowerUpADC();
+                                              McuStartADC();
+                                              McuWaitADCComplete();
+                                              McuPowerDownADC();
+                                                      adc_level = McuGetADC(KEY_GROUP1_ADC);
+                                              } 
+                                    
+                                              if((GetTimerTick() - Factory_key_time) > 2500 )   
+                                              {
+                                                      key  =   (KEYCODE_PWR|KEYCODE_MENU);      //140304 mike for factory mode  1|2=3
+              
+                                                      #if Key_Debug == ENABLE
+                                                              printf("__AXI-key= 'Factory-Mode'__\n");
+                                              //printf("ADC_REG2 auto KEY  ++  auto=Factory=%d\n\r",(unsigned short)(GetTimerTick() - Fa
+             -ctory_key_time)); 
+                                                      #endif
+                                          }
+                          }
+                              else
+                              {
+                                              key |= ADGRP1_CODE_5;
+              
+                                              #if Key_Debug == ENABLE
+                                                      if(KeyComp != key){
+                                                              printf("__AXI-key= 'auto'__\n");
+                                                              //printf("KEY_MIN_LEVEL1   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL1);   //140304 MIKE
+                                                      }
+                                                      KeyComp = key;
+                                              #endif                     
+                      }
+                  }                                                                           
+              #endif  
+ 284   1      
+ 285   1      //===================================== ADS:(ADGRP1_CODE_3:0x08, "sel-");        AXI:(ADGRP1_CODE_2:0x04, "menu"
+             -) =============================
+ 286   1          else if (adc_level > KEY_MIN_LEVEL1 && adc_level < KEY_MIN_LEVEL2)  //( 21 < x < 41)
+ 287   1      #ifdef X_ADS
+ 288   1              {       // ----------------------------- For ADS set= key is (ADGRP1_CODE_3, "sel-")
+ 289   2         
+ 290   2                              key |= ADGRP1_CODE_3;
+ 291   2      
+ 292   2                                      #if Key_Debug == ENABLE
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 6   
+
+                                                      if(KeyComp != key){
+                                                              printf("__ADS-key= 'sel-'__\n");
+                                                      }
+                                                      KeyComp = key;
+                                              #endif
+ 298   2          }
+ 299   1      #elif X_AXI==1          //george-create: for AX98310   
+                  {   // ----------------------------- For AXI_AX98310 set= key is (factory-mode) or (ADGRP1_CODE_5:0x20, 
+             -"auto key")
+                              if (OSD_state==0)
+                              {
+                                              Factory_key_time=GetTimerTick();                                               //140304 mike 
+                                              
+                                              while (((adc_level > KEY_MIN_LEVEL1) && (adc_level < KEY_MIN_LEVEL2)) && ((GetTimerTick() - Factory_k
+             -ey_time)<2500 ))
+                                      {
+                                              Sleep(10);
+                                                      McuPowerUpADC();
+                                              McuStartADC();
+                                              McuWaitADCComplete();
+                                              McuPowerDownADC();
+                                                      adc_level = McuGetADC(KEY_GROUP1_ADC);
+                                              } 
+                                    
+              /*                              if((GetTimerTick() - Factory_key_time) > 2500 )   
+                                              {
+                                                      key  =   (KEYCODE_PWR|KEYCODE_MENU);      //140304 mike for factory mode  1|2=3
+              
+                                                      #ifdef Key_Debug
+                                                              printf("__AXI-key= 'Factory-Mode'__\n");
+                                              //printf("ADC_REG2 auto KEY  ++  auto=Factory=%d\n\r",(unsigned short)(GetTimerTick() - Fa
+             -ctory_key_time)); 
+                                                      #endif
+                                          }  */
+              
+                                      if(  ((GetTimerTick()-Factory_key_time) > 200)  && ((GetTimerTick()-Factory_key_time) < 1000 )  )               //key
+             - set => "auto",   150526 george-create-condition: if{} only.
+                                      {       
+                                              bKeyAutoTuneFlag = 1;   //150529 george, when return to ScanKeyPad() will do (key_buffer = key_temp)
+                                              key |= ADGRP1_CODE_5;   //150529 george, ** add this for situation:  [at OSD_State=0, press this key to 
+             -AutoTune_at_VGA]
+                                              
+                                              #if Key_Debug == ENABLE
+                                                      if(KeyComp != key){
+                                                              printf("__ADS-key1= 'auto'__\n");
+                                                      }
+                                                      KeyComp = key;
+                                              #endif
+                                              
+                                      }                      
+                                      else if((GetTimerTick() - Factory_key_time) > 2500 )    //key seet => (factory-mode, key= (0x04 | 0x20) = 
+             -0x06)
+                                      {
+                                              key  =   (KEYCODE_PWR|KEYCODE_MENU);                                    
+                                              //george test,  key  = KEYCODE_DEMO;    //george: (KEYCODE_PWR|KEYCODE_AUTO)    
+                                              #if Key_Debug == ENABLE
+                                                              printf("__ADS-key= 'Factory-Mode'__\n");
+                                                      //printf("ADC_REG2 auto KEY  ++  auto=Factory=%d\n\r",(unsigned short)(GetTimerTick() - Factor
+             -y_key_time));          //george-stement: two-time-show-this-print_will-ext->(factorymode).
+                                              #endif
+              
+                                      }
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 7   
+
+              
+                          }
+                              else
+                              {
+                                              key |= ADGRP1_CODE_5;
+              
+                                              #if Key_Debug == ENABLE
+                                                      if(KeyComp != key){
+                                                              printf("__AXI-key2= 'auto'__\n");
+                                                              //printf("KEY_MIN_LEVEL1   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL1);   //140304 MIKE
+                                                      }
+                                                      KeyComp = key;
+                                              #endif                     
+                      }
+                  }
+              #else
+                      {       //------------------------------------- For Axiomtek set= key is (ADGRP1_CODE_2:0x04, "menu")
+                                      key |= ADGRP1_CODE_2;
+                                                                              
+                                              #if Key_Debug == ENABLE
+                                                      if(KeyComp != key){
+                                                              printf("__AXI-key= 'menu'__\n");    //140304 MIKE  2                                       
+                                                      }
+                                                      KeyComp = key;
+                                              #endif
+                  }
+              #endif
+ 375   1      
+ 376   1      //===================================== (ADGRP1_CODE_4:0x10, "sel+") =====================================
+             -=================================
+ 377   1       else if (adc_level > KEY_MIN_LEVEL2 && adc_level < KEY_MIN_LEVEL3)             //( 41 < x < 68) set ===> 
+ 378   1              {        
+ 379   2                      key |= ADGRP1_CODE_4;
+ 380   2      
+ 381   2                      #if Key_Debug == ENABLE
+                                      if(KeyComp != key){
+                                              printf("__key= 'sel+'__\n");    //140304 MIKE  2                                   
+                                      }
+                                      KeyComp = key;
+                              #endif
+ 387   2          }   
+ 388   1                      
+ 389   1              //--------------------------------------------  sel+ key (disable factory key)
+ 390   1                      /*     
+ 391   1                   else if (adc_level > KEY_MIN_LEVEL2 && adc_level < KEY_MIN_LEVEL3) 
+ 392   1                              {                
+ 393   1                                 key |= ADGRP1_CODE_4;
+ 394   1                            #ifdef Key_Debug                                  //140304 mike       sel+      
+ 395   1                        //       printf("\nADC_KEY_GROUP1_ADC ==> RIGHT  131205==%x\n\r",(unsigned short)adc_level);
+ 396   1                               printf("KEY_MIN_LEVEL2   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL3);     //140304 m
+             -ike  3
+ 397   1                            #endif
+ 398   1                             }        
+ 399   1                      */
+ 400   1      
+ 401   1      //===================================== ADS:(ADGRP1_CODE_5:0x20, "auto") or (factory-mode);      AXI:(ADGRP1_C
+             -ODE_3, "sel-") =============================
+ 402   1          else if (adc_level > KEY_MIN_LEVEL3 && adc_level < KEY_MIN_LEVEL4)  //( 68 < x < 105)
+ 403   1      #ifdef X_ADS
+ 404   1              {       // ----------------------------- For ADS set= key is (ADGRP1_CODE_5:0x20, "auto" / "exit") or (factory-
+             -mode)
+ 405   2                      if (OSD_state==0)
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 8   
+
+ 406   2                      {
+ 407   3                      Factory_key_time=GetTimerTick();                                               //140304 mike 
+ 408   3                              while (((adc_level > KEY_MIN_LEVEL3) && (adc_level < KEY_MIN_LEVEL4)) && ((GetTimerTick() - Factory_key
+             -_time)<2500 ))
+ 409   3                      {  
+ 410   4                                              //printf("\n%d\n\r",(unsigned short)(GetTimerTick() - Factory_key_time)); 
+ 411   4                                              //printf("ADC_REG2  SEL+ KEY     131227==%x\n\r",(unsigned short)adc_level);      
+ 412   4                                              Sleep(10);
+ 413   4                                                      McuPowerUpADC();
+ 414   4                                              McuStartADC();
+ 415   4                                              McuWaitADCComplete();
+ 416   4                                              McuPowerDownADC();
+ 417   4                                                      adc_level = McuGetADC(KEY_GROUP1_ADC);
+ 418   4                                                      //if((GetTimerTick() - Factory_key_time)>3000 )  
+ 419   4                                                      //{
+ 420   4                                                      //      break;
+ 421   4                                                      //}              
+ 422   4                              } 
+ 423   3      
+ 424   3                              if(  ((GetTimerTick()-Factory_key_time) > 200)  && ((GetTimerTick()-Factory_key_time) < 1000 )  )               //key
+             - set => "auto",   150526 george-create-condition: if{} only.
+ 425   3                              {       
+ 426   4                                      bKeyAutoTuneFlag = 1;   //150529 george, when return to ScanKeyPad() will do (key_buffer = key_temp)
+ 427   4                                      key |= ADGRP1_CODE_5;   //150529 george, ** add this for situation:  [at OSD_State=0, press this key to 
+             -AutoTune_at_VGA]
+ 428   4                                      
+ 429   4                                      #if Key_Debug == ENABLE
+                                                      if(KeyComp != key){
+                                                              printf("__ADS-key= 'auto'__\n");
+                                                      }
+                                                      KeyComp = key;
+                                              #endif
+ 435   4                                      
+ 436   4                              }                      
+ 437   3                              else if((GetTimerTick() - Factory_key_time) > 2500 )    //key seet => (factory-mode, key= (0x04 | 0x20) = 
+             -0x06)
+ 438   3                              {
+ 439   4                                      key  =   (KEYCODE_PWR|KEYCODE_MENU);                                    
+ 440   4                                      //george test,  key  = KEYCODE_DEMO;    //george: (KEYCODE_PWR|KEYCODE_AUTO)    
+ 441   4                                      #if Key_Debug == ENABLE
+                                                              printf("__ADS-key= 'Factory-Mode'__\n");
+                                                      //printf("ADC_REG2 auto KEY  ++  auto=Factory=%d\n\r",(unsigned short)(GetTimerTick() - Factor
+             -y_key_time));          //george-stement: two-time-show-this-print_will-ext->(factorymode).
+                                              #endif
+ 445   4      
+ 446   4                              }
+ 447   3                      }
+ 448   2                      else
+ 449   2                      {       
+ 450   3                                      key |= ADGRP1_CODE_5;                                                           //key set => "exit", (when (OSD_state > 0)
+ 451   3                                      
+ 452   3                                      #if Key_Debug == ENABLE
+                                                      if(KeyComp != key){
+                                                              printf("__ADS-key= 'exit'__\n");
+                                                      //printf("KEY_MIN_LEVEL1   131205==%x\n\r",(unsigned short)KEY_MIN_LEVEL1);   //140304 MIKE  1
+             -                   
+                                                      }
+                                                      KeyComp = key;
+                                              #endif
+ 459   3                      }
+ 460   2          }
+ 461   1      #elif X_AXI==1          //george-create: for AX98310   "the same: #else"
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 9   
+
+                      {   //-------------------------------------     For AXI_AX98310 set= key is (ADGRP1_CODE_3, "sel-")   
+                              key |= ADGRP1_CODE_3;
+                                                
+                              #if Key_Debug == ENABLE
+                                      if(KeyComp != key){
+                                              printf("__AXI-key= 'sel-'__\n");    //140304 MIKE  2
+                                      }
+                                      KeyComp = key;
+                              #endif
+                  }
+              #else   
+                      {   //-------------------------------------     For Axiomtek set= key is (ADGRP1_CODE_3, "sel-")   
+                              key |= ADGRP1_CODE_3;
+                                                
+                              #if Key_Debug == ENABLE
+                                      if(KeyComp != key){
+                                              printf("__AXI-key= 'sel-'__\n");    //140304 MIKE  2
+                                      }
+                                      KeyComp = key;
+                              #endif
+                  }           
+              #endif
+ 484   1              
+ 485   1      //----------------------------------
+ 486   1      //KEY GROUP2 ADC FUNCTION  140304 mike
+ 487   1      //----------------------------------
+ 488   1      #if ALS_EnDis == ALSRange
+                      // disable KEY_GROUP2_ADC, change to LS3101 Light-Sensor
+              #else
+ 491   1      if(0)   //150526 george , Disable this KEY-GROUP2 function.
+ 492   1      {
+ 493   2          adc_level = McuGetADC(KEY_GROUP2_ADC);
+ 494   2          if (adc_level < KEY_MIN_LEVEL0) {
+ 495   3              key |= ADGRP2_CODE_1;
+ 496   3          }
+ 497   2          else if (adc_level > KEY_MIN_LEVEL0 && adc_level < KEY_MIN_LEVEL1) {
+ 498   3              key |= ADGRP2_CODE_2;
+ 499   3          }
+ 500   2          else if (adc_level > KEY_MIN_LEVEL1 && adc_level < KEY_MIN_LEVEL2) {
+ 501   3              key |= ADGRP2_CODE_3;
+ 502   3          }
+ 503   2      }
+ 504   1      #endif  //#if ALS_EnDis == ENABLE
+ 505   1      
+ 506   1          // Perform IO Key decode
+ 507   1          //140317 mike 
+ 508   1          /*
+ 509   1          key |= GetIOKeyCode(IOBTN_CODE_1);
+ 510   1          key |= GetIOKeyCode(IOBTN_CODE_2);
+ 511   1          key |= GetIOKeyCode(IOBTN_CODE_3);
+ 512   1          key |= GetIOKeyCode(IOBTN_CODE_4);
+ 513   1          key |= GetIOKeyCode(IOBTN_CODE_5);
+ 514   1          key |= GetIOKeyCode(IOBTN_CODE_6);
+ 515   1          key |= GetIOKeyCode(IOBTN_CODE_7);
+ 516   1          key |= GetIOKeyCode(IOBTN_CODE_8);
+ 517   1           */ //140317 mike 
+ 518   1      
+ 519   1          return key;
+ 520   1      }
+ 521          
+ 522          #if MD_ENABLE_AO_DETECT == ON
+              bit CheckFactoryMode(void)
+C51 COMPILER V8.02   KEYPAD                                                                08/07/2015 16:22:31 PAGE 10  
+
+              {
+                  if (GetKey() == (KEYCODE_FACT & ~KEYCODE_PWR)) {
+                      return TRUE;
+                  }
+                  return FALSE;
+                  }
+              #endif
+ 531          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    370    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      7       5
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,11 @@
+//EDID _(PET_OT215ZFWDLV, HDMI-no-include-audio)
+VGA[128]  CkSum= 0xF6
+DVI[128]  CkSum= 0x9D
+HDMI[256] CkSum= 0xC8, 0x00 	//實際測試, 應只有 128bytes
+
+
+//Customer: Nextech
+//Panel: AU_T215HVN01.0
+VGA[128]  CkSum= 0xF6
+DVI[128]  CkSum= 0x9D
+HDMI[256] CkSum= 0xC8, 0xE7

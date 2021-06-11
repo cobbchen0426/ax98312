@@ -1,0 +1,922 @@
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_HDMI
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_HDMI.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_HDMI.c LARGE OPTIMIZE(9,SPEED) BROWSE INC
+                    -DIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\S
+                    -I\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215)
+                    - PRINT(.\Lst\Scaler_HDMI.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_HDMI.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          #if ENABLE_HDMI == ON
+  15          
+  16          //******************************************************************************
+  17          // M A C R O   D E F I N I T I O N S
+  18          //******************************************************************************
+  19          #if AUDIO_OUT == IIS_OUT
+                  #define AUDIO_PINOUT_SEL       0x04
+                  #define AUDIO_OUT_CTRL         0x00
+                  #define AUDIO_OUT_IIS_CTRL1    0x40
+                  #define AUDIO_OUT_IIS_CTRL2    0xF8
+                  #define AUDIO_OUT_IIS_CTRL3    0x05
+                  #define AUDIO_EXT_CAP          0x00
+              #else
+  27              #define AUDIO_PINOUT_SEL       0x00
+  28              #define AUDIO_OUT_CTRL         0x01
+  29              #define AUDIO_EXT_CAP          0x00
+  30              #define AUDIO_OUT_IIS_CTRL3    0x60
+  31          #endif
+  32          
+  33          //******************************************************************************
+  34          // G L O B A L   V A R I A B L E S
+  35          //******************************************************************************
+  36          #if ENABLE_HDMI_AUDIO_CK_RCVY == ON 
+              /*!
+               * Data type for HDMI audio clock recovery (ARC).
+               */
+              typedef struct _ACRITM_ {
+                  ULONG ulNSVAL;
+                  ULONG ulCTSSVAL;
+              } ACRItm;
+              
+              /*!
+               * Data type for HDMI audio clock recovery (ARC).
+               */
+              typedef enum _HDMICLKTYPE_ {
+                  HDMI_25MHz,
+                  HDMI_25MHz_101,
+                  HDMI_27MHz,
+                  HDMI_27MHz_101,
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 2   
+
+                  HDMI_54MHz,
+                  HDMI_54MHz_101,
+                  HDMI_74MHz,
+                  HDMI_74MHz_101,
+                  HDMI_148MHz,
+                  HDMI_148MHz_101,
+                  HDMI_297MHz,
+                  HDMI_297MHz_101,
+                  NUM_HDMICLKTYPE
+              } HDMICLKTYPE;
+              
+              /*!
+               * Data type for HDMI audio clock recovery (ARC).
+               */
+              typedef enum _AUDIOFSTYPE_ {
+                  AUDIOFS_44KHz,
+                  AUDIOFS_NOTINDICATED,
+                  AUDIOFS_48KHz,
+                  NUM_AUDIOFSTYPE
+              } AUDIOFSTYPE;
+              #endif
+  74          
+  75          //******************************************************************************
+  76          // S T A T I C   V A R I A B L E S
+  77          //******************************************************************************
+  78          static BOOL bHDMIMute = FALSE; /*!< Status of HDMI mute. */
+  79          #if ENABLE_INTERNAL_AUDIO_BUZZER == ON
+              static UCHAR ucReg0x8605; /*!< Temperal storage for scaler register. */
+              static UCHAR ucReg0x8700; /*!< Temperal storage for scaler register. */
+              static UCHAR ucReg0x871A; /*!< Temperal storage for scaler register. */
+              static UCHAR ucReg0x871D; /*!< Temperal storage for scaler register. */
+              #endif
+  85          
+  86          //******************************************************************************
+  87          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  88          //******************************************************************************
+  89          
+  90          //******************************************************************************
+  91          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  92          //******************************************************************************
+  93          static void ConfigHDMIAnalogAudioGain(UCHAR value);
+  94          static void ConfigHDMIDigitalAudioGain(USHRT value);
+  95          static void AudioOffset(void);
+  96          #if ENABLE_HDMI_AUDIO_CK_RCVY == ON 
+              static void HDMIAudioACRCorrection(void);
+              #endif
+  99          
+ 100          //******************************************************************************
+ 101          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+ 102          //******************************************************************************
+ 103          
+ 104          //******************************************************************************
+ 105          // F U N C T I O N   B O D Y S
+ 106          //******************************************************************************
+ 107          
+ 108          /**************************************************************************//**
+ 109           * Get deep color mode by HDMI deep color PLL divider M select
+ 110           ******************************************************************************/
+ 111          /*
+ 112          UCHAR GetSCDeepColor(void)
+ 113          {
+ 114           UCHAR ret=DEEP_COLOR_24BIT;
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 3   
+
+ 115              switch (SC_DVI_PLL_M) {
+ 116                  default:
+ 117                  case 0x10:
+ 118                  case 0x20:   
+ 119                      ret = DEEP_COLOR_24BIT;
+ 120                      break;
+ 121                  case 0x28:
+ 122                      ret = DEEP_COLOR_30BIT;
+ 123                      break;
+ 124                  case 0x30:
+ 125                      ret = DEEP_COLOR_36BIT;
+ 126                      break;
+ 127                  case 0x40:
+ 128                      ret = DEEP_COLOR_48BIT;
+ 129                      break;
+ 130              }
+ 131          
+ 132              return ret;
+ 133          }
+ 134          */
+ 135          
+ 136          /**************************************************************************//**
+ 137           * CSC Dithering Manual Mode Enable
+ 138           * For The MNT screen have garbage/mute issue when AVI InfoFrame change.
+ 139           ******************************************************************************/
+ 140          /*
+ 141          void CSCDitherManualModeEn(void)
+ 142          {
+ 143           if((SC_CSC_CTRL2 & BIT0) == 0x01){
+ 144              SC_HDMI_RESET_CTRL &= ~BIT3;  
+ 145                  if((GetSCDeepColor() >= DEEP_COLOR_30BIT)||((SC_HDMI_AVI[0] & 0x60) == BIT5)){// 10/12/16 bit deep color
+             - or YCbCr 422
+ 146                          SC_CSC_CTRL2 |= BIT4;
+ 147                  }
+ 148                  else{
+ 149                          SC_CSC_CTRL2 &= ~BIT4;
+ 150                  }
+ 151           }
+ 152          }
+ 153          */
+ 154          
+ 155          /**************************************************************************//**
+ 156           * Initialize HDMI-related registers.
+ 157           ******************************************************************************/
+ 158          void HDMIInit(void)
+ 159          {
+ 160   1          SC_HDMI_SOFTWARE_RESET = 0xFF;
+ 161   1          SC_HDMI_SOFTWARE_RESET = 0x10;
+ 162   1      
+ 163   1          SC_TMDS_LINK_CLK_SEL |= BIT0;
+ 164   1          SC_AUDIO_SMOOTH = 0xFF;
+ 165   1          SC_AUDIO_VOLUME_R = 0xC6;                            
+ 166   1          SC_AUDIO_VOLUME_L = 0xC6;
+ 167   1          ScalerAudioPowerOn();
+ 168   1          SC_AUDIO_EXT_CAP_CTRL = AUDIO_EXT_CAP;
+ 169   1      #if AUDIO_OUT == IIS_OUT
+                  SC_AUDIO_OUT_IIS_CTRL1 = AUDIO_OUT_IIS_CTRL1;
+                  SC_AUDIO_OUT_IIS_CTRL2 = AUDIO_OUT_IIS_CTRL2;
+              #endif
+ 173   1          SC_AUDIO_OUT_IIS_CTRL3 = AUDIO_OUT_IIS_CTRL3;
+ 174   1      
+ 175   1          // Enable external cap for improving audio performance
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 4   
+
+ 176   1          SC_AUDIO_DAC_DRIV_CTRL = 0xcc; //test by Rex 0x00
+ 177   1          SC_AUDIO_TEST1 = 0x06;//test by Rex 0x07;
+ 178   1          SC_AUDIO_ANALOG_OUT_CTRL = 0x70;
+ 179   1      
+ 180   1      #if ENABLE_HDMI_AUDIO_AUTO_MUTE == ON
+                  SC_AUDIO_AUTO_CTRL1 = 0x00;
+                  if(GetSCID() == SCID_770_E){
+                      SC_AUDIO_AUTO_CTRL2 = 0x02;
+                  }
+                  else{
+                      SC_AUDIO_AUTO_CTRL2 = 0x20;
+                  }
+                  SC_AUDIO_AUTO_CTRL3 = 0x32;
+                  SC_AUDIO_AUTO_CTRL4 = 0xC6;
+              #endif
+ 191   1      
+ 192   1          SC_HDMI_CLK_INT |= BIT0; // Normal HDMI interrupt
+ 193   1          SC_CP_PACKET_TYPE = 0x02;
+ 194   1          SC_HDMI_PREAMBLE_CYCLE = 0x06;
+ 195   1      }
+ 196          
+ 197          /**************************************************************************//**
+ 198           * System perform this function periodically to handle the HDMI events.
+ 199           * For example, Color space changed, AV mute etc...
+ 200           ******************************************************************************/
+ 201          void HdmiHandler(void)
+ 202          {
+ 203   1          UCHAR ch;
+ 204   1      
+ 205   1          ch = GetCurrInputInterface();
+ 206   1          if ((ch != DIGITAL_INPUT0) && (ch != DIGITAL_INPUT1)) {
+ 207   2              return;
+ 208   2          }
+ 209   1      
+ 210   1          bHDMIMute = FALSE;
+ 211   1      
+ 212   1          ch = SC_HDMI_INT_STATE1[2];
+ 213   1          if (ch != 0) {
+ 214   2              //printf("SC_HDMI_INT_STATE1[2] = %02BX\r\n", ch);
+ 215   2              if ((ch & BIT7) != 0) {
+ 216   3                  //printf("HDMI/DVI change\r\n");
+ 217   3                  bHDMIMute = TRUE;
+ 218   3              }
+ 219   2              //if ((ch & BIT4) != 0) {
+ 220   2              //    printf("Clock detect change detected\r\n");
+ 221   2              //}
+ 222   2              //if ((ch & BIT3) != 0) {
+ 223   2              //    printf("Sync detect change detected\r\n");
+ 224   2              //}
+ 225   2              //if ((ch & BIT0) != 0) {
+ 226   2              //    printf("Video clock frequency changed\r\n");
+ 227   2              //}
+ 228   2      #if ENABLE_SCALER_3D == ON
+ 229   2              // Because this bit is used for AMD 3D detection now.
+ 230   2              // We can not clear the bit here
+ 231   2              // Jude 2011/08/25
+ 232   2              ch &= ~BIT6;
+ 233   2      #endif
+ 234   2              SC_HDMI_INT_STATE1[2] = ch;
+ 235   2          }
+ 236   1          ch = SC_HDMI_INT_STATE1[3];
+ 237   1          if (ch != 0) {
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 5   
+
+ 238   2              //printf("SC_HDMI_INT_STATE1[3] = %02BX\r\n", ch);
+ 239   2              //if ((ch & BIT7) != 0) {
+ 240   2              //    printf("New General Control Packet detected\r\n");
+ 241   2              //}
+ 242   2              if ((ch & BIT6) != 0) {
+ 243   3                  bHDMIMute = TRUE;
+ 244   3                  //printf("General Control Packet set to mute\r\n");
+ 245   3              }
+ 246   2              if ((ch & BIT4) != 0) {
+ 247   3                  //printf("New/changed unrecognized packet detected\r\n");
+ 248   3              }
+ 249   2              if ((ch & BIT3) != 0) {
+ 250   3                  //printf("New/changed MPEG InfoFrame detected\r\n");
+ 251   3              }
+ 252   2              if ((ch & BIT2) != 0) {
+ 253   3                  //printf("New/changed audio InfoFrame detected\r\n");
+ 254   3              }
+ 255   2              if ((ch & BIT1) != 0) {
+ 256   3                  //printf("New/changed SPD InfoFrame detected\r\n");
+ 257   3              }
+ 258   2              if ((ch & BIT0) != 0) {
+ 259   3                  //printf("New/changed AVI InfoFrame detected\r\n");
+ 260   3                  if (GetModeHandleState() == WAIT_MODE_CHANGE){
+ 261   4                      if ((SC_HDMI_AVI[0] & 0x60) != GetScalerColorSpace()){
+ 262   5                          SetModeChangeFlag();
+ 263   5                      }
+ 264   4                  }
+ 265   3                  else{
+ 266   4                      SetColorSpace();
+ 267   4                  }
+ 268   3              }
+ 269   2              SC_HDMI_INT_STATE1[3] = ch;
+ 270   2          }
+ 271   1          ch = SC_HDMI_INT_STATE1[4];
+ 272   1          if (ch != 0) {
+ 273   2              //printf("SC_HDMI_INT_STATE1[4] = %02BX\r\n", ch);
+ 274   2              if ((ch & BIT4) != 0) {
+ 275   3                  //printf("No AVI\r\n");
+ 276   3              }
+ 277   2              if ((SC_CTRL_PACKET[0] != 0) && (SC_CTRL_PACKET[1] != 0)) {
+ 278   3      #if ENABLE_HDMI_AUDIO_CK_RCVY == ON 
+                          HDMIAudioACRCorrection(); // 20100727 Leon for unknown media player
+              #endif
+ 281   3      #if ENABLE_HDMI_FS_MUTE == ON 
+                          HDMIAPI_MuteUnmatchedFs();
+              #endif
+ 284   3                  if ((ch & BIT0) != 0) {
+ 285   4                      //printf("FIFO under run\r\n");
+ 286   4                      SC_HDMI_SOFTWARE_RESET |= BIT1;
+ 287   4                      SC_HDMI_SOFTWARE_RESET &= ~BIT1;
+ 288   4                      Sleep(5);
+ 289   4                  }
+ 290   3                  if ((ch & BIT1) != 0) {
+ 291   4                      //printf("FIFO over run\r\n");
+ 292   4                      SC_HDMI_SOFTWARE_RESET |= BIT1;
+ 293   4                      SC_HDMI_SOFTWARE_RESET &= ~BIT1;
+ 294   4                      Sleep(5);
+ 295   4                  }
+ 296   3              }
+ 297   2              SC_HDMI_INT_STATE1[4] = ch;
+ 298   2          }
+ 299   1          
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 6   
+
+ 300   1      #if ENABLE_SCALER_3D == ON
+ 301   1          ch = SC_HDMI_INT_STATE2[1];
+ 302   1          if (ch != 0) {
+ 303   2              if ((ch & BIT7) != 0) {
+ 304   3                  // On some devices, the VSP is sent after timing stable and our f/w may not catch the
+ 305   3                  // correct the information during mode change. It causes the display to be 2D while input
+ 306   3                  // is 3D.To avoid this kind of issue, we check the VSP periodically to make display
+ 307   3                  // being right.
+ 308   3                  if (IsHDMI() && SC3DAPI_CheckVSI3DStatus() && !SC3DAPI_IsHDMI3D()) {
+ 309   4                      SetModeChangeFlag();
+ 310   4                  }
+ 311   3                  if (IsHDMI() && !SC3DAPI_CheckVSI3DStatus() && SC3DAPI_IsHDMI3D() && !SC3DAPI_IsManualHDMI3D()
+             -) {
+ 312   4                      SetModeChangeFlag();
+ 313   4                  }
+ 314   3                  if (IsHDMI() && SC3DAPI_CheckVSI3DStatus() && SC3DAPI_IsHDMI3DFmtChanged()) {
+ 315   4                      SetModeChangeFlag();
+ 316   4                  }
+ 317   3              }
+ 318   2              SC_HDMI_INT_STATE2[1] = ch;
+ 319   2          }
+ 320   1      #endif
+ 321   1      }
+ 322          
+ 323          /**************************************************************************//**
+ 324           * Check HDMI audio/video are muted or not.
+ 325           * @return TRUE if HDMI audio/video are muted else FALSE.
+ 326           ******************************************************************************/
+ 327          BOOL IsHDMIDataMute(void)
+ 328          {
+ 329   1          return bHDMIMute;
+ 330   1      }
+ 331          
+ 332          /**************************************************************************//**
+ 333           * Clear HDMI-related interrupt status.
+ 334           * E.x. AV mute.
+ 335           ******************************************************************************/
+ 336          void ClearHDMIStatus(void)
+ 337          {
+ 338   1          SC_HDMI_INT_STATE1[2] = (BIT7 | BIT4 | BIT3);
+ 339   1          SC_HDMI_INT_STATE1[3] = BIT6;
+ 340   1      }
+ 341          
+ 342          #if 0
+              /**************************************************************************//**
+               * Enable AVMute interrupt.
+               * @param enable TRUE to enable HDMI AVMute interrupt.
+               ******************************************************************************/
+              void HDMIEnableAVMuteInt(UCHAR enable)
+              {
+                  if (enable) {
+                      SC_HDMI_INT_UNMASK1[2] |= BIT6;
+                      McuScalerHDMIIntEnable();
+                  }
+                  else {
+                      SC_HDMI_INT_UNMASK1[2] &= ~BIT6;
+                      McuScalerHDMIIntDisable();
+                  }
+              }
+              #endif
+ 359          
+ 360          /**************************************************************************//**
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 7   
+
+ 361           * Detect the status of deep color from info-frame and set proper divider.
+ 362           ******************************************************************************/
+ 363          USHRT TMDSDeepColorDetection(void)
+ 364          {
+ 365   1          USHRT clock;
+ 366   1      
+ 367   1          clock = TMDS_GetClock();
+ 368   1          switch (SC_HDCP_PACKING & 0x07) {
+ 369   2              case 4:
+ 370   2                  SC_DVI_PLL_M = 0x20;
+ 371   2                  break;
+ 372   2              case 5:
+ 373   2                  SC_DVI_PLL_M = 0x28;
+ 374   2                  clock = (clock * 8 + 5) / 10;
+ 375   2                  break;
+ 376   2              case 6:
+ 377   2                  SC_DVI_PLL_M = 0x30;
+ 378   2                  clock = (clock * 8 + 6) / 12;
+ 379   2                  break;
+ 380   2              case 7:
+ 381   2                  SC_DVI_PLL_M = 0x40;
+ 382   2                  clock = (clock * 8 + 8) / 16;
+ 383   2                  break;
+ 384   2          }
+ 385   1          return clock;
+ 386   1      }
+ 387          
+ 388          /**************************************************************************//**
+ 389           * Function to enable/disable detecting HDMI preamble.
+ 390           * @param enable TRUE/FALSE to enable/disable preamble detection.
+ 391           ******************************************************************************/
+ 392          void HDMIEnablePreambleDetection(UCHAR enable)
+ 393          {
+ 394   1          if (enable) {
+ 395   2              SC_HDMI_PREAMBLE_CYCLE = 0x06;
+ 396   2          }
+ 397   1          else {
+ 398   2              SC_HDMI_PREAMBLE_CYCLE = 0x09;
+ 399   2          }
+ 400   1      }
+ 401          
+ 402          /**************************************************************************//**
+ 403           * Function to enable/disable auto HDMI video configuration by scaler.
+ 404           * @param enable TRUE/FALSE to enable/disable AVC.
+ 405           ******************************************************************************/
+ 406          void HDMIEnableAVC(UCHAR enable)
+ 407          {
+ 408   1          if (enable) {
+ 409   2              SC_HDMI_AUTO_CTRL |= BIT2;
+ 410   2          }
+ 411   1          else {
+ 412   2              SC_HDMI_AUTO_CTRL &= ~BIT2;
+ 413   2          }
+ 414   1      }
+ 415          
+ 416          /**************************************************************************//**
+ 417           * Soft reset HDMI-related circuits.
+ 418           ******************************************************************************/
+ 419          void HDMISoftReset(void)
+ 420          {
+ 421   1          // After this soft reset, please make sure there is delay timing befure turn on system interrupt
+ 422   1          SC_HDMI_SOFTWARE_RESET |= BIT0;
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 8   
+
+ 423   1          SC_HDMI_SOFTWARE_RESET &= ~BIT0;
+ 424   1      }
+ 425          
+ 426          /**************************************************************************//**
+ 427           * Set HDMI analog audio gain.
+ 428           * @param value The range is from 0x00 to 0xC6.
+ 429           ******************************************************************************/
+ 430          static void ConfigHDMIAnalogAudioGain(UCHAR value)
+ 431          {
+ 432   1          SC_AUDIO_VOLUME_R = value;
+ 433   1          SC_AUDIO_VOLUME_L = value;
+ 434   1      }
+ 435          
+ 436          /**************************************************************************//**
+ 437           * Set HDMI digital audio gain
+ 438           * @param value The range is from 0x0000 to 0xFFFF.
+ 439           ******************************************************************************/
+ 440          static void ConfigHDMIDigitalAudioGain(USHRT value)
+ 441          {
+ 442   1          WriteShortScaler(&SC_DIG_AUDIO_GAIN_L_LO, value);        
+ 443   1          WriteShortScaler(&SC_DIG_AUDIO_GAIN_R_LO, value);       
+ 444   1      }
+ 445          
+ 446          /**************************************************************************//**
+ 447           * Control the volume of scaler audio output.
+ 448           * @param value The range is from 0 to HDMI_AUDIO_VOL_INF_RANGE.
+ 449           ******************************************************************************/
+ 450          void ConfigScalerAudio(USHRT value)
+ 451          {
+ 452   1      #ifndef HDMI_AUDIO_VOLUME_RANGE
+              #define HDMI_AUDIO_VOLUME_RANGE    1023
+              #endif
+ 455   1      
+ 456   1      #define VOL_STEP 8
+ 457   1      
+ 458   1          if (value > HDMI_AUDIO_VOLUME_RANGE) 
+ 459   1              {
+ 460   2                      ConfigHDMIAnalogAudioGain(DEF_HDMI_ANA_VOL);
+ 461   2                      ConfigHDMIDigitalAudioGain(DEF_HDMI_DIG_VOL);
+ 462   2                      return;
+ 463   2              }
+ 464   1      
+ 465   1          if ((SC_AUDIO_SELECT & 0x20) != 0)   //PCM
+ 466   1              { 
+ 467   2              USHRT startvol, endvol, vol;
+ 468   2              startvol = ReadShortScaler(&SC_DIG_AUDIO_GAIN_L_LO);
+ 469   2              endvol = (ULONG)value * 0xFFFE / HDMI_AUDIO_VOLUME_RANGE + 1;
+ 470   2              ConfigHDMIAnalogAudioGain(DEF_HDMI_ANA_VOL);
+ 471   2              if (endvol > 0x6000) 
+ 472   2                      {
+ 473   3                              SC_AUDIO_DELTA_SIGMA_CTRL &= ~BIT4;
+ 474   3                      }
+ 475   2              else 
+ 476   2                      {
+ 477   3                              SC_AUDIO_DELTA_SIGMA_CTRL |= BIT4;
+ 478   3                      }
+ 479   2              if (startvol > endvol) 
+ 480   2                   {
+ 481   3                      for (vol=startvol; vol>endvol; vol-=VOL_STEP) 
+ 482   3                              {
+ 483   4                                      ResetWDTimer();
+ 484   4                                      ConfigHDMIDigitalAudioGain(vol);
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 9   
+
+ 485   4                       if ((vol - endvol) < VOL_STEP) 
+ 486   4                                      {
+ 487   5                                              break;
+ 488   5                                      }
+ 489   4                              }
+ 490   3                       }
+ 491   2              else 
+ 492   2                      {
+ 493   3                      for (vol=startvol; vol<endvol; vol+=VOL_STEP) 
+ 494   3                              {
+ 495   4                                      ResetWDTimer();
+ 496   4                                       ConfigHDMIDigitalAudioGain(vol);
+ 497   4                                 if ((endvol - vol) < VOL_STEP)
+ 498   4                                      {
+ 499   5                                      break;
+ 500   5                              }
+ 501   4                      }
+ 502   3                    }
+ 503   2                      ConfigHDMIDigitalAudioGain(endvol);
+ 504   2          }
+ 505   1          else 
+ 506   1              {
+ 507   2                      value = HDMI_AUDIO_VOLUME_RANGE - value;
+ 508   2                      value = (ULONG)value * 0xC6 / HDMI_AUDIO_VOLUME_RANGE;
+ 509   2               ConfigHDMIAnalogAudioGain(value);
+ 510   2               }
+ 511   1      
+ 512   1      #undef VOL_STEP
+ 513   1      }
+ 514          
+ 515          /**************************************************************************//**
+ 516           * Turn off scaler analog audio power.
+ 517           ******************************************************************************/
+ 518          void ScalerAudioPowerOff(void)
+ 519          {
+ 520   1          SC_AUDIO_OUT_CTRL &= ~BIT0;
+ 521   1      }
+ 522          
+ 523          /**************************************************************************//**
+ 524           * Turn on scaler analog audio power.
+ 525           ******************************************************************************/
+ 526          void ScalerAudioPowerOn(void)
+ 527          {
+ 528   1          SC_AUDIO_OUT_CTRL = AUDIO_OUT_CTRL;
+ 529   1      }
+ 530          
+ 531          /**************************************************************************//**
+ 532           * Select audio in/output channel.
+ 533           * @param ch Input/output audio channel.
+ 534           ******************************************************************************/
+ 535          void ScalerAudioSelect(AudioInOutChannel ch)
+ 536          {
+ 537   1          // Select audio input channel
+ 538   1          switch(ch & AUDIO_IN_CH_MASK) {
+ 539   2              case AUDIO_IN_LINE1:
+ 540   2              #if ENABLE_HDMI_AUDIO_AUTO_MUTE == ON
+                          SC_AUDIO_AUTO_CTRL1 = 0x00;
+                      #endif
+ 543   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xCF);
+ 544   2                  break;
+ 545   2              case AUDIO_IN_LINE2:
+ 546   2              #if ENABLE_HDMI_AUDIO_AUTO_MUTE == ON
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 10  
+
+                          SC_AUDIO_AUTO_CTRL1 = 0x00;
+                      #endif
+ 549   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xCF) | BIT4;
+ 550   2                  break;
+ 551   2              case AUDIO_IN_DSD:
+ 552   2              #if ENABLE_HDMI_AUDIO_AUTO_MUTE == ON
+                          SC_AUDIO_AUTO_CTRL1 = 0x03;
+                      #endif
+ 555   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xCF) | BIT5 | BIT4;
+ 556   2                  break;
+ 557   2              default : // AUDIO_IN_HDMI
+ 558   2              #if ENABLE_HDMI_AUDIO_AUTO_MUTE == ON
+                          SC_AUDIO_AUTO_CTRL1 = 0x03;
+                      #endif
+ 561   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xCF) | BIT5;
+ 562   2                  break;
+ 563   2          }
+ 564   1      
+ 565   1          // Select audio output channel
+ 566   1          switch(ch & AUDIO_OUT_CH_MASK) {
+ 567   2              case AUDIO_OUT_DISABLE:
+ 568   2                  SC_AUDIO_SELECT = SC_AUDIO_SELECT | BIT3 | BIT2;
+ 569   2                  break;
+ 570   2              case AUDIO_OUT_IIS:
+ 571   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xF3) | BIT2;
+ 572   2                  break;
+ 573   2              case AUDIO_OUT_DSD:
+ 574   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xF3) | BIT3;
+ 575   2                  break;
+ 576   2              default : // AUDIO_OUT_LINEOUT
+ 577   2                  SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xF3);
+ 578   2                  break;
+ 579   2          }
+ 580   1      }
+ 581          
+ 582          /**************************************************************************//**
+ 583           * Turn on internal audio pattern with specific frequency.
+ 584           * @param freq Audio frequency.
+ 585           ******************************************************************************/
+ 586          #if ENABLE_INTERNAL_AUDIO_BUZZER == ON
+              void EnableVCSAudioBuzzer(USHRT freq)
+              {
+                  ULONG ratio;
+                  ULONG cts_value, n_value;
+              
+                  if ((SC_AUDIO_DELTA_SIGMA_CTRL & BIT0) != 0) {
+                      // Internal audio pattern has been turned on.
+                      return;
+                  }
+              
+                  if (((GetCurrInputInterface() == DIGITAL_INPUT0)
+                          || (GetCurrInputInterface() == DIGITAL_INPUT1)) && IsHDMI()) {
+                      n_value = (float) freq * 4096 / 1000;
+                      Write3ByteScaler(&SC_ACR_N_VALUE_LO, n_value); //Write 0x703~0x705
+                      cts_value = ReadShortScaler(&SC_VIDEO_HTOTAL_LO) & 0x1FFF;
+                      cts_value = cts_value * usHSyncFreq / 10; // cts_value = Input clock /1000
+                      Write3ByteScaler(&SC_ACR_CTS_VALUE_LO, cts_value); //Write 0x709~0x70B
+                      ucReg0x8700 = SC_ACR_CTRL;
+                      SC_ACR_CTRL = 0x18; // User software N, CTS value
+                  }
+                  else {
+                      ratio = (float) freq * 16384 * 131072 / REF_CLK;
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 11  
+
+                      Write3ByteScaler(&SC_VCLK_RATIO_LO, ratio);
+                      SC_HPLL_FREQ_CTRL &= ~BIT4;
+                  }
+                  ucReg0x8605 = SC_HDMI_SOFTWARE_RESET;
+                  ucReg0x871A = SC_AUDIO_SELECT;
+                  ucReg0x871D = SC_AUDIO_DELTA_SIGMA_CTRL;
+                  SC_HDMI_SOFTWARE_RESET = 0x00;
+                  SC_AUDIO_SELECT = 0x20;
+                  SC_AUDIO_DELTA_SIGMA_CTRL = 0x15;
+              }
+              
+              /**************************************************************************//**
+               * Turn off internal audio pattern.
+               ******************************************************************************/
+              void DisableVCSAudioBuzzer(void)
+              {
+                  if (((GetCurrInputInterface() == DIGITAL_INPUT0)
+                          || (GetCurrInputInterface() == DIGITAL_INPUT1)) && IsHDMI()) {
+                      SC_ACR_CTRL = ucReg0x8700; // Recover to hardware N, CTS value
+                  }
+                  else {
+                      SC_HPLL_FREQ_CTRL |= BIT4;
+                  }
+                  SC_HDMI_SOFTWARE_RESET = ucReg0x8605;
+                  SC_AUDIO_SELECT = ucReg0x871A;
+                  SC_AUDIO_DELTA_SIGMA_CTRL = ucReg0x871D;
+              }
+              #endif
+ 637          
+ 638          /**************************************************************************//**
+ 639           * Check the current input is HDMI or not.
+ 640           * @return TRUE if input is HDMI else FALSE.
+ 641           ******************************************************************************/
+ 642          BOOL IsHDMI(void)
+ 643          {
+ 644   1          if ((SC_HDMI_DET & BIT1) != 0) {
+ 645   2              return TRUE;
+ 646   2          }
+ 647   1          else {
+ 648   2              return FALSE;
+ 649   2          }
+ 650   1      }
+ 651          
+ 652          /**************************************************************************//**
+ 653           * Check the current input is HDMI video timing or not.
+ 654           * @return TRUE if input is HDMI video timing else FALSE.
+ 655           ******************************************************************************/
+ 656          BOOL IsHDMIVideo(void)
+ 657          {
+ 658   1          if (((SC_HDMI_DET & BIT1) != 0) && (SC_HDMI_AVI_TYPE == 0x82) && ((SC_HDMI_AVI[0] & 0x60) != 0)) {//HD
+             -MI & YUV color
+ 659   2              return TRUE;
+ 660   2          }
+ 661   1          else {
+ 662   2              return FALSE;
+ 663   2          }
+ 664   1      }
+ 665          
+ 666          #if ENABLE_HDMI_AUDIO_CK_RCVY == ON 
+              /**************************************************************************//**
+               * Function of recovering HDMI audio clock.
+               ******************************************************************************/
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 12  
+
+              static void HDMIAudioACRCorrection(void)
+              {   
+                  static code ACRItm ulNCTSSVALTable[NUM_AUDIOFSTYPE][NUM_HDMICLKTYPE] = 
+                  {
+                          {// Audio FS = 44.1KHz
+                          {6272,        28000}, // HDMI_25MHz
+                          {7007,        31250}, // HDMI_25MHz_101
+                          {6272,        30030}, // HDMI_27MHz
+                          {6272,        30000}, // HDMI_27MHz_101
+                          {6272,        60060}, // HDMI_54MHz
+                          {6272,        60000}, // HDMI_54MHz_101
+                          {0x001880, 0x014244}, // HDMI_74MHz
+                          {0x0045AC, 0x039387}, // HDMI_74MHz_101
+                          {6272,       165000}, // HDMI_148MHz
+                          {8918,       234375}, // HDMI_148MHz_101
+                          {4704,       247500}, // HDMI_297MHz
+                          {4459,       234375}, // HDMI_297MHz_101
+                      },
+                      {// Audio FS = Not indicated
+                          {6272,        28000}, // HDMI_25MHz
+                          {7007,        31250}, // HDMI_25MHz_101
+                          {6272,        30030}, // HDMI_27MHz
+                          {6272,        30000}, // HDMI_27MHz_101
+                          {6272,        60060}, // HDMI_54MHz
+                          {6272,        60000}, // HDMI_54MHz_101
+                          {0x001880, 0x014244}, // HDMI_74MHz
+                          {0x0045AC, 0x039387}, // HDMI_74MHz_101
+                          {6272,       165000}, // HDMI_148MHz
+                          {8918,       234375}, // HDMI_148MHz_101
+                          {4704,       247500}, // HDMI_297MHz
+                          {4459,       234375}, // HDMI_297MHz_101
+                      },
+                      {// Audio FS = 48KHz
+                          {6144,        25200}, // HDMI_25MHz
+                          {6864,        28125}, // HDMI_25MHz_101
+                          {6144,        27027}, // HDMI_27MHz
+                          {6144,        27000}, // HDMI_27MHz_101
+                          {6144,        54054}, // HDMI_54MHz
+                          {6144,        54000}, // HDMI_54MHz_101
+                          {6144,        74250}, // HDMI_74MHz
+                          {11648,      140625}, // HDMI_74MHz_101
+                          {6144,       148500}, // HDMI_148MHz
+                          {5824,       140625}, // HDMI_148MHz_101
+                          {5120,       247500}, // HDMI_297MHz
+                          {5824,       281250}, // HDMI_297MHz_101
+                      },
+                  };
+                  UCHAR fs, ch, type = 0xFF;
+                  USHRT pixelclock;
+                  ULONG n_hval, cts_hval;
+              
+                  SC_VPLL_CTRL |= BIT2; // Audio FIFO Auto Balance
+                  
+                  ch = SC_HDMI_INT_STATE1[4];
+                  fs = SC_AUDIO_IN_SPDIF_STATE4 & 0x0F;
+                  pixelclock = TMDS_GetClock();//DVI pixel clock
+                  n_hval = Read3ByteScaler(&SC_ACR_N_HVAL[0]) & 0x0FFFFF;
+                  cts_hval = Read3ByteScaler(&SC_ACR_CTS_HVAL[0]) & 0x0FFFFF;
+                  if (pixelclock <= 0x0019) {//25MHz
+                      type = 0;
+                  }
+                  else if (pixelclock < 0x0028) {//40MHz
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 13  
+
+                      type = 1;
+                  }
+                  else if (pixelclock < 0x0040) {//64MHz
+                      type = 2;
+                  }
+                  else if (pixelclock < 0x006F) {//111MHz
+                      type = 3;
+                  }
+                  else if (pixelclock < 0x00DE) {//222MHz
+                      type = 4;
+                  }
+                  else if (pixelclock < 0x0130) {//304MHz
+                      type = 5;
+                  }
+              //pixelclock > 304MHz, audio != 44k, 48k. software reset and return
+                  if ((type == 0xFF) || (fs >= NUM_AUDIOFSTYPE) || (fs == AUDIOFS_NOTINDICATED)) {
+                      if (SC_ACR_CTRL != 0x00) {
+                          SC_ACR_CTRL = 0x00;
+                          Sleep(60);
+                          SC_HDMI_SOFTWARE_RESET |= BIT1;
+                          SC_HDMI_SOFTWARE_RESET &= ~BIT1;
+                          Sleep(5);
+                          SC_HDMI_INT_STATE1[4] = ch;
+                      }
+                      return;
+                  }
+              //pixelclock < 304MHz, audio == 44k, 48k
+                  type *= 2;
+                  if (((labs(n_hval - ulNCTSSVALTable[fs][type].ulNSVAL) > 100) && (labs(n_hval - ulNCTSSVALTable[fs][ty
+             -pe+1].ulNSVAL) > 100)) 
+                  || ((labs(cts_hval - ulNCTSSVALTable[fs][type].ulCTSSVAL) > 1000) && (labs(cts_hval - ulNCTSSVALTable[
+             -fs][type+1].ulCTSSVAL) > 1000))) {
+                      if ((SC_ACR_CTRL & 0x18) == 0x00) { //hardware-determined: auto
+                          // N-CTS Value Type 1
+                          Write3ByteScaler(&SC_ACR_N_VALUE_LO, ulNCTSSVALTable[fs][type].ulNSVAL);
+                          Write3ByteScaler(&SC_ACR_CTS_VALUE_LO, ulNCTSSVALTable[fs][type].ulCTSSVAL);
+                          SC_ACR_CTRL = 0x19; //software-determined: manual
+                          Sleep(60);
+                          SC_HDMI_SOFTWARE_RESET |= BIT1;
+                          SC_HDMI_SOFTWARE_RESET &= ~BIT1;
+                          Sleep(5);
+              
+                          SC_HDMI_INT_STATE1[4] = ch;
+                          
+                          ch = SC_HDMI_INT_STATE1[4];
+                          if ((ch & BIT1) != 0) { // N-CTS Format Type 2. FIFO over run
+                              Write3ByteScaler(&SC_ACR_N_VALUE_LO, ulNCTSSVALTable[fs][type+1].ulNSVAL);
+                              Write3ByteScaler(&SC_ACR_CTS_VALUE_LO, ulNCTSSVALTable[fs][type+1].ulCTSSVAL);
+                              SC_ACR_CTRL = 0x19; //software-determined: manual
+                              Sleep(60);
+                              SC_HDMI_SOFTWARE_RESET |= BIT1;
+                              SC_HDMI_SOFTWARE_RESET &= ~BIT1;
+                              Sleep(5);
+              
+                              SC_HDMI_INT_STATE1[4] = ch;
+                          }
+                      }
+                  }
+                  else {
+                      if (SC_ACR_CTRL != 0x00) { //no error change to hardware-determined
+                          SC_ACR_CTRL = 0x00;
+                          Sleep(60);
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 14  
+
+                          SC_HDMI_SOFTWARE_RESET |= BIT1;
+                          SC_HDMI_SOFTWARE_RESET &= ~BIT1;
+                          Sleep(5);
+              
+                          SC_HDMI_INT_STATE1[4] = ch;
+                      }
+                  }
+              }
+              #endif
+ 801          
+ 802          /**************************************************************************//**
+ 803           * Function to validate the audio clock.
+ 804           * If the CTS/N of current HDMI input does not match with audio sampling rate in
+ 805           * the info-frame, the system audio will be muted.
+ 806           ******************************************************************************/
+ 807          #if ENABLE_HDMI_FS_MUTE == ON 
+              void HDMIAPI_MuteUnmatchedFs(void)
+              {
+                  code USHRT FsTable[][2] = {
+                      {0x0000,   441},
+                      {0x0008,   882},
+                      {0x000C,  1764},
+                      {0x0002,   480},
+                      {0x000A,   960},
+                      {0x000E,  1920},
+                      {0x0003,   320}
+                  };
+              
+                  UCHAR i;
+                  ULONG tmp_cts, tmp_n;
+                  USHRT clk, fs;
+              
+                  for (i = 0; i < sizeof(FsTable)/sizeof(USHRT)/2 ; i++) {
+                      if (FsTable[i][0] == (SC_AUDIO_HW_EXT_FS & 0x0F)) {
+                          break;
+                      }
+                  }
+              
+                  if (i >= sizeof(FsTable)/sizeof(USHRT)/2) {
+                      return;
+                  }
+              
+                  tmp_n = Read3ByteScaler(&SC_ACR_N_HVAL[0]) & 0x0FFFFF;
+                  tmp_cts = Read3ByteScaler(&SC_ACR_CTS_HVAL[0]) & 0x0FFFFF;
+                  if ((tmp_n == 0) || (tmp_cts == 0)) {
+                      return;
+                  }
+                  clk = TMDS_GetClock();
+                  fs = (USHRT)((float)clk * 10000 * tmp_n / tmp_cts / 128);
+              
+                  // We define the tolerance of fs and CTS/N less then 10KHz
+                  // If the tolerance is larger than 10K, we mute the audio.
+                  // Jude 2011/08/27
+                  if (abs(fs - FsTable[i][1]) > 100) {
+                  #if ENABLE_INTERNAL_AUDIO_BUZZER == ON
+                      SC_AUDIO_SELECT |= 0x0C;
+                  #else
+                      SC_AUDIO_DELTA_SIGMA_CTRL = 0x01;
+                  #endif
+                      SetGlobalTimer(GLOBAL_TMR_HDMI_FS_MUTE, 500);
+                  }
+                  else if (GetGlobalTimer(GLOBAL_TMR_HDMI_FS_MUTE) == 0) {
+C51 COMPILER V8.02   SCALER_HDMI                                                           08/07/2015 16:22:25 PAGE 15  
+
+                  #if ENABLE_INTERNAL_AUDIO_BUZZER == ON
+                      SC_AUDIO_SELECT = (SC_AUDIO_SELECT & 0xF3) | AUDIO_PINOUT_SEL;;
+                  #else
+                      SC_AUDIO_DELTA_SIGMA_CTRL = 0x00;
+                  #endif
+                  }
+              }
+              #endif
+ 862          
+ 863          #endif //ENABLE_HDMI == ON
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1072    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6      11
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

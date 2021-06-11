@@ -1,0 +1,189 @@
+C51 COMPILER V8.02   MCUHWIIC                                                              08/07/2015 16:22:22 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MCUHWIIC
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\McuHwIIC.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\McuHwIIC.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\
+                    -User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\N
+                    -VT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\McuHwIIC.lst)
+                    - OBJECT(.\Bin\ADS\AXI\104N\McuHwIIC.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          
+  30          //******************************************************************************
+  31          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          
+  34          //******************************************************************************
+  35          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  36          //******************************************************************************
+  37          
+  38          //******************************************************************************
+  39          // F U N C T I O N   B O D Y S
+  40          //******************************************************************************
+  41          
+  42          /**************************************************************************//**
+  43           * Enable MCU IIC.
+  44           * @param mask Each bit indicates one IIC channel, Bit 0: IIC0, Bit 1: IIC1, ..., Bit 3: IIC3.
+  45           ******************************************************************************/
+  46          void McuEnableIIC(UCHAR mask)
+  47          {
+  48   1      
+  49   1          if ((mask & BIT0) && (MCU_UART_OUTPUT != 1)) {
+  50   2              IIC0_ADDR |= BIT0;
+  51   2              IIC0_INT_CLR = 0xFF;
+  52   2              IIC0_INT_EN = 0xF8;
+C51 COMPILER V8.02   MCUHWIIC                                                              08/07/2015 16:22:22 PAGE 2   
+
+  53   2          }
+  54   1          if ((mask & BIT1) && (MCU_UART_OUTPUT != 2)) {
+  55   2              IIC1_ADDR |= BIT0;
+  56   2              IIC1_INT_CLR = 0xFF;
+  57   2              IIC1_INT_EN = 0xF8;
+  58   2          }
+  59   1          if ((mask & BIT2) && (MCU_UART_OUTPUT != 3)) {
+  60   2              IIC2_ADDR |= BIT0;
+  61   2              IIC2_INT_CLR = 0xFF;
+  62   2              IIC2_INT_EN = 0xF8;
+  63   2          }
+  64   1          if ((mask & BIT3) && (MCU_UART_OUTPUT != 4)) {
+  65   2              IIC3_ADDR |= BIT0;
+  66   2              IIC3_INT_CLR = 0xFF;
+  67   2              IIC3_INT_EN = 0xF8;
+  68   2          }
+  69   1      }
+  70          
+  71          /**************************************************************************//**
+  72           * Disable MCU IIC.
+  73           * @param mask Each bit indicates one IIC channel, Bit 0: IIC0, Bit 1: IIC1, ..., Bit 3: IIC3.
+  74           ******************************************************************************/
+  75          void McuDisableIIC(UCHAR mask)
+  76          {
+  77   1          if (mask & BIT0) {
+  78   2              IIC0_ADDR &= ~BIT0;
+  79   2          }
+  80   1          if (mask & BIT1) {
+  81   2              IIC1_ADDR &= ~BIT0;
+  82   2          }
+  83   1          if (mask & BIT2) {
+  84   2              IIC2_ADDR &= ~BIT0;
+  85   2          }
+  86   1          if (mask & BIT3) {
+  87   2              IIC3_ADDR &= ~BIT0;
+  88   2          }
+  89   1      }
+  90          
+  91          /**************************************************************************//**
+  92           * Set the address of IIC channel.
+  93           * @param channel IIC channel.
+  94           * @param address IIC slave address.
+  95           ******************************************************************************/
+  96          void McuSetIIC(UCHAR channel, UCHAR address)
+  97          {
+  98   1          address &= ~BIT0;
+  99   1      
+ 100   1          switch (channel) {
+ 101   2              case MCU_IIC_0:
+ 102   2                  IIC0_ADDR = (IIC0_ADDR&BIT0) | address;
+ 103   2                  break;
+ 104   2      
+ 105   2              case MCU_IIC_1:
+ 106   2                  IIC1_ADDR = (IIC1_ADDR&BIT0) | address;
+ 107   2                  break;
+ 108   2      
+ 109   2              case MCU_IIC_2:
+ 110   2                  IIC2_ADDR = (IIC2_ADDR&BIT0) | address;
+ 111   2                  break;
+ 112   2      
+ 113   2              case MCU_IIC_3:
+ 114   2                  IIC3_ADDR = (IIC3_ADDR&BIT0) | address;
+C51 COMPILER V8.02   MCUHWIIC                                                              08/07/2015 16:22:22 PAGE 3   
+
+ 115   2                  break;
+ 116   2          }
+ 117   1      }
+ 118          
+ 119          /**************************************************************************//**
+ 120           * Enable "send ACK" of IIC.
+ 121           * XXX This function has special history.
+ 122           * @param mask Each bit indicates one IIC channel, Bit 0: IIC0, Bit 1: IIC1, ..., Bit 3: IIC3.
+ 123           ******************************************************************************/
+ 124          void McuIICPreSendACK(UCHAR mask)
+ 125          {
+ 126   1          if ((mask & BIT0) && (MCU_UART_OUTPUT != 1)) {
+ 127   2              IIC0_CFG |= SEND_ACK;
+ 128   2          }
+ 129   1          if ((mask & BIT1) && (MCU_UART_OUTPUT != 2)) {
+ 130   2              IIC1_CFG |= SEND_ACK;
+ 131   2          }
+ 132   1          if ((mask & BIT2) && (MCU_UART_OUTPUT != 3)) {
+ 133   2              IIC2_CFG |= SEND_ACK;
+ 134   2          }
+ 135   1          if ((mask & BIT3) && (MCU_UART_OUTPUT != 4)) {
+ 136   2              IIC3_CFG |= SEND_ACK;
+ 137   2          }
+ 138   1      }
+ 139          
+ 140          /**************************************************************************//**
+ 141           * Release SCL by clearing NACK.
+ 142           * XXX This function has special history.
+ 143           * @param mask Each bit indicates one IIC channel, Bit 0: IIC0, Bit 1: IIC1, ..., Bit 3: IIC3.
+ 144           ******************************************************************************/
+ 145          void McuIICReleaseSCL(UCHAR mask)
+ 146          {
+ 147   1          if ((mask & BIT0) && (MCU_UART_OUTPUT != 1)) {
+ 148   2              IIC0_INT_CLR = INTNAK;
+ 149   2          }
+ 150   1          if ((mask & BIT1) && (MCU_UART_OUTPUT != 2)) {
+ 151   2              IIC1_INT_CLR = INTNAK;
+ 152   2          }
+ 153   1          if ((mask & BIT2) && (MCU_UART_OUTPUT != 3)) {
+ 154   2              IIC2_INT_CLR = INTNAK;
+ 155   2          }
+ 156   1          if ((mask & BIT3) && (MCU_UART_OUTPUT != 4)) {
+ 157   2              IIC3_INT_CLR = INTNAK;
+ 158   2          }
+ 159   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    273    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

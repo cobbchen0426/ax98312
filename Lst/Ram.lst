@@ -1,0 +1,107 @@
+C51 COMPILER V8.02   RAM                                                                   08/07/2015 16:22:23 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE RAM
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Ram.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\Ram.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\User;
+                    -.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Ke
+                    -ypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\Ram.lst) OBJECT(.\
+                    -Bin\ADS\AXI\104N\Ram.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          xdata InputTimingFormat InputTiming;    /*!< Variable of input timing information. */
+  22          xdata NvramUserData UserData;                   /*!< Variable of user data. */
+  23          xdata NvramCalibData CalibData;                 /*!< Variable of calibration data. */
+  24          xdata NvramSystemData SystemData;               /*!< Variable of system data. */
+  25          xdata PanelData UserPanelData;                  /*!< Variable of panel timing information. */
+  26          xdata UCHAR ucADCPhase100;                              /*!< Variable of ADC phase normalized to 100. */
+  27          xdata UCHAR ucVstart100;                                /*!< Variable of Vstart normalized to 100. */
+  28          //===========================
+  29          xdata unsigned char   OSD_state;                    //140304mike 
+  30          xdata unsigned char   OSD_color_level;          //140429 mike 
+  31          xdata unsigned char   OSD_color_RGB;            //140509 mike 
+  32          xdata unsigned char   Factory_key;                //140304 mike 
+  33          xdata unsigned short  Factory_key_time;       //140304 mike 
+  34          //===========================
+  35          //RS232
+  36          //gg xdata unsigned char        ucUARTRxIn;              //140701 mike 
+  37          
+  38          xdata tCUSTOM_SYS Custom_System;
+  39          #if ENABLE_HDCP_TRIM_MODE == ON
+              xdata UCHAR ucEFUSE_ID;
+              xdata UCHAR ucEFUSETrimSucess;
+              
+              
+              //--------------------------------------------------------------------------------------------------------
+             --------------------------
+              
+              
+              #endif
+  48          
+  49          //******************************************************************************
+  50          // S T A T I C   V A R I A B L E S
+  51          //******************************************************************************
+C51 COMPILER V8.02   RAM                                                                   08/07/2015 16:22:23 PAGE 2   
+
+  52          
+  53          //******************************************************************************
+  54          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  55          //******************************************************************************
+  56          
+  57          //******************************************************************************
+  58          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  59          //******************************************************************************
+  60          
+  61          //******************************************************************************
+  62          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  63          //******************************************************************************
+  64          
+  65          //******************************************************************************
+  66          // F U N C T I O N   B O D Y S
+  67          //******************************************************************************
+  68          
+  69          /**************************************************************************//**
+  70           * Initialize all global variables.
+  71           ******************************************************************************/
+  72          void RamInitialize(void)
+  73          {
+  74   1          UserData = UserDataDefault;
+  75   1          CalibData = CalibDataDefault;
+  76   1          SystemData = SystemDataDefault;
+  77   1          UserPanelData = PanelDataDefault;
+  78   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     73    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    192    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,843 @@
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE SYNCHANDLER
+OBJECT MODULE PLACED IN .\Bin\SyncHandler.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\SyncHandler.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\A
+                    -pp\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\S
+                    -I\NVT\Keypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD) DEFINE(SCALER_TYPE=NT68857,NT68857_MODULE,NVT
+                    -_1920X1080,FLASH_BANK=4) PRINT(.\Lst\SyncHandler.lst) OBJECT(.\Bin\SyncHandler.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+*** WARNING C318 IN LINE 254 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\ModelConfig.h'
+*** WARNING C318 IN LINE 255 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\GlobalTimerDef.h'
+*** WARNING C318 IN LINE 256 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\NonSupportTimingList.h'
+*** WARNING C318 IN LINE 257 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\OSDConfig.h'
+*** WARNING C318 IN LINE 258 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\SRConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 15 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 26 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 40 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 54 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 61 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 68 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 75 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 82 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 89 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 96 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 110 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 2   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 117 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 124 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 131 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 140 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 147 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 154 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 161 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 175 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 187 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 194 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 201 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 208 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 215 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 222 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 229 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 236 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 243 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 250 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 259 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 266 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 273 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 280 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 287 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 294 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 301 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 308 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 315 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 322 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 329 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 336 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 3   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 343 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 350 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 360 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 367 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 374 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 381 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 388 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 395 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 402 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 409 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 419 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 426 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 438 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 442 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 452 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 460 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 17 OF .\PHY\SI\NVT\BOARD\BOARD.H: unknown identifier
+*** WARNING C318 IN LINE 18 OF .\PHY\SI\NVT\BOARD\BOARD.H: can't open file 'NT68168_DEMO_BOARD\BoardConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** ERROR C202 IN LINE 74 OF .\LIB\INT.H: 'UART_TX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 74 OF .\LIB\INT.H: invalid dimension size: [0]
+*** ERROR C202 IN LINE 75 OF .\LIB\INT.H: 'UART_RX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 75 OF .\LIB\INT.H: invalid dimension size: [0]
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 16 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: unknown identifier
+*** WARNING C318 IN LINE 17 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: can't open file 'NT68168_DEMO_KEYPAD\KeyPadConfig.h'
+*** WARNING C322 IN LINE 42 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_POWER.H: unknown identifier
+*** WARNING C322 IN LINE 36 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_PWM.H: unknown identifier
+*** WARNING C322 IN LINE 227 OF SYS\NVRAM.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 505 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 97 OF .\APP\OSD\OSDINDEX.H: unknown identifier
+*** WARNING C322 IN LINE 66 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 148 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 4   
+
+*** WARNING C322 IN LINE 320 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 389 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 475 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** ERROR C320 IN LINE 170 OF .\PHY\PANEL\PANEL.H: "Please choose one panel at least!"
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** ERROR C320 IN LINE 173 OF .\PHY\PANEL\PANEL.H: "Wrong PanelVTotal setting! Please review it!"
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF SYS\SYSAPI.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 111 OF .\APP\INCLUDE.H: unknown identifier
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          #define SYNC_CHANGE_CNT     10
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          xdata UCHAR ucInputSyncMode = SEP_SYNC;
+  23          
+  24          code UCHAR SyncSrcTbl[] = {
+  25          #if (INPUT_INTERFACE&INPUT_VGA1)
+*** WARNING C322 IN LINE 25 OF Sys\SyncHandler.c: unknown identifier
+                  ANALOG_SEP_INPUT1,
+                  ANALOG_COM_INPUT1,
+                  ANALOG_SOG_INPUT1,
+              #endif
+  30          #if (INPUT_INTERFACE&INPUT_VGA0)
+*** WARNING C322 IN LINE 30 OF Sys\SyncHandler.c: unknown identifier
+                  ANALOG_SEP_INPUT0,
+                  ANALOG_COM_INPUT0,
+                  ANALOG_SOG_INPUT0,
+              #endif
+  35          #if (INPUT_INTERFACE&INPUT_DIG1)
+*** WARNING C322 IN LINE 35 OF Sys\SyncHandler.c: unknown identifier
+                  DIGITAL_INPUT1,
+              #endif
+  38          #if (INPUT_INTERFACE&INPUT_DIG0)
+*** WARNING C322 IN LINE 38 OF Sys\SyncHandler.c: unknown identifier
+                  DIGITAL_INPUT0,
+              #endif
+  41          #if (INPUT_INTERFACE&INPUT_YPbPr1)
+*** WARNING C322 IN LINE 41 OF Sys\SyncHandler.c: unknown identifier
+                  ANALOG_YPBPR_INPUT1,
+              #endif
+  44          #if (INPUT_INTERFACE&INPUT_YPbPr0)
+*** WARNING C322 IN LINE 44 OF Sys\SyncHandler.c: unknown identifier
+                  ANALOG_YPBPR_INPUT0,
+              #endif
+  47          #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 47 OF Sys\SyncHandler.c: unknown identifier
+                  DISPLAY_PORT_INPUT,
+              #endif
+  50          };
+*** ERROR C141 IN LINE 50 OF SYS\SYNCHANDLER.C: syntax error near '}'
+  51          
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 5   
+
+  52          //******************************************************************************
+  53          // S T A T I C   V A R I A B L E S
+  54          //******************************************************************************
+  55          static xdata UCHAR ucSyncHdlrState = SEP_SYNC; //Sync handler state
+  56          static xdata UCHAR ucSyncSrcIdx = 0; //Sync source table index
+  57          static xdata UCHAR ucSyncChangeCnt = SYNC_CHANGE_CNT; //Mode change delay
+  58          static xdata USHRT usPortTimer_1ms = 0; //Port delay when changing input port
+  59          static BOOL bManualSyncSource = FALSE; //Make SyncSource searching input sync automatically or manually
+  60          static xdata USHRT usTimerTickTemp = 0;
+  61          static xdata USHRT usTMDSClock = 0;
+  62          static xdata USHRT usTMDSHrtlDE = 0;
+  63          static xdata USHRT usTMDSVrtlDE = 0;
+  64          #if ENABLE_HDMI == ON
+              static xdata USHRT usTMDSHtotal = 0;
+              static xdata USHRT usTMDSVtotal = 0;
+              #endif
+  68          static xdata UCHAR ucRecordSyncSrcIdx = 0xFF; //Sync source table index
+  69          
+  70          //******************************************************************************
+  71          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  72          //******************************************************************************
+  73          
+  74          //******************************************************************************
+  75          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  76          //******************************************************************************
+  77          static UCHAR SyncSource(void);
+  78          static void SetModeChanged(void);
+  79          static UCHAR GetSameInput(void);
+  80          static UCHAR GetNextInput(void);
+  81          static void UpdateSyncSrcIdx(void);
+  82          static USHRT GetSyncSourceTimer(void);
+  83          
+  84          //******************************************************************************
+  85          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  86          //******************************************************************************
+  87          
+  88          //******************************************************************************
+  89          // F U N C T I O N   B O D Y S
+  90          //******************************************************************************
+  91          
+  92          //******************************************************************************
+  93          // Prototype: 
+  94          //  void SyncHandler(void)
+  95          // Parameters:
+  96          //  None
+  97          // Return:
+  98          //  None
+  99          // Purpose:
+ 100          //  Handle input sync
+ 101          // Notes:
+ 102          //  None
+ 103          //******************************************************************************
+ 104          void SyncHandler(void)
+ 105          {
+ 106   1          switch (ucSyncHdlrState) 
+ 107   1              {
+ 108   2              case NO_SYNC:
+ 109   2              case NO_CABLE:
+ 110   2              case UNKNOWN_SYNC:
+ 111   2              // printf("  131120 SyncHdlrState =   NO_SYNC:=  NO_CABLE:=   UNKNOWN_SYNC:===> %X\n",(unsigned short)ucS
+             -yncHdlrState);                 
+ 112   2                  ucSyncHdlrState = SyncSource();
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 6   
+
+ 113   2                              //printf("140319 ucSyncHdlrState = SyncSource();==> %X\n",(unsigned short)ucSyncHdlrState); 
+ 114   2      
+ 115   2                  ucInputSyncMode = ucSyncHdlrState;
+ 116   2                  usTMDSClock = TMDS_GetClock();
+ 117   2      
+ 118   2                  // The following "get DE" function must be after SyncSource!
+ 119   2                  // Because of some TMDS setting in SyncSource may affect HDE/VDE value and will cause infinite
+             -ly mode changed.
+ 120   2                      #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 120 OF Sys\SyncHandler.c: unknown identifier
+                                      if ( GetCurrInputInterface() == DISPLAY_PORT_INPUT ) 
+                                              {
+                                                      usTMDSHrtlDE = GetDPInputHDEImmediate();
+                                              usTMDSVrtlDE = GetDPInputVDEImmediate();
+                                                      //printf("SyncHdlrState =#if (INPUT_INTERFACE&INPUT_DP)===> %X\n",(unsigned short)ucSyncHdlrState);     
+             -                        
+                                      }
+                                      else
+                              #endif
+ 129   2                                      {
+ 130   3                                              #if ENABLE_HDMI == ON
+                                                      usTMDSHtotal = GetDigInputHTotalImmediate();
+                                                      usTMDSVtotal = GetDigInputVTotalImmediate();
+                                                      #endif
+ 134   3                                              usTMDSHrtlDE = GetDigInputHActiveImmediate();
+ 135   3                                              usTMDSVrtlDE = GetDigInputVActiveImmediate();
+ 136   3                                      }
+ 137   2                               break;
+ 138   2      
+ 139   2              case SEP_SYNC:
+ 140   2              case COM_SYNC:
+ 141   2              case SOG_SYNC:
+ 142   2              case DIG_SYNC:
+ 143   2      
+ 144   2                                      if (CheckModeChange() == TRUE) 
+ 145   2                                              {
+ 146   3                                               SetModeChanged();
+ 147   3                                      }
+ 148   2                                      break;
+ 149   2      
+ 150   2                      default:
+ 151   2                                      break;
+ 152   2              }
+ 153   1      }
+ 154          
+ 155          //******************************************************************************
+ 156          // Prototype: 
+ 157          //  static BOOL CheckModeChange(void)
+ 158          // Parameters:
+ 159          //  None
+ 160          // Return:
+ 161          //  None
+ 162          // Purpose:
+ 163          //  Check input timing was changed or not
+ 164          // Notes:
+ 165          //  None
+ 166          //******************************************************************************
+ 167          BOOL CheckModeChange(void)
+ 168          {
+ 169   1          if (ucSyncHdlrState == DIG_SYNC) 
+ 170   1              {
+ 171   2               if (IsForceToSleep() == TRUE) 
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 7   
+
+ 172   2                      {
+ 173   3                              ClearModeChangeFlag();
+ 174   3                              TMDS_EnableSCDT();
+ 175   3                              McuScalerIntEnable();
+ 176   3                  // Monitor the variation of TMDS clock under power saving mode
+ 177   3                       if (abs(TMDS_GetClock() - usTMDSClock) > 2) 
+ 178   3                               {
+ 179   4                                      return TRUE;
+ 180   4                               }
+ 181   3                      }
+ 182   2      #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 182 OF Sys\SyncHandler.c: unknown identifier
+                      else if ( GetCurrInputInterface() == DISPLAY_PORT_INPUT ) 
+                                      {
+                                       if (abs(GetDPInputHDEImmediate() - usTMDSHrtlDE) > 2) 
+                                               {
+                                                      return TRUE;
+                                               }
+                                       if (abs(GetDPInputVDEImmediate() - usTMDSVrtlDE) > 1) 
+                                              {
+                                                      return TRUE;
+                                              }
+                                      }
+                      #endif        
+ 195   2              else {
+ 196   3      
+ 197   3              // The HDMISoftReset is used to recover the abnormal states of HDMI circuit. When HDMI circuit
+ 198   3              // is under abnormal states, the H/V total are unstable. So, we monitor H/V total and reset HDMI
+ 199   3              // circuit when H/V total is unstable.
+ 200   3                  // Monitor the variation of TMDS DE under normal display
+ 201   3                  if (abs(GetDigInputHActiveImmediate() - usTMDSHrtlDE) > 2) 
+ 202   3                              {
+ 203   4                                      return TRUE;
+ 204   4                              }
+ 205   3                  if (abs(GetDigInputVActiveImmediate() - usTMDSVrtlDE) > 1) 
+ 206   3                                      {
+ 207   4                                              return TRUE;
+ 208   4                                      }
+ 209   3      
+ 210   3              #if ENABLE_HDMI == ON
+                          // Monitor the variation of TMDS DE under normal display
+                          #if ENABLE_SCALER_3D == ON
+                               if (SC3DAPI_IsActiveSpaceChanged()) 
+                                      {
+                                              return TRUE;
+                                      }
+                          #endif
+                          // The HTotal is unstable when input is deepcolor(e.x. For NT68360 the diff range is 0~10).
+                          // For fitting all scaler characteristic, we choose the value of HTotal tolerance as 16.
+                          if (abs(GetDigInputHTotalImmediate() - usTMDSHtotal) > 16) 
+                                      {
+                                       HDMISoftReset();
+                                              return TRUE;
+                                       }
+                          // The VTotal is unstable when input is interlace format.  we choose the value of VTotal
+                          // tolerance as 4.
+                          if (abs(GetDigInputVTotalImmediate() - usTMDSVtotal) > 4) 
+                                              {
+                                                      HDMISoftReset();
+                                                      return TRUE;
+                                              }
+                      #endif
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 8   
+
+ 233   3              }
+ 234   2          }
+ 235   1          if (CheckModeChangeFlag() == TRUE) {
+ 236   2              return TRUE;
+ 237   2          }
+ 238   1      
+ 239   1          return FALSE;
+ 240   1      }
+ 241          
+ 242          //******************************************************************************
+ 243          // Prototype: 
+ 244          //  static UCHAR SyncSource(void)
+ 245          // Parameters:
+ 246          //  None
+ 247          // Return:
+ 248          //  Sync status(NO_SYNC/NO_CABLE/SEP_SYNC/COM_SYNC/SOG_SYNC/DIG_SYNC)
+ 249          // Purpose:
+ 250          //  Check and search input sync in SyncSrcTbl
+ 251          // Notes:
+ 252          //  None
+ 253          //******************************************************************************
+ 254          static UCHAR SyncSource(void)
+ 255          {
+ 256   1          UCHAR sync, next_sync_idx;
+ 257   1      
+ 258   1          //CheckInputSync will return NO_SYNC/SEP_SYNC/COM_SYNC/SOG_SYNC/DIG_SYNC
+ 259   1          sync = CheckInputSync();
+ 260   1              //   printf("sync = CheckInputSync();140319=> %X\n",(unsigned short)sync); 
+ 261   1      
+ 262   1          if (sync == NO_SYNC) 
+ 263   1              {
+ 264   2               if (bIsCableConnect() == FALSE) 
+ 265   2                      {
+ 266   3                              sync = NO_CABLE;
+ 267   3                          // printf("140319  SyncSource==>sync = NO_CABLE;===>%x \n",(unsigned short)ucSyncChangeCnt);                        
+ 268   3                      }
+ 269   2                      if (ucSyncChangeCnt > 0) 
+ 270   2                              {
+ 271   3                                      ucSyncChangeCnt--;
+ 272   3                              }
+ 273   2              else 
+ 274   2                      {                   
+ 275   3                          //  printf("140319  else  SyncSource==>sync = NO_CABLE;===>%x \n",(unsigned short)ucSyncChangeCnt);         
+             -        
+ 276   3      
+ 277   3                                      UpdateSyncSrcIdx();
+ 278   3                                      usPortTimer_1ms = GetSyncSourceTimer();
+ 279   3                              if (((GetTimerTick()-usTimerTickTemp)<usPortTimer_1ms) || (bManualSyncSource==TRUE)) 
+ 280   3                                      {
+ 281   4                                              next_sync_idx = GetSameInput();
+ 282   4                                              //RecordCurrentSource(FALSE);
+ 283   4                                              if (ucSyncSrcIdx != next_sync_idx) 
+ 284   4                                              {
+ 285   5                                                      ucSyncSrcIdx = next_sync_idx;
+ 286   5                                                      SetInputInterface(SyncSrcTbl[ucSyncSrcIdx]);
+ 287   5                                              }
+ 288   4                                      }
+ 289   3                      else 
+ 290   3                              {
+ 291   4                                      if (ucRecordSyncSrcIdx < sizeof(SyncSrcTbl)) 
+ 292   4                                              {
+ 293   5                                                      // Do not change the sequence of the following statements.
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 9   
+
+ 294   5                                                      // Return back to Record source index.
+ 295   5                                                      next_sync_idx = ucRecordSyncSrcIdx;
+ 296   5                                                      RecordCurrentSource(FALSE);
+ 297   5                                              }
+ 298   4                              else 
+ 299   4                                      {
+ 300   5                                              next_sync_idx = GetNextInput();
+ 301   5                                      }
+ 302   4                              if (ucSyncSrcIdx != next_sync_idx) 
+ 303   4                                      {
+ 304   5                                              ucSyncSrcIdx = next_sync_idx;
+ 305   5                                              SetInputInterface(SyncSrcTbl[ucSyncSrcIdx]);
+ 306   5                                      #if (ENABLE_DIGI1_HPD == ON) || (ENABLE_DIGI0_HPD == ON) || (ENABLE_DP_HPD == ON) 
+                                                      SYSAPI_PerformHPDOff(FALSE);
+                                              #endif
+ 309   5                                      }
+ 310   4                                      usTimerTickTemp = GetTimerTick();
+ 311   4                              }
+ 312   3      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+*** WARNING C322 IN LINE 312 OF Sys\SyncHandler.c: unknown identifier
+*** WARNING C322 IN LINE 312 OF Sys\SyncHandler.c: unknown identifier
+                          if ( ((SyncSrcTbl[ucSyncSrcIdx]==DIGITAL_INPUT0) && MHLIsCBus1On() ) || ((SyncSrcTbl[ucSyncSrc
+             -Idx]==DIGITAL_INPUT1) &&  MHLIsCBus2On() )) {
+                              if ( GetCbusConnectStatus() == MHL_PATH_EN ) 
+                                      {
+                                              ResetCurTimerTick();
+                                      }
+                          }
+              #endif
+ 320   3              }
+ 321   2          }
+ 322   1      
+ 323   1              #if (ENABLE_DIGI1_HPD == ON) || (ENABLE_DIGI0_HPD == ON) || (ENABLE_DP_HPD == ON)
+                              if ( sync == UNKNOWN_SYNC)                                      //need to discuss with Nick&James
+                                      { 
+                                              SYSAPI_PerformHPDOn(); 
+                                      }
+                      else 
+                              {
+                                      if (bIsHPDActive() == FALSE) 
+                                              {
+                                                      if (GetGlobalTimer(GLOBAL_TMR_HPD) > 0) 
+                                                              {
+                                                                      sync = NO_SYNC;
+                                                                       if (bIsCableConnect() == FALSE) 
+                                                                              {
+                                                                               sync = NO_CABLE;
+                                                                              }
+                                                              }
+                                                      else 
+                                                              {
+                                                                       SYSAPI_PerformHPDOn(); 
+                                                              }
+                                                      }
+                              }
+              #endif
+ 347   1                 //printf("140319 return sync;=> %X\n",(unsigned short)sync); 
+ 348   1          return sync;
+ 349   1      }
+ 350          
+ 351          //******************************************************************************
+ 352          // Prototype: 
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 10  
+
+ 353          //  static void SetModeChanged(void)
+ 354          // Parameters:
+ 355          //  None
+ 356          // Return:
+ 357          //  None
+ 358          // Purpose:
+ 359          //  Set some flags to indicate that input timing was changed
+ 360          // Notes:
+ 361          //  None
+ 362          //******************************************************************************
+ 363          static void SetModeChanged(void)
+ 364          {
+ 365   1          Force2Background(0, 0, 0); //Mute screen and display black pattern
+ 366   1          ucSyncHdlrState = NO_SYNC;
+ 367   1          ucInputSyncMode = NO_SYNC;
+ 368   1          ucSyncChangeCnt = SYNC_CHANGE_CNT;
+ 369   1          usPortTimer_1ms = GetSyncSourceTimer();
+ 370   1          usTimerTickTemp = GetTimerTick();
+ 371   1          ClearModeChangeFlag(); //Clear mode change flag
+ 372   1          ClearForceToSleep();
+ 373   1      }
+ 374          
+ 375          //******************************************************************************
+ 376          // Prototype: 
+ 377          //  static UCHAR GetSameInput(void)
+ 378          // Parameters:
+ 379          //  None
+ 380          // Return:
+ 381          //  The sync index in SyncSrcTbl
+ 382          // Purpose:
+ 383          //  Search next input sync belonged to the same input interface in SyncSrcTbl
+ 384          // Notes:
+ 385          //  None
+ 386          //******************************************************************************
+ 387          static UCHAR GetSameInput(void)
+ 388          {
+ 389   1          UCHAR i, j;
+ 390   1      
+ 391   1          for (i=1; i<=sizeof(SyncSrcTbl); i++) {
+ 392   2              j = (ucSyncSrcIdx+i) % sizeof(SyncSrcTbl);
+ 393   2              if ((SyncSrcTbl[j]&PORT_MASK) == (SyncSrcTbl[ucSyncSrcIdx]&PORT_MASK)) {
+ 394   3                  //SyncSrcTbl[j] is the next sync that we found in the same interface.
+ 395   3                  //Ex. Seperate -> Composite -> SOG -> Seperate -> Composite -> ...
+ 396   3                  return j;
+ 397   3              }
+ 398   2          }
+ 399   1      
+ 400   1          //Error handling, program should not run to here.
+ 401   1          return ucSyncSrcIdx;
+ 402   1      }
+ 403          
+ 404          //******************************************************************************
+ 405          // Prototype: 
+ 406          //  static UCHAR GetNextInput(void)
+ 407          // Parameters:
+ 408          //  None
+ 409          // Return:
+ 410          //  The sync index in SyncSrcTbl
+ 411          // Purpose:
+ 412          //  Search next input sync belonged to the different input interface in 
+ 413          //  SyncSrcTbl
+ 414          // Notes:
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 11  
+
+ 415          //  None
+ 416          //******************************************************************************
+ 417          static UCHAR GetNextInput(void)
+ 418          {
+ 419   1           UCHAR i, j,K,L;
+ 420   1          for (i=1; i<=sizeof(SyncSrcTbl); i++) 
+ 421   1              {
+ 422   2               K=(ucSyncSrcIdx+i) ;
+ 423   2                        L=sizeof(SyncSrcTbl);
+ 424   2               j = (ucSyncSrcIdx+i) % sizeof(SyncSrcTbl);
+ 425   2              if ((SyncSrcTbl[j]&PORT_MASK) != (SyncSrcTbl[ucSyncSrcIdx]&PORT_MASK)) 
+ 426   2                      {
+ 427   3                              return j;
+ 428   3                      }
+ 429   2              }
+ 430   1      
+ 431   1          ucSyncSrcIdx = GetSameInput();
+ 432   1          //If we can not find next input in SyncSrcTbl, return current input.
+ 433   1          return ucSyncSrcIdx;
+ 434   1      }
+ 435          
+ 436          //******************************************************************************
+ 437          // Prototype: 
+ 438          //  void SetSyncSource(UCHAR Type)
+ 439          // Parameters:
+ 440          //  Type : AUTO_SYNC/MANUAL_SYNC
+ 441          // Return:
+ 442          //  None
+ 443          // Purpose:
+ 444          //  Make SyncSource searching input sync automatically or manually
+ 445          // Notes:
+ 446          //  None
+ 447          //******************************************************************************
+ 448          void SetSyncSource(UCHAR Type)
+ 449          {
+ 450   1      #if ENABLE_HDMI_PRETEST == ON
+                  Type = MANUAL_SYNC;
+              #endif
+ 453   1          if (Type == AUTO_SYNC) {
+ 454   2              bManualSyncSource = FALSE;
+ 455   2          }
+ 456   1          else {
+ 457   2              bManualSyncSource = TRUE;
+ 458   2          }
+ 459   1      }
+ 460          
+ 461          //******************************************************************************
+ 462          // Prototype: 
+ 463          //  static void UpdateSyncSrcIdx(void)
+ 464          // Parameters:
+ 465          //  void
+ 466          // Return:
+ 467          //  None
+ 468          // Purpose:
+ 469          //  Update the variable "ucSyncSrcIdx" if the input interface was changed 
+ 470          //  outside of SyncSource.
+ 471          // Notes:
+ 472          //  None
+ 473          //******************************************************************************
+ 474          static void UpdateSyncSrcIdx(void)
+ 475          {
+ 476   1          UCHAR i, curr_interface;
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 12  
+
+ 477   1      
+ 478   1          curr_interface = GetCurrInputInterface();
+ 479   1          for (i=0; i<sizeof(SyncSrcTbl); i++) {
+ 480   2              if (SyncSrcTbl[i] == curr_interface) {
+ 481   3                  ucSyncSrcIdx = i;
+ 482   3                  return;
+ 483   3              }
+ 484   2          }
+ 485   1      }
+ 486          
+ 487          //******************************************************************************
+ 488          // Prototype: 
+ 489          //  static USHRT GetSyncSourceTimer(void)
+ 490          // Parameters:
+ 491          //  void
+ 492          // Return:
+ 493          //  The time out timer of changing input port
+ 494          // Purpose:
+ 495          //  Set set timer to change input port
+ 496          // Notes:
+ 497          //  None
+ 498          //******************************************************************************
+ 499          static USHRT GetSyncSourceTimer(void)
+ 500          {
+ 501   1          UCHAR curr_interface;
+ 502   1          USHRT time = 0;
+ 503   1      
+ 504   1          curr_interface = GetCurrInputInterface();
+ 505   1      
+ 506   1          switch (curr_interface) {
+ 507   2              case ANALOG_SEP_INPUT0:
+ 508   2              case ANALOG_COM_INPUT0:
+ 509   2              case ANALOG_SOG_INPUT0:
+ 510   2              case ANALOG_YPBPR_INPUT0:
+ 511   2                  time = SYNCSRC_TIME_ANALOG0;
+ 512   2                  break;
+ 513   2      
+ 514   2              case DIGITAL_INPUT0:
+ 515   2                  time = SYNCSRC_TIME_DIGITAL0;
+ 516   2                  break;
+ 517   2      
+ 518   2              case ANALOG_SEP_INPUT1:
+ 519   2              case ANALOG_COM_INPUT1:
+ 520   2              case ANALOG_SOG_INPUT1:
+ 521   2              case ANALOG_YPBPR_INPUT1:
+ 522   2                  time = SYNCSRC_TIME_ANALOG1;
+ 523   2                  break;
+ 524   2      
+ 525   2              case DIGITAL_INPUT1:
+ 526   2                  time = SYNCSRC_TIME_DIGITAL1;
+ 527   2                  break;
+ 528   2      #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 528 OF Sys\SyncHandler.c: unknown identifier
+                      case DISPLAY_PORT_INPUT:
+                          time = SYNCSRC_TIME_DP;
+                          break;
+              #endif
+ 533   2              default:
+ 534   2                  time = SYNCSRC_TIME_ANALOG0;
+ 535   2                  break;
+ 536   2          }
+ 537   1      
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 13  
+
+ 538   1          return time;
+ 539   1      }
+ 540          
+ 541          //******************************************************************************
+ 542          // Prototype: 
+ 543          //  UCHAR GetSyncMode(void)
+ 544          // Parameters:
+ 545          //  None
+ 546          // Return:
+ 547          //  NO_SYNC/NO_CABLE/SEP_SYNC/COM_SYNC/SOG_SYNC/DIG_SYNC/OUT_SYNC
+ 548          // Purpose:
+ 549          //  Return system sync state
+ 550          // Notes:
+ 551          //  None
+ 552          //******************************************************************************
+ 553          UCHAR GetInputSyncMode(void)
+ 554          {
+ 555   1          return ucInputSyncMode;
+ 556   1      }
+ 557          
+ 558          #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1) || (ENABLE_DP_HPD == ON)
+*** WARNING C322 IN LINE 558 OF Sys\SyncHandler.c: unknown identifier
+*** WARNING C322 IN LINE 558 OF Sys\SyncHandler.c: unknown identifier
+              //******************************************************************************
+              // Prototype: 
+              //  void ResetCurTimerTick(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Reset Change-port timer (used for MHL)
+              // Notes:
+              //  None
+              //******************************************************************************
+              void ResetCurTimerTick(void)
+              {
+                  ucSyncChangeCnt = SYNC_CHANGE_CNT;
+                  usPortTimer_1ms = GetSyncSourceTimer();
+                  usTimerTickTemp = GetTimerTick();
+              }
+              #endif
+ 578          
+ 579          //******************************************************************************
+ 580          // Prototype:
+ 581          //  void RecordCurrentSource(UCHAR enable)
+ 582          // Parameters:
+ 583          //  enable : TRUE/FALSE
+ 584          //  TRUE: Record current source index.
+ 585          //  FALSE: clear Record source index.
+ 586          // Return:
+ 587          //  None
+ 588          // Purpose:
+ 589          //  Determine whether to record current sync source or not
+ 590          // Notes:
+ 591          //  @Param TRUE : only use to manual change input source
+ 592          //******************************************************************************
+ 593          void RecordCurrentSource(UCHAR enable)
+ 594          {
+ 595   1          if (enable) {
+ 596   2              // We use UpdateSyncSrcIdx to make sure the range of ucSyncSrcIdx is valid or not.
+ 597   2              // P.S. When system AC on, ucSyncSrcIdx is 0. That is invalid for ucRecordSyncSrcIdx.
+C51 COMPILER V7.50   SYNCHANDLER                                                           11/16/2016 14:31:24 PAGE 14  
+
+ 598   2              UpdateSyncSrcIdx();
+ 599   2              ucRecordSyncSrcIdx = ucSyncSrcIdx;
+ 600   2          }
+ 601   1          else {
+ 602   2              ucRecordSyncSrcIdx = 0xFF;
+ 603   2          }
+ 604   1      }
+
+C51 COMPILATION COMPLETE.  118 WARNING(S),  7 ERROR(S)

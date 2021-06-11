@@ -1,0 +1,1394 @@
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALERREG
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\ScalerReg.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\ScalerReg.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDI
+                    -R(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\
+                    -NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) P
+                    -RINT(.\Lst\ScalerReg.lst) OBJECT(.\Bin\ADS\AXI\104N\ScalerReg.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "ScalerReg.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          xdata UCHAR volatile SC_ADC_CTRL _at_ 0x8000;
+  22          xdata UCHAR volatile SC_RGAIN_HI _at_ 0x8001;
+  23          xdata UCHAR volatile SC_ADC_TEST1 _at_ 0x8002;
+  24          xdata UCHAR volatile SC_ROFFSET _at_ 0x8003;
+  25          xdata UCHAR volatile SC_GGAIN_HI _at_ 0x8004;
+  26          xdata UCHAR volatile SC_ADC_TEST2 _at_ 0x8005;
+  27          xdata UCHAR volatile SC_GOFFSET _at_ 0x8006;
+  28          xdata UCHAR volatile SC_BGAIN_HI _at_ 0x8007;
+  29          xdata UCHAR volatile SC_ADC_MID_CH_SEL _at_ 0x8008;
+  30          xdata UCHAR volatile SC_BOFFSET _at_ 0x8009;
+  31          xdata UCHAR volatile SC_SOG_SLICER_EN _at_ 0x800A;
+  32          xdata UCHAR volatile SC_SOG_DIGITAL_GLITCH_FILTER_THREESHOLD _at_ 0x800B;
+  33          xdata UCHAR volatile SC_SOG_GLITCH_MASK_LO _at_ 0x800C;
+  34          xdata UCHAR volatile SC_SOG_DIGITAL_FILTER_CTRL _at_ 0x800D;
+  35          xdata UCHAR volatile SC_ADC_POWER_UP _at_ 0x800E;
+  36          xdata UCHAR volatile SC_ADC_CLAMP_CTRL _at_ 0x800F;
+  37          xdata UCHAR volatile SC_ADC_BW_CTRL _at_ 0x8010;
+  38          xdata UCHAR volatile SC_SOG_CLAMPING_CTRL _at_ 0x8011;
+  39          xdata UCHAR volatile SC_SOG_SLICER_CTRL _at_ 0x8012;
+  40          xdata UCHAR volatile SC_ADC_INPUT_CTRL _at_ 0x8013;
+  41          xdata UCHAR volatile SC_HS_TRIG_LEVEL _at_ 0x8014;
+  42          xdata UCHAR volatile SC_VS_TRIG_LEVEL _at_ 0x8015;
+  43          xdata UCHAR volatile SC_TMDS_CLOCK_DET _at_ 0x8016;
+  44          xdata UCHAR volatile SC_ADC_CTRL2 _at_ 0x801E;
+  45          xdata UCHAR volatile SC_PRE_PATTER_CTRL _at_ 0x801F;
+  46          xdata UCHAR volatile SC_GPORT_CTRL _at_ 0x8020;
+  47          xdata UCHAR volatile SC_CLAMP_BEGIN _at_ 0x8021;
+  48          xdata UCHAR volatile SC_CLAMP_WIDTH _at_ 0x8022;
+  49          xdata UCHAR volatile SC_DIGITAL_CTRL _at_ 0x8023;
+  50          xdata UCHAR volatile SC_INPUT_SELECT _at_ 0x8024;
+  51          xdata UCHAR volatile SC_ADC_CK_CTRL _at_ 0x8025;
+  52          xdata UCHAR volatile SC_CAP_SWAP _at_ 0x8026;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 2   
+
+  53          xdata UCHAR volatile SC_GI_V_DE_DLY _at_ 0x8027;
+  54          xdata UCHAR volatile SC_GI_MASK_MSB _at_ 0x8028;
+  55          xdata UCHAR volatile SC_GI_MASK_CTRL _at_ 0x8029; 
+  56          xdata UCHAR volatile SC_GI_HMASK_BEG _at_ 0x802A;
+  57          xdata UCHAR volatile SC_GI_HMASK_END _at_ 0x802B;
+  58          xdata UCHAR volatile SC_GI_VMASK_BEG _at_ 0x802C;
+  59          xdata UCHAR volatile SC_GI_VMASK_END _at_ 0x802D;
+  60          xdata UCHAR volatile SC_GI_CAP_VBEGO_LO _at_ 0x802E;
+  61          xdata UCHAR volatile SC_GI_CAP_VBEGO_HI _at_ 0x802F;
+  62          xdata UCHAR volatile SC_GI_CAP_VBEGE_LO _at_ 0x8030;
+  63          xdata UCHAR volatile SC_GI_CAP_VBEGE_HI _at_ 0x8031;
+  64          xdata UCHAR volatile SC_GI_CAP_VLEN_LO _at_ 0x8032;
+  65          xdata UCHAR volatile SC_GI_CAP_VLEN_HI _at_ 0x8033;
+  66          xdata UCHAR volatile SC_GI_CAP_HBEG_LO _at_ 0x8034;
+  67          xdata UCHAR volatile SC_GI_CAP_HBEG_HI _at_ 0x8035;
+  68          xdata UCHAR volatile SC_GI_CAP_HWID_LO _at_ 0x8036;
+  69          xdata UCHAR volatile SC_GI_CAP_HWID_HI _at_ 0x8037;
+  70          xdata UCHAR volatile SC_GI_ALT_CTRL _at_ 0x8038;
+  71          xdata UCHAR volatile SC_GI_CLK_MASK_WID _at_ 0x8039;
+  72          xdata UCHAR volatile SC_DVI_CAP_HWID_LO _at_ 0x803C;
+  73          xdata UCHAR volatile SC_DVI_CAP_HWID_HI _at_ 0x803D;
+  74          xdata UCHAR volatile SC_DVI_CAP_VLEN_LO _at_ 0x803E;
+  75          xdata UCHAR volatile SC_DVI_CAP_VLEN_HI _at_ 0x803F;
+  76          xdata UCHAR volatile SC_VI_PORT_CTRL _at_ 0x8040;
+  77          xdata UCHAR volatile SC_VI_PORT_SELECT _at_ 0x8041;
+  78          xdata UCHAR volatile SC_VI_POLARITY_CTRL _at_ 0x8042;
+  79          xdata UCHAR volatile SC_SOG_T1_POSITION _at_ 0x8043;
+  80          xdata UCHAR volatile SC_SOG_T2_POSITION _at_ 0x8044;
+  81          xdata UCHAR volatile SC_SOG_T4_POSITION _at_ 0x8045;
+  82          xdata UCHAR volatile SC_SOG_T1_T2_WIDTH _at_ 0x8046;
+  83          xdata UCHAR volatile SC_SOG_T4_WIDTH _at_ 0x8047;
+  84          xdata UCHAR volatile SC_SOG_MODE_SEL _at_ 0x8048;
+  85          xdata UCHAR volatile SC_DEI_COLOR_COFFA_LO _at_ 0x804B;
+  86          xdata UCHAR volatile SC_DEI_COLOR_COFFA_HI _at_ 0x804C;
+  87          xdata UCHAR volatile SC_DEI_COLOR_COFFB_LO _at_ 0x804D;
+  88          xdata UCHAR volatile SC_DEI_COLOR_COFFB_HI _at_ 0x804E;
+  89          xdata UCHAR volatile SC_DEI_COLOR_COFFC_LO _at_ 0x804F;
+  90          xdata UCHAR volatile SC_DEI_COLOR_COFFC_HI _at_ 0x8050;
+  91          xdata UCHAR volatile SC_DEI_COLOR_COFFD_LO _at_ 0x8051;
+  92          xdata UCHAR volatile SC_DEI_COLOR_COFFD_HI _at_ 0x8052;
+  93          xdata UCHAR volatile SC_DEI_CSC_CTRL _at_ 0x8053;
+  94          xdata UCHAR volatile SC_CSC_CTRL1 _at_ 0x8054;
+  95          xdata UCHAR volatile SC_CSC_CTRL2 _at_ 0x8055;
+  96          xdata UCHAR volatile SC_CSC_COLOR_COFFA_LO _at_ 0x8056;
+  97          xdata UCHAR volatile SC_CSC_COLOR_COFFA_HI _at_ 0x8057;
+  98          xdata UCHAR volatile SC_CSC_COLOR_COFFB_LO _at_ 0x8058;
+  99          xdata UCHAR volatile SC_CSC_COLOR_COFFB_HI _at_ 0x8059;
+ 100          xdata UCHAR volatile SC_CSC_COLOR_COFFC_LO _at_ 0x805A;
+ 101          xdata UCHAR volatile SC_CSC_COLOR_COFFC_HI _at_ 0x805B;
+ 102          xdata UCHAR volatile SC_CSC_COLOR_COFFD_LO _at_ 0x805C;
+ 103          xdata UCHAR volatile SC_CSC_COLOR_COFFD_HI _at_ 0x805D;
+ 104          xdata UCHAR volatile SC_CSC_COLOR_COFFE_LO _at_ 0x805E;
+ 105          xdata UCHAR volatile SC_CSC_COLOR_COFFE_HI _at_ 0x805F;
+ 106          xdata UCHAR volatile SC_BK_H_SHAP_CTRL _at_ 0x8060;
+ 107          xdata UCHAR volatile SC_BK_CTRL1 _at_ 0x8061;
+ 108          xdata UCHAR volatile SC_INTE_CTRL _at_ 0x8064;
+ 109          xdata UCHAR volatile SC_GAMMA_CTRL _at_ 0x8065;
+ 110          xdata UCHAR volatile SC_BK_V_SHAP_CTRL _at_ 0x8066;
+ 111          xdata UCHAR volatile SC_INTERPOLATION_THRESHOLD _at_ 0x8067;
+ 112          xdata UCHAR volatile SC_NR_CTRL _at_ 0x8068;
+ 113          xdata UCHAR volatile SC_NR_THR_CTRL1 _at_ 0x8069;
+ 114          xdata UCHAR volatile SC_JITTER_CTRL _at_ 0x806A;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 3   
+
+ 115          xdata UCHAR volatile SC_NR_THR_CTRL2 _at_ 0x806B;
+ 116          xdata UCHAR volatile SC_VER_INTERPOLATION_OFFSET _at_ 0x806C;
+ 117          xdata UCHAR volatile SC_NR_RANDOM_GENERATOR_CTRL _at_ 0x806D;
+ 118          xdata UCHAR volatile SC_NR3_CTRL1 _at_ 0x806E;
+ 119          xdata UCHAR volatile SC_NR3_CTRL2 _at_ 0x806F;
+ 120          xdata UCHAR volatile SC_GPIO_CTRL _at_ 0x8070;
+ 121          xdata UCHAR volatile SC_BP_SYNC_CTRL _at_ 0x8072;
+ 122          xdata UCHAR volatile SC_PWMA_LCNT _at_ 0x8074;
+ 123          xdata UCHAR volatile SC_PWMA_HCNT _at_ 0x8075;
+ 124          xdata UCHAR volatile SC_PWMB_LCNT _at_ 0x8076;
+ 125          xdata UCHAR volatile SC_PWMB_HCNT _at_ 0x8077;
+ 126          xdata UCHAR volatile SC_PWMA_DUTY_LO _at_ 0x8078;
+ 127          xdata UCHAR volatile SC_PWMB_DUTY_LO _at_ 0x8079;
+ 128          xdata UCHAR volatile SC_PWM_COUNTER _at_ 0x807A;
+ 129          xdata UCHAR volatile SC_PWM_CTRL1 _at_ 0x807E;
+ 130          xdata UCHAR volatile SC_PWM_CTRL2 _at_ 0x807F;
+ 131          xdata UCHAR volatile SC_OSD_CTRL1 _at_ 0x8080;
+ 132          xdata UCHAR volatile SC_OSD_HS_LO _at_ 0x8081;
+ 133          xdata UCHAR volatile SC_OSD_HS_HI _at_ 0x8082;
+ 134          xdata UCHAR volatile SC_OSD_HW _at_ 0x8083;
+ 135          xdata UCHAR volatile SC_OSD_VS_LO _at_ 0x8084;
+ 136          xdata UCHAR volatile SC_OSD_VS_HI _at_ 0x8085;
+ 137          xdata UCHAR volatile SC_OSD_VH _at_ 0x8086;
+ 138          xdata UCHAR volatile SC_OSD_SHIFT_ROW _at_ 0x8087;
+ 139          xdata UCHAR volatile SC_OSD_FONT1B_ADDR_LO _at_ 0x8088;
+ 140          xdata UCHAR volatile SC_OSD_FONT1B_ADDR_HI _at_ 0x8089;
+ 141          xdata UCHAR volatile SC_OSD_FONT2B_ADDR_LO _at_ 0x808A;
+ 142          xdata UCHAR volatile SC_OSD_FONT2B_ADDR_HI _at_ 0x808B;
+ 143          xdata UCHAR volatile SC_OSD_FONT4B_ADDR_LO _at_ 0x808C;
+ 144          xdata UCHAR volatile SC_OSD_FONT4B_ADDR_HI _at_ 0x808D;
+ 145          xdata UCHAR volatile SC_OSD_FADE_STEP _at_ 0x808E;
+ 146          xdata UCHAR volatile SC_OSD_FADE_FREQ _at_ 0x808F;
+ 147          xdata UCHAR volatile SC_OSD_ZOOM_CTL _at_ 0x8090;
+ 148          xdata UCHAR volatile SC_OSD_HZM_PATN_LO _at_ 0x8091;
+ 149          xdata UCHAR volatile SC_OSD_HZM_PATN_HI _at_ 0x8092;
+ 150          xdata UCHAR volatile SC_OSD_VZM_PATN_LO _at_ 0x8093;
+ 151          xdata UCHAR volatile SC_OSD_VZM_PATN_MI _at_ 0x8094;
+ 152          xdata UCHAR volatile SC_OSD_VHGLOB_ZMRNG _at_ 0x8095;
+ 153          xdata UCHAR volatile SC_OSD_HOR_ROW_ZOOM_CTRL1 _at_ 0x8096;
+ 154          xdata UCHAR volatile SC_OSD_HOR_ROW_ZOOM_CTRL2 _at_ 0x8097;
+ 155          xdata UCHAR volatile SC_OSD_HOR_ROW_ZOOM_CTRL3 _at_ 0x8098;
+ 156          xdata UCHAR volatile SC_OSD_HOR_ROW_ZOOM_CTRL4 _at_ 0x8099;
+ 157          xdata UCHAR volatile SC_OSD_VER_ROW_ZOOM_CTRL1 _at_ 0x809A;
+ 158          xdata UCHAR volatile SC_OSD_VER_ROW_ZOOM_CTRL2 _at_ 0x809B;
+ 159          xdata UCHAR volatile SC_OSD_VER_ROW_ZOOM_CTRL3 _at_ 0x809C;
+ 160          xdata UCHAR volatile SC_OSD_VER_ROW_ZOOM_CTRL4 _at_ 0x809D;
+ 161          xdata UCHAR volatile SC_OSD_FONT_ROW_ZOOM_RANGE _at_ 0x809E;
+ 162          xdata UCHAR volatile SC_OSD_SEPARATE_ROW_CTRL _at_ 0x809F;
+ 163          xdata UCHAR volatile SC_OSD_BLINK_CTRL _at_ 0x80A0;
+ 164          xdata UCHAR volatile SC_OSD_TRANSLUCENT_CTL _at_ 0x80A1;
+ 165          xdata UCHAR volatile SC_OSD_SPACE_CTL _at_ 0x80A2;
+ 166          xdata UCHAR volatile SC_OSD_WIN_SEL _at_ 0x80A5;
+ 167          xdata UCHAR volatile SC_OSD_WIN_ATTRIBUTE _at_ 0x80AA;
+ 168          xdata UCHAR volatile SC_OSD_WIN_COLOR _at_ 0x80AB;
+ 169          xdata UCHAR volatile SC_OSD_WIN_BEVEL_WIDTH _at_ 0x80AD;
+ 170          xdata UCHAR volatile SC_OSD_WIN_BEVEL_COLOR_R _at_ 0x80AE;
+ 171          xdata UCHAR volatile SC_OSD_WIN_BEVEL_COLOR_L _at_ 0x80AF;
+ 172          xdata UCHAR volatile SC_OSD_SHADOW_CTRL_BYTE0 _at_ 0x80B0;
+ 173          xdata UCHAR volatile SC_OSD_SHADOW_CTRL_BYTE1 _at_ 0x80B1;
+ 174          xdata UCHAR volatile SC_OSD_SHADOW_CTRL_BYTE2 _at_ 0x80B2;
+ 175          xdata UCHAR volatile SC_OSD_SHADOW_CTRL_BYTE3 _at_ 0x80B3;
+ 176          xdata UCHAR volatile SC_OSD_BORDER_CTRL_BYTE0 _at_ 0x80B4;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 4   
+
+ 177          xdata UCHAR volatile SC_OSD_BORDER_CTRL_BYTE1 _at_ 0x80B5;
+ 178          xdata UCHAR volatile SC_OSD_BORDER_CTRL_BYTE2 _at_ 0x80B6;
+ 179          xdata UCHAR volatile SC_OSD_BORDER_CTRL_BYTE3 _at_ 0x80B7;
+ 180          xdata UCHAR volatile SC_OSD_BOR_SHA_COLOR_01 _at_ 0x80B8;
+ 181          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_23 _at_ 0x80B9;
+ 182          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_45 _at_ 0x80BA;
+ 183          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_67 _at_ 0x80BB;
+ 184          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_89 _at_ 0x80BC;
+ 185          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_1011 _at_ 0x80BD;
+ 186          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_1213 _at_ 0x80BE;
+ 187          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_1415 _at_ 0x80BF;
+ 188          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_1617 _at_ 0x80C0;
+ 189          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_1819 _at_ 0x80C1;
+ 190          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_2021 _at_ 0x80C2;
+ 191          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_2223 _at_ 0x80C3;
+ 192          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_2425 _at_ 0x80C4;
+ 193          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_2627 _at_ 0x80C5;
+ 194          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_2829 _at_ 0x80C6;
+ 195          xdata UCHAR volatile SC_OSD_BOR_SHA_COL_3031 _at_ 0x80C7;
+ 196          xdata UCHAR volatile SC_OSD_HOR_SPLIT_START_LO _at_ 0x80C8;
+ 197          xdata UCHAR volatile SC_OSD_HOR_SPLIT_WIDTH_LO _at_ 0x80C9;
+ 198          xdata UCHAR volatile SC_OSD_VER_SPLIT_START_LO _at_ 0x80CA;
+ 199          xdata UCHAR volatile SC_OSD_VER_SPLIT_WIDTH_LO _at_ 0x80CB;
+ 200          xdata UCHAR volatile SC_OSD_ATTRIBUTE_LO _at_ 0x80CC;
+ 201          xdata UCHAR volatile SC_OSD_ATTRIBUTE_MI _at_ 0x80CD;
+ 202          xdata UCHAR volatile SC_OSD_CODE_FC _at_ 0x80CE;
+ 203          xdata UCHAR volatile SC_OSD_CODE_FC_CTL _at_ 0x80CF;
+ 204          xdata UCHAR volatile SC_HPLL_CTRL1 _at_ 0x80D0;
+ 205          xdata UCHAR volatile SC_HPLL_FREQ_CTRL _at_ 0x80D1;
+ 206          xdata UCHAR volatile SC_HSDDS_RATIO_LO _at_ 0x80D2;
+ 207          xdata UCHAR volatile SC_HSDDS_RATIO_MI _at_ 0x80D3;
+ 208          xdata UCHAR volatile SC_HSDDS_RATIO_HI _at_ 0x80D4;
+ 209          xdata UCHAR volatile SC_HPLL_PHASE_CTRL _at_ 0x80D5;
+ 210          xdata UCHAR volatile SC_HPLL_CTRL2 _at_ 0x80D6;
+ 211          xdata UCHAR volatile SC_HSDDS_DIVIDER_LO _at_ 0x80D7;
+ 212          xdata UCHAR volatile SC_HSDDS_DIVIDER_HI _at_ 0x80D8;
+ 213          xdata UCHAR volatile SC_HPLL_PHASE_CTRL1 _at_ 0x80D9;
+ 214          xdata UCHAR volatile SC_HPLL_PHASE_CTRL2 _at_ 0x80DA;
+ 215          xdata UCHAR volatile SC_HPLL_LINE_CNT _at_ 0x80DB;
+ 216          xdata UCHAR volatile SC_HPLL_CTRL3 _at_ 0x80DC;
+ 217          xdata UCHAR volatile SC_HS_CNT_RESULT_LO _at_ 0x80DD;
+ 218          xdata UCHAR volatile SC_HS_CNT_RESULT_MI _at_ 0x80DE;
+ 219          xdata UCHAR volatile SC_HS_CNT_RESULT_HI _at_ 0x80DF;
+ 220          xdata UCHAR volatile SC_INDEX_CTRL _at_ 0x80E0;
+ 221          xdata UCHAR volatile SC_INDEX_ADDR_LO _at_ 0x80E1;
+ 222          xdata UCHAR volatile SC_INDEX_ADDR_HI _at_ 0x80E2;
+ 223          xdata UCHAR volatile SC_INDEX_DATA _at_ 0x80E3;
+ 224          xdata UCHAR volatile SC_INDEX_DATA2 _at_ 0x80E4;
+ 225          xdata UCHAR volatile SC_AUTO_GAIN_WIN_ODD_VER_BEG_LO _at_ 0x80E6;
+ 226          xdata UCHAR volatile SC_AUTO_GAIN_WIN_ODD_VER_BEG_HI _at_ 0x80E7;
+ 227          xdata UCHAR volatile SC_AUTO_GAIN_WIN_EVEN_VER_BEG_LO _at_ 0x80E8;
+ 228          xdata UCHAR volatile SC_AUTO_GAIN_WIN_EVEN_VER_BEG_HI _at_ 0x80E9;
+ 229          xdata UCHAR volatile SC_AUTO_GAIN_WIN_VER_LEN_LO _at_ 0x80EA;
+ 230          xdata UCHAR volatile SC_AUTO_GAIN_WIN_VER_LEN_HI _at_ 0x80EB;
+ 231          xdata UCHAR volatile SC_AUTO_GAIN_WIN_HOR_BEG_LO _at_ 0x80EC;
+ 232          xdata UCHAR volatile SC_AUTO_GAIN_WIN_HOR_BEG_HI _at_ 0x80ED;
+ 233          xdata UCHAR volatile SC_AUTO_GAIN_WIN_HOR_WIDTH_LO _at_ 0x80EE;
+ 234          xdata UCHAR volatile SC_AUTO_GAIN_WIN_HOR_WIDTH_HI _at_ 0x80EF;
+ 235          xdata UCHAR volatile SC_DPLL_CTRL1 _at_ 0x80F0;
+ 236          xdata UCHAR volatile SC_DPLL_FREQ_CTRL _at_ 0x80F1;
+ 237          xdata UCHAR volatile SC_DDDS_RATIO_LO _at_ 0x80F2;
+ 238          xdata UCHAR volatile SC_DDDS_RATIO_MI _at_ 0x80F3;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 5   
+
+ 239          xdata UCHAR volatile SC_DDDS_RATIO_HI _at_ 0x80F4;
+ 240          xdata UCHAR volatile SC_SSC_CTRL _at_ 0x80F5;
+ 241          xdata UCHAR volatile SC_GAUGE_CTRL1 _at_ 0x80F7;
+ 242          xdata UCHAR volatile SC_GAUGE_CTRL2 _at_ 0x80F8;
+ 243          xdata UCHAR volatile SC_GAUGE_AREA_SEL _at_ 0x80F9;
+ 244          xdata UCHAR volatile SC_GAUGE_OFFSET _at_ 0x80FA;
+ 245          xdata UCHAR volatile SC_GAUGE_RESULT_LO _at_ 0x80FB;
+ 246          xdata UCHAR volatile SC_GAUGE_RESULT_MI _at_ 0x80FC;
+ 247          xdata UCHAR volatile SC_GAUGE_RESULT_HI _at_ 0x80FD;
+ 248          xdata UCHAR volatile SC_RegPage _at_ 0x80FF;
+ 249          xdata UCHAR volatile SC_PRODUCT_ID _at_ 0x8100;
+ 250          xdata UCHAR volatile SC_POWER_CTRL1 _at_ 0x8101;
+ 251          xdata UCHAR volatile SC_POWER_CTRL2 _at_ 0x8102;
+ 252          xdata UCHAR volatile SC_POWER_CTRL3 _at_ 0x8103;
+ 253          xdata UCHAR volatile SC_REVISION_ID _at_ 0x8104;
+ 254          xdata UCHAR volatile SC_CHIP_ID _at_ 0x8105;
+ 255          xdata UCHAR volatile SC_GI_AUTO_TUNE_CTRL _at_ 0x8106;
+ 256          xdata UCHAR volatile SC_GI_POS_THR _at_ 0x8107;
+ 257          xdata UCHAR volatile SC_GI_POS_VBEGO_LO _at_ 0x8108;
+ 258          xdata UCHAR volatile SC_GI_POS_VBEGO_HI _at_ 0x8109;
+ 259          xdata UCHAR volatile SC_GI_POS_VBEGE_LO _at_ 0x810A;
+ 260          xdata UCHAR volatile SC_GI_POS_VBEGE_HI _at_ 0x810B;
+ 261          xdata UCHAR volatile SC_GI_POS_VLEN_LO _at_ 0x810C;
+ 262          xdata UCHAR volatile SC_GI_POS_VLEN_HI _at_ 0x810D;
+ 263          xdata UCHAR volatile SC_GI_POS_HBEG_LO _at_ 0x810E;
+ 264          xdata UCHAR volatile SC_GI_POS_HBEG_HI _at_ 0x810F;
+ 265          xdata UCHAR volatile SC_GI_POS_HWID_LO _at_ 0x8110;
+ 266          xdata UCHAR volatile SC_GI_POS_HWID_HI _at_ 0x8111;
+ 267          xdata UCHAR volatile SC_GI_PHS_MASK _at_ 0x8112;
+ 268          xdata UCHAR volatile SC_GI_PHS_SDIFF_LO0 _at_ 0x8113;
+ 269          xdata UCHAR volatile SC_GI_PHS_SDIFF_LO1 _at_ 0x8114;
+ 270          xdata UCHAR volatile SC_GI_PHS_SDIFF_HI0 _at_ 0x8115;
+ 271          xdata UCHAR volatile SC_GI_PHS_SDIFF_HI1 _at_ 0x8116;
+ 272          xdata UCHAR volatile SC_GI_CLK_REF_LO _at_ 0x8117;
+ 273          xdata UCHAR volatile SC_GI_CLK_REF_HI _at_ 0x8118;
+ 274          xdata UCHAR volatile SC_GI_CLK_RESULT _at_ 0x8119;
+ 275          xdata UCHAR volatile SC_VI_AUTO_CTRL _at_ 0x811B;
+ 276          xdata UCHAR volatile SC_AUTO_OFFSET_ATART_LO _at_ 0x811E;
+ 277          xdata UCHAR volatile SC_AUTO_OFFSET_ATART_HI _at_ 0x811F;
+ 278          xdata UCHAR volatile SC_REDUCE_ADC_PWR_CTRL _at_ 0x8120;
+ 279          xdata UCHAR volatile SC_CAPTURE_CLK_MASK_WIN_BEG_LO _at_ 0x8121;
+ 280          xdata UCHAR volatile SC_CAPTURE_CLK_MASK_WIN_BEG_HI _at_ 0x8122;
+ 281          xdata UCHAR volatile SC_CAPTURE_CLK_MASK_WIN_END_LO _at_ 0x8123;
+ 282          xdata UCHAR volatile SC_CAPTURE_CLK_MASK_WIN_END_HI _at_ 0x8124;
+ 283          xdata UCHAR volatile SC_ADC_BLANK_PWR_DOWN_BEG_LO _at_ 0x8125;
+ 284          xdata UCHAR volatile SC_ADC_BLANK_PWR_DOWN_BEG_HI _at_ 0x8126;
+ 285          xdata UCHAR volatile SC_ADC_BLANK_PWR_DOWN_END_LO _at_ 0x8127;
+ 286          xdata UCHAR volatile SC_ADC_BLANK_PWR_DOWN_END_HI _at_ 0x8128;
+ 287          xdata UCHAR volatile SC_AUTO_GAIN_CTRL1 _at_ 0x812B;
+ 288          xdata UCHAR volatile SC_AUTO_GAIN_CTRL2 _at_ 0x812C;
+ 289          xdata UCHAR volatile SC_AUTO_GAIN_CTRL3 _at_ 0x812D;
+ 290          xdata UCHAR volatile SC_AUTO_GAIN_CTRL4 _at_ 0x812E;
+ 291          xdata UCHAR volatile SC_AUTO_GAIN_CTRL5 _at_ 0x812F;
+ 292          xdata UCHAR volatile SC_BRIGHT_FRM_CTRL _at_ 0x8130;
+ 293          xdata UCHAR volatile SC_BRIGHT_FRM_SEL _at_ 0x8131;
+ 294          xdata UCHAR volatile SC_BRIGHT_FRM_HS_LO _at_ 0x8132;
+ 295          xdata UCHAR volatile SC_BRIGHT_FRM_HS_HI _at_ 0x8133;
+ 296          xdata UCHAR volatile SC_BRIGHT_FRM_HW_LO _at_ 0x8134;
+ 297          xdata UCHAR volatile SC_BRIGHT_FRM_HW_HI _at_ 0x8135;
+ 298          xdata UCHAR volatile SC_BRIGHT_FRM_VS_LO _at_ 0x8136;
+ 299          xdata UCHAR volatile SC_BRIGHT_FRM_VS_HI _at_ 0x8137;
+ 300          xdata UCHAR volatile SC_BRIGHT_FRM_VH_LO _at_ 0x8138;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 6   
+
+ 301          xdata UCHAR volatile SC_BRIGHT_FRM_VH_HI _at_ 0x8139;
+ 302          xdata UCHAR volatile SC_BRIGHT_FRM_GAIN _at_ 0x813A;
+ 303          xdata UCHAR volatile SC_BRIGHT_FRM_OFFSET _at_ 0x813B;
+ 304          xdata UCHAR volatile SC_POST_PATTERN_GRAY_LEVEL_HI _at_ 0x814A;
+ 305          xdata UCHAR volatile SC_POST_PATTERN_GRAY_LEVEL_LO _at_ 0x814B;
+ 306          xdata UCHAR volatile SC_CAP_HTOTAL_LENGTH_LO _at_ 0x814C;
+ 307          xdata UCHAR volatile SC_CAP_HTOTAL_LENGTH_HI _at_ 0x814D;
+ 308          xdata UCHAR volatile SC_LOCK_H_SHIFT_LO _at_ 0x814E;
+ 309          xdata UCHAR volatile SC_LOCK_H_SHIFT_HI _at_ 0x814F;
+ 310          xdata UCHAR volatile SC_DISPLAY_CTRL _at_ 0x8150;                                       //150112 mike 
+ 311          xdata UCHAR volatile SC_DISPLAY_VLOCK _at_ 0x8151;
+ 312          xdata UCHAR volatile SC_DISPLAY_HLOCK_LO _at_ 0x8152;
+ 313          xdata UCHAR volatile SC_DISPLAY_HLOCK_HI _at_ 0x8153;
+ 314          xdata UCHAR volatile SC_DISPLAY_MUTE_CTRL _at_ 0x8154;
+ 315          xdata UCHAR volatile SC_DISP_DRIVE_CTRL _at_ 0x8155;
+ 316          xdata UCHAR volatile SC_DISPLAY_POL_CTRL _at_ 0x8156;
+ 317          xdata UCHAR volatile SC_DISPLAY_CLK_CTRL _at_ 0x8157;
+ 318          xdata UCHAR volatile SC_DITH_CTRL _at_ 0x8158;
+ 319          xdata UCHAR volatile SC_DISPLAY_CHANNEL _at_ 0x8159;
+ 320          xdata UCHAR volatile SC_CBAR_FG _at_ 0x815A;
+ 321          xdata UCHAR volatile SC_DV_TOTAL_LO _at_ 0x815B;
+ 322          xdata UCHAR volatile SC_DV_TOTAL_HI _at_ 0x815C;
+ 323          xdata UCHAR volatile SC_DV_VS_WID _at_ 0x815D;
+ 324          xdata UCHAR volatile SC_DH_HTOTAL_LO _at_ 0x815E;
+ 325          xdata UCHAR volatile SC_DH_HTOTAL_HI _at_ 0x815F;
+ 326          xdata UCHAR volatile SC_DH_HS_WID _at_ 0x8160;
+ 327          xdata UCHAR volatile SC_DISPLAY_BR_CTRL _at_ 0x8161;
+ 328          xdata UCHAR volatile SC_DV_BG_BEG_LO _at_ 0x8162;
+ 329          xdata UCHAR volatile SC_DV_BG_BEG_HI _at_ 0x8163;
+ 330          xdata UCHAR volatile SC_DV_BG_LEN_LO _at_ 0x8164;
+ 331          xdata UCHAR volatile SC_DV_BG_LEN_HI _at_ 0x8165;
+ 332          xdata UCHAR volatile SC_DH_BG_BEG_LO _at_ 0x8166;
+ 333          xdata UCHAR volatile SC_DH_BG_BEG_HI _at_ 0x8167;
+ 334          xdata UCHAR volatile SC_DH_BG_WID_LO _at_ 0x8168;
+ 335          xdata UCHAR volatile SC_DH_BG_WID_HI _at_ 0x8169;
+ 336          xdata UCHAR volatile SC_DISP_SWAP _at_ 0x816A;
+ 337          xdata UCHAR volatile SC_DISP_BACKGROUND_RED _at_ 0x816B;
+ 338          xdata UCHAR volatile SC_DISP_BACKGROUND_GREEN _at_ 0x816C;
+ 339          xdata UCHAR volatile SC_DISP_BACKGROUND_BLUE _at_ 0x816D;
+ 340          xdata UCHAR volatile SC_GRAPHIC_DISP_WIN_CTRL _at_ 0x816E;
+ 341          xdata UCHAR volatile SC_GRAPHIC_DISP_VER_ACT_BEG_LO _at_ 0x816F;
+ 342          xdata UCHAR volatile SC_GRAPHIC_DISP_VER_ACT_BEG_HI _at_ 0x8170;
+ 343          xdata UCHAR volatile SC_GRAPHIC_DISP_VER_ACT_LEN_LO _at_ 0x8171;
+ 344          xdata UCHAR volatile SC_GRAPHIC_DISP_VER_ACT_LEN_HI _at_ 0x8172;
+ 345          xdata UCHAR volatile SC_GRAPHIC_DISP_HOR_ACT_BEG_LO _at_ 0x8173;
+ 346          xdata UCHAR volatile SC_GRAPHIC_DISP_HOR_ACT_BEG_HI _at_ 0x8174;
+ 347          xdata UCHAR volatile SC_GRAPHIC_DISP_HOR_ACT_WID_LO _at_ 0x8175;
+ 348          xdata UCHAR volatile SC_GRAPHIC_DISP_HOR_ACT_WID_HI _at_ 0x8176;
+ 349          xdata UCHAR volatile SC_DISP_HLOCK_POS_R _at_ 0x8177;
+ 350          xdata UCHAR volatile SC_DISP_VLOCK_POS_R _at_ 0x8178;
+ 351          xdata UCHAR volatile SC_FREE_RUN_HTOTAL_LO _at_ 0x8179;
+ 352          xdata UCHAR volatile SC_FREE_RUN_HTOTAL_HI _at_ 0x817A;
+ 353          xdata UCHAR volatile SC_SCALER_DE_EXT_2DTO3D _at_ 0x817E;
+ 354          xdata UCHAR volatile SC_DSP_HTOTAL_LO _at_ 0x8182;
+ 355          xdata UCHAR volatile SC_DSP_HTOTAL_HI _at_ 0x8183;
+ 356          xdata UCHAR volatile SC_HR_VALUE_LO _at_ 0x8184;
+ 357          xdata UCHAR volatile SC_HR_VALUE_HI _at_ 0x8185;
+ 358          xdata UCHAR volatile SC_HR_CTRL _at_ 0x8186;
+ 359          xdata UCHAR volatile SC_DISP_SYNC_STATUS _at_ 0x8187;
+ 360          xdata UCHAR volatile SC_VCR_CTRL _at_ 0x8188;
+ 361          xdata UCHAR volatile SC_VER_COUNTER_LO _at_ 0x8189;
+ 362          xdata UCHAR volatile SC_VER_COUNTER_MI _at_ 0x818A;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 7   
+
+ 363          xdata UCHAR volatile SC_VER_COUNTER_HI _at_ 0x818B;
+ 364          xdata UCHAR volatile SC_RESIDUAL_DISP_HOR_SYNC_CTRL _at_ 0x818D;
+ 365          xdata UCHAR volatile SC_FIFO_FLAG _at_ 0x818E;
+ 366          xdata UCHAR volatile SC_FIFO_FLAG_EN _at_ 0x818F;
+ 367          xdata UCHAR volatile SC_FIFO_CTRL1 _at_ 0x8190;
+ 368          xdata UCHAR volatile SC_FIFO_CTRL2 _at_ 0x8191;
+ 369          xdata UCHAR volatile SC_GI_SYNC_CTRL _at_ 0x8196;
+ 370          xdata UCHAR volatile SC_GI_SYNC_CTRL2 _at_ 0x8197;
+ 371          xdata UCHAR volatile SC_GI_FIELD_WIN _at_ 0x8198;
+ 372          xdata UCHAR volatile SC_GI_SYNC_CTRL3 _at_ 0x8199;
+ 373          xdata UCHAR volatile SC_GI_SYNC_STATUS _at_ 0x819A;
+ 374          xdata UCHAR volatile SC_GI_HCNT_LO _at_ 0x819B;
+ 375          xdata UCHAR volatile SC_GI_HCNT_HI _at_ 0x819C;
+ 376          xdata UCHAR volatile SC_GI_VCNT_LO _at_ 0x819D;
+ 377          xdata UCHAR volatile SC_GI_VCNT_HI _at_ 0x819E;
+ 378          xdata UCHAR volatile SC_HREE_DIV_LO _at_ 0x819F;
+ 379          xdata UCHAR volatile SC_HREE_DIV_HI _at_ 0x81A0;
+ 380          xdata UCHAR volatile SC_VREE_DIV_LO _at_ 0x81A1;
+ 381          xdata UCHAR volatile SC_VREE_DIV_HI _at_ 0x81A2;
+ 382          xdata UCHAR volatile SC_HPRE_THR_LO _at_ 0x81A3;
+ 383          xdata UCHAR volatile SC_HPRE_THR_HI _at_ 0x81A4;
+ 384          xdata UCHAR volatile SC_VPRE_THR_LO _at_ 0x81A5;
+ 385          xdata UCHAR volatile SC_VPRE_THR_HI _at_ 0x81A6;
+ 386          xdata UCHAR volatile SC_HCNT_THR _at_ 0x81A7;
+ 387          xdata UCHAR volatile SC_V_CHANG_CTRL _at_ 0x81A8;
+ 388          xdata UCHAR volatile SC_SYNC_INT_EN1 _at_ 0x81A9;
+ 389          xdata UCHAR volatile SC_SYNC_INT_EN2 _at_ 0x81AA;
+ 390          xdata UCHAR volatile SC_SYNC_INT_FLAG1 _at_ 0x81AB;
+ 391          xdata UCHAR volatile SC_SYNC_INT_FLAG2 _at_ 0x81AC;
+ 392          xdata UCHAR volatile SC_DVI_STATUS _at_ 0x81AD;
+ 393          xdata UCHAR volatile SC_MACROVISION_THRESHOLD _at_ 0x81AE;
+ 394          xdata UCHAR volatile SC_FAST_MUTE_CTRL _at_ 0x81AF;
+ 395          xdata UCHAR volatile SC_FIELD_POLARITY_CTRL _at_ 0x81B0;
+ 396          xdata UCHAR volatile SC_GI_HS_WID _at_ 0x81B1;
+ 397          xdata UCHAR volatile SC_GI_VS_WID _at_ 0x81B2;
+ 398          xdata UCHAR volatile SC_PRE_COAST _at_ 0x81B3;
+ 399          xdata UCHAR volatile SC_POS_COAST _at_ 0x81B4;
+ 400          xdata UCHAR volatile SC_GRAPHIC_VTOTAL_COUNTER_LO _at_ 0x81B5;
+ 401          xdata UCHAR volatile SC_GRAPHIC_VTOTAL_COUNTER_HI _at_ 0x81B6;
+ 402          xdata UCHAR volatile SC_LVDS_CTRL _at_ 0x81B8;
+ 403          xdata UCHAR volatile SC_DISP_INTERFACE_CTRL _at_ 0x81B9;
+ 404          xdata UCHAR volatile SC_AUTO_OFFSET_CTRL1 _at_ 0x81BA;
+ 405          xdata UCHAR volatile SC_AUTO_OFFSET_CTRL2 _at_ 0x81BB;
+ 406          xdata UCHAR volatile SC_AUTO_OFFSET_CTRL3 _at_ 0x81BC;
+ 407          xdata UCHAR volatile SC_AUTO_OFFSET_TARGET_RED _at_ 0x81BD;
+ 408          xdata UCHAR volatile SC_AUTO_OFFSET_TARGET_GREEN _at_ 0x81BE;
+ 409          xdata UCHAR volatile SC_AUTO_OFFSET_TARGET_BLUE _at_ 0x81BF;
+ 410          xdata UCHAR volatile SC_AUTO_OFFSET_ADJUST_RED _at_ 0x81C0;
+ 411          xdata UCHAR volatile SC_AUTO_OFFSET_ADJUST_GREEN _at_ 0x81C1;
+ 412          xdata UCHAR volatile SC_AUTO_OFFSET_ADJUST_BLUE _at_ 0x81C2;
+ 413          xdata UCHAR volatile SC_AUTO_OFFSET_MID_RED _at_ 0x81C3;
+ 414          xdata UCHAR volatile SC_AUTO_OFFSET_MID_GREEN _at_ 0x81C4;
+ 415          xdata UCHAR volatile SC_AUTO_OFFSET_MID_BLUE _at_ 0x81C5;
+ 416          xdata UCHAR volatile SC_INSIDE_CTRL3 _at_ 0x81C6;
+ 417          xdata UCHAR volatile SC_DATA_TRACK_CTRL _at_ 0x81C7;
+ 418          xdata UCHAR volatile SC_DATA_TRACK_MASK1 _at_ 0x81C8;
+ 419          xdata UCHAR volatile SC_DATA_TRACK_MASK2 _at_ 0x81C9;
+ 420          xdata UCHAR volatile SC_DATA_TRACK_MASK3 _at_ 0x81CA;
+ 421          xdata UCHAR volatile SC_DATA_TRACK_MASK4 _at_ 0x81CB;
+ 422          xdata UCHAR volatile SC_ASYNC_RANDOM_DITHRER_CTRL _at_ 0x81CC;
+ 423          xdata UCHAR volatile SC_AUTO_OFFSET_CTRL4 _at_ 0x81CD;
+ 424          xdata UCHAR volatile SC_AUTO_OFFSET_HCNT_MODE01 _at_ 0x81CE;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 8   
+
+ 425          xdata UCHAR volatile SC_AUTO_OFFSET_HCNT_MODE11 _at_ 0x81CF;
+ 426          xdata UCHAR volatile SC_SRGB_CTRL _at_ 0x81D0;
+ 427          xdata UCHAR volatile SC_SRGB_COEF_R_LO _at_ 0x81D1;
+ 428          xdata UCHAR volatile SC_SRGB_COEF_R_HI _at_ 0x81D2;
+ 429          xdata UCHAR volatile SC_SRGB_COEF_G_LO _at_ 0x81D3;
+ 430          xdata UCHAR volatile SC_SRGB_COEF_G_HI _at_ 0x81D4;
+ 431          xdata UCHAR volatile SC_SRGB_COEF_B_LO _at_ 0x81D5;
+ 432          xdata UCHAR volatile SC_SRGB_COEF_B_HI _at_ 0x81D6;
+ 433          xdata UCHAR volatile SC_SRGB_COEF_OFFSET _at_ 0x81D7;
+ 434          xdata UCHAR volatile SC_SRGB_DITH_CTRL _at_ 0x81D8;
+ 435          xdata UCHAR volatile SC_DISP_DITH_CTRL _at_ 0x81D9;
+ 436          xdata UCHAR volatile SC_DISP_RANDOM_DITH_CTRL _at_ 0x81DA;
+ 437          xdata UCHAR volatile SC_GAMMA_DITH_CTRL _at_ 0x81DB;
+ 438          xdata UCHAR volatile SC_MISC_O_RD_LO _at_ 0x81DC;
+ 439          xdata UCHAR volatile SC_MISC_O_RD_HI _at_ 0x81DD;
+ 440          xdata UCHAR volatile SC_MISC_E_RD_LO _at_ 0x81DE;
+ 441          xdata UCHAR volatile SC_MISC_E_RD_HI _at_ 0x81DF;
+ 442          xdata UCHAR volatile SC_INV_GR _at_ 0x81E0;
+ 443          xdata UCHAR volatile SC_INV_BR _at_ 0x81E1;
+ 444          xdata UCHAR volatile SC_TEST_MODE1_LOCKER _at_ 0x81E2;
+ 445          xdata UCHAR volatile SC_TEST_MODE1 _at_ 0x81E3;
+ 446          xdata UCHAR volatile SC_TEST_MODE2 _at_ 0x81E4;
+ 447          xdata UCHAR volatile SC_TEST_MODE3 _at_ 0x81E5;
+ 448          xdata UCHAR volatile SC_ADC_TEST_MODE _at_ 0x81E6;
+ 449          xdata UCHAR volatile SC_TMDS_LINK_CLK_SEL _at_ 0x81E7;
+ 450          xdata UCHAR volatile SC_BIST_CTRL1 _at_ 0x81E8;
+ 451          xdata UCHAR volatile SC_BIST_CTRL2 _at_ 0x81E9;
+ 452          xdata UCHAR volatile SC_ADC_REG_1D _at_ 0x81EA;
+ 453          xdata UCHAR volatile SC_ADC_COMP_CTRL _at_ 0x81EB;
+ 454          xdata UCHAR volatile SC_ADC_BAND_GAP _at_ 0x81ED;
+ 455          xdata UCHAR volatile SC_BYPASS_CTRL _at_ 0x81EE;
+ 456          xdata UCHAR volatile SC_LVDS_RSDS_SWITCH _at_ 0x81EF;
+ 457          xdata UCHAR volatile SC_LVDS_DIV _at_ 0x81F0;
+ 458          xdata UCHAR volatile SC_ADC_OP_CURRENT _at_ 0x81F1;
+ 459          xdata UCHAR volatile SC_LVDS_ISOLATION _at_ 0x81F2;
+ 460          xdata UCHAR volatile SC_ADC_TEST2_CTRL _at_ 0x81F3;
+ 461          xdata UCHAR volatile SC_LVDS_CHARGE_PUMP_CURRENT _at_ 0x81F4;
+ 462          xdata UCHAR volatile SC_LVDS_MISC_CTRL1 _at_ 0x81F5;
+ 463          xdata UCHAR volatile SC_LVDS_MISC_CTRL2 _at_ 0x81F6;
+ 464          xdata UCHAR volatile SC_LVDS_MISC_CTRL3 _at_ 0x81F7;
+ 465          xdata UCHAR volatile SC_LVDS_MISC_CTRL4 _at_ 0x81F8;
+ 466          xdata UCHAR volatile SC_LVDS_MISC_CTRL5 _at_ 0x81F9;
+ 467          xdata UCHAR volatile SC_LVDS_MISC_CTRL6 _at_ 0x81FA;
+ 468          xdata UCHAR volatile SC_LVDS_DATA_DELAY _at_ 0x81FB;
+ 469          xdata UCHAR volatile SC_LVDS_CLOCK_DELAY _at_ 0x81FC;
+ 470          xdata UCHAR volatile SC_LVDS_PLL_CTRL _at_ 0x81FD;
+ 471          xdata UCHAR volatile SC_LVDS_PAD_POWER _at_ 0x81FE;
+ 472          
+ 473          xdata UCHAR volatile SC_CBUS_DEV_STATE _at_ 0x8200;//Reserved
+ 474          xdata UCHAR volatile SC_CBUS_MHL_VER _at_ 0x8201;//define by CDF: MHL_VER_MAJOR=1, MHL_VER_MINOR=2
+ 475          xdata UCHAR volatile SC_CBUS_DEV_CAT _at_ 0x8202;//define by CDF: DEV_TYPE[0..3]=1, POW = 900mA
+ 476          xdata UCHAR volatile SC_CBUS_ADOPTER_ID_H _at_ 0x8203;//define by CDF
+ 477          xdata UCHAR volatile SC_CBUS_ADOPTER_ID_L _at_ 0x8204;//define by CDF
+ 478          xdata UCHAR volatile SC_CBUS_VID_LINK_MODE _at_ 0x8205;//define by CDF: SUPP_RGB444, SUPP_YCBCR444, SUPP_ 
+             -YCBCR422, SUPP_PPIXEL, SUPP_ISLANDS, SUPP_VGA
+ 479          xdata UCHAR volatile SC_CBUS_AUD_LINK_MODE _at_ 0x8206;//define by CDF: AUD_2CH, AUD_8CH
+ 480          xdata UCHAR volatile SC_CBUS_VIDEO_TYPE _at_ 0x8207;//define by CDF: VT_GRAPHICS, VT_PHOTO, VT_CINEMA, VT_
+             -GAME, SUPP_VT
+ 481          xdata UCHAR volatile SC_CBUS_LOG_DEV_MAP _at_ 0x8208;//define by CDF: LD_DISPLAY, LD_VIDEO, LD_AUDIO, LD_M
+             -EDIA, LD_TUNER, LD_RECORD, LD_SPEAKER, LD_GUI
+ 482          xdata UCHAR volatile SC_CBUS_BANDWIDTH _at_ 0x8209;//define by CDF: 15x5 =75MHz
+ 483          xdata UCHAR volatile SC_CBUS_FEATURE_FLAG _at_ 0x820A;//define by CDF: UCP_RECV_SUPPORT, UCP_SEND_SUPPORT,
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 9   
+
+             - RCP_SUPPORT, RAP_SUPPORT, SP_SUPPORT
+ 484          xdata UCHAR volatile SC_CBUS_DEVICE_ID_H _at_ 0x820B;//define by CDF
+ 485          xdata UCHAR volatile SC_CBUS_DEVICE_ID_L _at_ 0x820C;//define by CDF
+ 486          xdata UCHAR volatile SC_CBUS_SCRATCHPAD_SIZE _at_ 0x820D;//define by CDF (change to 16 for 6.3.11.19 CBM: 
+             -DUT Receives (0x6C) WRITE_BURST - Too Much Data.)
+ 487          xdata UCHAR volatile SC_CBUS_INT_STAT_SIZE _at_ 0x820E;//define by CDF
+ 488          
+ 489          xdata UCHAR volatile RCP_TEST _at_ 0x820F;//Reserved
+ 490          xdata UCHAR volatile SC_CBUS_TRANS_FLAG0        _at_    0x8280; //R
+ 491          xdata UCHAR volatile SC_CBUS_RX_DATA            _at_    0x8281; //R
+ 492          xdata UCHAR volatile SC_CBUS_TRANS_FLAG1        _at_    0x8282; //R
+ 493          xdata UCHAR volatile SC_CBUS_MSC_CMD            _at_    0x8283; //W
+ 494          xdata UCHAR volatile SC_CBUS_MSC_DATA   _at_    0x8284; //W
+ 495          xdata UCHAR volatile SC_CBUS_DDC_CMD            _at_    0x8285; //W
+ 496          xdata UCHAR volatile SC_CBUS_DDC_DATA   _at_    0x8286; //W
+ 497          xdata UCHAR volatile SC_CBUS_VDR_CMD            _at_    0x8287; //W
+ 498          xdata UCHAR volatile SC_CBUS_VDR_DATA   _at_    0x8288; //W
+ 499          xdata UCHAR volatile SC_CBUS_MSC_ERROR          _at_    0x8289;
+ 500          xdata UCHAR volatile SC_CBUS_DDC_ERROR          _at_    0x828A;
+ 501          xdata UCHAR volatile SC_CBUS_TRANS_INT_EN       _at_    0x828B;
+ 502          xdata UCHAR volatile SC_CBUS_TRANS_RESET        _at_    0x828C; // 1: Reset
+ 503          
+ 504          xdata UCHAR volatile SC_CBUS_CONTROL                    _at_ 0x82A0;
+ 505          xdata UCHAR volatile SC_VBUS_ENABLE_TIME      _at_ 0x82A1;
+ 506          xdata UCHAR volatile SC_CBUS_DISCOVERY_TIME     _at_ 0x82A2;
+ 507          xdata UCHAR volatile SC_DISCOVERY2CONN     _at_ 0x82A3;
+ 508          xdata UCHAR volatile SC_RXSENSE_EN_TIME            _at_ 0x82A6;
+ 509          xdata UCHAR volatile SC_REJECT_CBUS_DISCOVERY_PULSE_MIN            _at_ 0x82AA;
+ 510          xdata UCHAR volatile SC_REJECT_CBUS_DISCOVERY_PULSE_MAX            _at_ 0x82AB;
+ 511          xdata UCHAR volatile SC_WAKE_MODE            _at_ 0x82AC;
+ 512          xdata UCHAR volatile SC_SINK_WAKE                       _at_ 0x82AE;
+ 513          xdata UCHAR volatile SC_CBUS_LINK_INT_FLAG                _at_  0x82B0;  // RO
+ 514          xdata UCHAR volatile SC_CBUS_LINK_INT_MASK   _at_  0x82B1;  
+ 515          xdata UCHAR volatile SC_CBUS_DIS_INT_MASK    _at_  0x82B2;
+ 516          xdata UCHAR volatile SC_CBUS_INT_FLAG           _at_    0x82B5;
+ 517          xdata UCHAR volatile SC_CBUS_INT_EN             _at_    0x82B6;
+ 518          xdata UCHAR volatile SC_LINK_CONTROL            _at_ 0x82C0;
+ 519          xdata UCHAR volatile SC_BIT_TIME_THD_LO            _at_ 0x82C1;
+ 520          xdata UCHAR volatile SC_BIT_TIME_THD_HI            _at_ 0x82C2;
+ 521          xdata UCHAR volatile SC_ACK_BIT_INIT_FALLING_EDGE                       _at_    0x82C8;
+ 522          xdata UCHAR volatile SC_CBUS_DRV                                _at_ 0x82CC;
+ 523          xdata UCHAR volatile SC_ARBIT_WAIT_TIME1                        _at_    0x82CD;
+ 524          xdata UCHAR volatile SC_ARBIT_WAIT_TIME2                        _at_    0x82CE;
+ 525          xdata UCHAR volatile SC_CBUS_NACK_TRY_MAX               _at_ 0x82CF;
+ 526          xdata UCHAR volatile SC_CBUS_RESISTOR_CTRL   _at_ 0x82D1;
+ 527          xdata UCHAR volatile SC_CBUS_DEBUG_CTRL   _at_ 0x82D2;
+ 528          xdata UCHAR volatile SC_MHL_CTRL_2E0           _at_ 0x82E0;
+ 529          xdata UCHAR volatile SC_MHL_CDSENSE_CTRL        _at_ 0x82E2;
+ 530          xdata UCHAR volatile SC_18V_LDO_CONTROL         _at_ 0x82E1;
+ 531          xdata UCHAR volatile SC_CBUS_CHANNEL_SEL                _at_ 0x82F0;
+ 532          xdata UCHAR volatile SC_CBUS_COUNT                      _at_ 0x82F1;    
+ 533          
+ 534          
+ 535          xdata UCHAR volatile SC_DVI_CTRL_300 _at_ 0x8300;
+ 536          xdata UCHAR volatile SC_DVI_CTRL_301 _at_ 0x8301;
+ 537          xdata UCHAR volatile SC_DVI_RB_SWAP _at_ 0x8302;
+ 538          xdata UCHAR volatile SC_DVI_CTRL_303 _at_ 0x8303;
+ 539          xdata UCHAR volatile SC_DVI_PIXELCLK_LO _at_ 0x8304;
+ 540          xdata UCHAR volatile SC_DVI_PIXELCLK_HI _at_ 0x8305;
+ 541          xdata UCHAR volatile SC_DVI_CTRL_306 _at_ 0x8306;
+ 542          xdata UCHAR volatile SC_DVI_CTRL_308 _at_ 0x8308;
+ 543          xdata UCHAR volatile SC_DVI_CTRL_309 _at_ 0x8309;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 10  
+
+ 544          xdata UCHAR volatile SC_DVI_CTRL_310 _at_ 0x8310;
+ 545          xdata UCHAR volatile SC_DVI_CTRL_311 _at_ 0x8311;
+ 546          xdata UCHAR volatile SC_DVI_CTRL_317 _at_ 0x8317;
+ 547          xdata UCHAR volatile SC_DVI_CTRL_32C _at_ 0x832C;
+ 548          xdata UCHAR volatile SC_DVI_CTRL_32F _at_ 0x832F;
+ 549          xdata UCHAR volatile SC_DVI_CTRL_330 _at_ 0x8330;
+ 550          xdata UCHAR volatile SC_DVI_CTRL_331 _at_ 0x8331;
+ 551          xdata UCHAR volatile SC_DVI_CTRL_332 _at_ 0x8332;
+ 552          xdata UCHAR volatile SC_DVI_CTRL_333 _at_ 0x8333;
+ 553          xdata UCHAR volatile SC_DVI_CTRL_334 _at_ 0x8334;
+ 554          xdata UCHAR volatile SC_DVI_CTRL_335 _at_ 0x8335;
+ 555          xdata UCHAR volatile SC_DVI_CTRL_336 _at_ 0x8336;
+ 556          xdata UCHAR volatile SC_DVI_CTRL_337 _at_ 0x8337;
+ 557          xdata UCHAR volatile SC_DVI_CTRL_338 _at_ 0x8338;
+ 558          xdata UCHAR volatile SC_DVI_CTRL_339 _at_ 0x8339;
+ 559          xdata UCHAR volatile SC_DVI_CTRL_33A _at_ 0x833A;
+ 560          xdata UCHAR volatile SC_DVI_CTRL_33B _at_ 0x833B;
+ 561          xdata UCHAR volatile SC_DVI_CTRL_33C _at_ 0x833C;
+ 562          xdata UCHAR volatile SC_DVI_CTRL_33D _at_ 0x833D;
+ 563          xdata UCHAR volatile SC_DVI_CTRL_33E _at_ 0x833E;
+ 564          xdata UCHAR volatile SC_DVI_CTRL_33F _at_ 0x833F;
+ 565          
+ 566          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_340 _at_ 0x8340;
+ 567          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_341 _at_ 0x8341;
+ 568          xdata UCHAR volatile SC_DVI_SLAVE_RB_SWAP _at_ 0x8342;
+ 569          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_343 _at_ 0x8343;
+ 570          xdata UCHAR volatile SC_DVI_SLAVE_PIXELCLK_LO _at_ 0x8344;
+ 571          xdata UCHAR volatile SC_DVI_SLAVE_PIXELCLK_HI _at_ 0x8345;
+ 572          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_346 _at_ 0x8346;
+ 573          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_348 _at_ 0x8348;
+ 574          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_349 _at_ 0x8349;
+ 575          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_350 _at_ 0x8350;
+ 576          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_351 _at_ 0x8351;
+ 577          xdata UCHAR volatile SC_DVI_SLAVE_CTRL_357 _at_ 0x8357;
+ 578          xdata UCHAR volatile SC_DITHER_TOGGLE_CTRL _at_ 0x8371;
+ 579          xdata UCHAR volatile SC_DITHER_TP_GRAY_LVL_LO _at_ 0x8378;
+ 580          xdata UCHAR volatile SC_DITHER_TP_GRAY_LVL_HI _at_ 0x8379;
+ 581          xdata UCHAR volatile SC_NEW_HSYNC_CTRL1 _at_ 0x837A;
+ 582          xdata UCHAR volatile SC_DISPLAY_DITHER_RANDOM _at_ 0x838C;
+ 583          xdata UCHAR volatile SC_BF_WIN_BORDER_CTRL _at_ 0x8390;
+ 584          xdata UCHAR volatile SC_BF_WIN_BORDER_RED _at_ 0x8391;
+ 585          xdata UCHAR volatile SC_BF_WIN_BORDER_GREEN _at_ 0x8392;
+ 586          xdata UCHAR volatile SC_BF_WIN_BORDER_BLUE _at_ 0x8393;
+ 587          xdata UCHAR volatile SC_BF_WIN_BORDER_EN _at_ 0x8394;
+ 588          xdata UCHAR volatile SC_YC_PEAKING_CTRL _at_ 0x83A0;
+ 589          xdata UCHAR volatile SC_LUMA_PEAKING_CTRL _at_ 0x83A1;
+ 590          xdata UCHAR volatile SC_CHROMA_PEAKING_CTRL _at_ 0x83A2;
+ 591          xdata UCHAR volatile SC_LUMA_NOISE_THRESHOLD _at_ 0x83A3;
+ 592          xdata UCHAR volatile SC_TEXT_PEAKING_CTRL _at_ 0x83A4;
+ 593          xdata UCHAR volatile SC_UNDER_SHOOT_CLAMP_EN _at_ 0x83A5;
+ 594          xdata UCHAR volatile SC_ACE_FUNC_CTRL1 _at_ 0x83B0;
+ 595          xdata UCHAR volatile SC_ACE_FUNC_CTRL2 _at_ 0x83B1;
+ 596          xdata UCHAR volatile SC_ACE_DATA_PORT _at_ 0x83B2;
+ 597          xdata UCHAR volatile SC_CM_COLOR_CTRL _at_ 0x83C0;
+ 598          xdata UCHAR volatile SC_CM_BRIGHTNESS_RED _at_ 0x83C1;
+ 599          xdata UCHAR volatile SC_CM_BRIGHTNESS_GREEN _at_ 0x83C2;
+ 600          xdata UCHAR volatile SC_CM_BRIGHTNESS_BLUE _at_ 0x83C3;
+ 601          xdata UCHAR volatile SC_CM_CONTRAST_RED _at_ 0x83C4;
+ 602          xdata UCHAR volatile SC_CM_CONTRAST_GREEN _at_ 0x83C5;
+ 603          xdata UCHAR volatile SC_CM_CONTRAST_BLUE _at_ 0x83C6;
+ 604          xdata UCHAR volatile SC_CM_HUE _at_ 0x83C7;
+ 605          xdata UCHAR volatile SC_CM_SATURATION _at_ 0x83C8;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 11  
+
+ 606          xdata UCHAR volatile SC_CM_INTENSITY _at_ 0x83C9;
+ 607          xdata UCHAR volatile SC_CM_COLOR_ENHANCEMENT_CTRL _at_ 0x83CC;
+ 608          xdata UCHAR volatile SC_CM_INDEX_ACCESS_CTRL _at_ 0x83CD;
+ 609          xdata UCHAR volatile SC_CM_INDEX_ACCESS_ADDR _at_ 0x83CE;
+ 610          xdata UCHAR volatile SC_CM_INDEX_ACCESS_PORT _at_ 0x83CF;
+ 611          xdata UCHAR volatile SC_PREPATTERN_CTRL1 _at_ 0x83F3;
+ 612          xdata UCHAR volatile SC_OVERSCAN_MODE _at_ 0x83FB;
+ 613          xdata UCHAR volatile SC_DBC_CTRL _at_ 0x8430;
+ 614          xdata UCHAR volatile SC_DBC_ADJ _at_ 0x8431;
+ 615          xdata UCHAR volatile SC_DBC_PWM_MIN _at_ 0x8432;
+ 616          xdata UCHAR volatile SC_DBC_PWM_DIV1 _at_ 0x8433;
+ 617          xdata UCHAR volatile SC_DBC_PWM_DIV2 _at_ 0x8434;
+ 618          xdata UCHAR volatile SC_DBC_PWM_DUTY _at_ 0x8435;
+ 619          xdata UCHAR volatile SC_DBC_PWM_CTRL _at_ 0x8436;
+ 620          xdata UCHAR volatile SC_DBC_PWM_OFFSET _at_ 0x8437;
+ 621          xdata UCHAR volatile SC_DBC_AVG_Y _at_ 0x8438;
+ 622          xdata UCHAR volatile SC_EFFECTIVE_COLOR_VALUE _at_ 0x8439;
+ 623          xdata UCHAR volatile SC_DBC_PWM_ACT _at_ 0x843B;
+ 624          xdata UCHAR volatile SC_DBC_POSITION _at_ 0x843D;
+ 625          xdata UCHAR volatile SC_DBC_INDEX_PORT _at_ 0x843E;
+ 626          xdata UCHAR volatile SC_DBC_INDEX_DATA _at_ 0x843F;
+ 627          xdata UCHAR volatile SC_DBC_AVERAGE_MODE _at_ 0x8441;
+ 628          xdata UCHAR volatile SC_DBC_DEBOUNCINT_MODE _at_ 0x8442;
+ 629          xdata UCHAR volatile SC_DBC_NON_LINEAR_GAIN_CTRL _at_ 0x8443;
+ 630          xdata UCHAR volatile SC_DBC_PWM_LUT_LIM _at_ 0x8444;
+ 631          xdata UCHAR volatile SC_DBC_GRAY_LUT_LIM _at_ 0x8445;
+ 632          xdata UCHAR volatile SC_DBC_EXT_CTRL _at_ 0x8446;
+ 633          xdata UCHAR volatile SC_PWMA_CTRL1 _at_ 0x8448;
+ 634          xdata UCHAR volatile SC_PWMA_CTRL2 _at_ 0x8449;
+ 635          xdata UCHAR volatile SC_PWMA_CTRL3 _at_ 0x844A;
+ 636          xdata UCHAR volatile SC_PWMA_CTRL4 _at_ 0x844B;
+ 637          xdata UCHAR volatile SC_PWMA_CTRL5 _at_ 0x844C;
+ 638          xdata UCHAR volatile SC_PWMA_CTRL6 _at_ 0x844D;
+ 639          xdata UCHAR volatile SC_PWMB_CTRL1 _at_ 0x844E;
+ 640          xdata UCHAR volatile SC_PWMB_CTRL2 _at_ 0x844F;
+ 641          xdata UCHAR volatile SC_PWMB_CTRL3 _at_ 0x8450;
+ 642          xdata UCHAR volatile SC_PWMB_CTRL4 _at_ 0x8451;
+ 643          xdata UCHAR volatile SC_PWMB_CTRL5 _at_ 0x8452;
+ 644          xdata UCHAR volatile SC_PWMB_CTRL6 _at_ 0x8453;
+ 645          xdata UCHAR volatile SC_PWMC_CTRL1 _at_ 0x8454;
+ 646          xdata UCHAR volatile SC_PWMC_CTRL2 _at_ 0x8455;
+ 647          xdata UCHAR volatile SC_PWMC_CTRL3 _at_ 0x8456;
+ 648          xdata UCHAR volatile SC_PWMC_CTRL4 _at_ 0x8457;
+ 649          xdata UCHAR volatile SC_PWMC_CTRL5 _at_ 0x8458;
+ 650          xdata UCHAR volatile SC_PWMC_CTRL6 _at_ 0x8459;
+ 651          xdata UCHAR volatile SC_PWMD_CTRL1 _at_ 0x845A;
+ 652          xdata UCHAR volatile SC_PWMD_CTRL2 _at_ 0x845B;
+ 653          xdata UCHAR volatile SC_PWMD_CTRL3 _at_ 0x845C;
+ 654          xdata UCHAR volatile SC_PWMD_CTRL4 _at_ 0x845D;
+ 655          xdata UCHAR volatile SC_PWMD_CTRL5 _at_ 0x845E;
+ 656          xdata UCHAR volatile SC_PWMD_CTRL6 _at_ 0x845F;
+ 657          xdata UCHAR volatile SC_OD_CONFIGURATION _at_ 0x8480;
+ 658          xdata UCHAR volatile SC_OD_MULTI_ZONE_LOW_BOUNDARY_LO _at_ 0x8489;
+ 659          xdata UCHAR volatile SC_OD_MULTI_ZONE_LOW_BOUNDARY_HI _at_ 0x848A;
+ 660          xdata UCHAR volatile SC_OD_MULTI_ZONE_HIGH_BOUNDARY_LO _at_ 0x848B;
+ 661          xdata UCHAR volatile SC_OD_MULTI_ZONE_HIGH_BOUNDARY_HI _at_ 0x848C;
+ 662          xdata UCHAR volatile SC_OD_BTC_CONFIGURATION _at_ 0x8490;
+ 663          xdata UCHAR volatile SC_OD_BTC_CONFIGURATION2 _at_ 0x8491;
+ 664          xdata UCHAR volatile SC_OD_STILL_CONFIGURATION _at_ 0x8498;
+ 665          xdata UCHAR volatile SC_OD_STILL_THRESHOLD _at_ 0x8499;
+ 666          xdata UCHAR volatile SC_OD_DCC_THRESHOLD _at_ 0x849A;
+ 667          xdata UCHAR volatile SC_OD_MOTION_CHECK_CFGCONFIGURATION _at_ 0x849B;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 12  
+
+ 668          xdata UCHAR volatile SC_OD_MOTION_AVG_THRESHOLD _at_ 0x849C;
+ 669          xdata UCHAR volatile SC_OD_MOTION_VALUE_THRESHOLD _at_ 0x89D;
+ 670          xdata UCHAR volatile SC_OD_DDC_CONFIGURATION _at_ 0x84A0;
+ 671          xdata UCHAR volatile SC_OD_TEST_CONFIGURATION _at_ 0x84B0;
+ 672          xdata UCHAR volatile SC_OD_TEST_TP_H_MT_STEP _at_ 0x84B8;
+ 673          xdata UCHAR volatile SC_OD_TEST_TP_V_MT_STEP _at_ 0x84B9;
+ 674          xdata UCHAR volatile SC_OD_MOTION_LOW_THRESHOLD_LO _at_ 0x84C0;
+ 675          xdata UCHAR volatile SC_OD_MOTION_LOW_THRESHOLD_MI _at_ 0x84C1;
+ 676          xdata UCHAR volatile SC_OD_MOTION_LOW_THRESHOLD_HI _at_ 0x84C2;
+ 677          xdata UCHAR volatile SC_OD_MOTION_HIGH_THRESHOLD_LO _at_ 0x84C3;
+ 678          xdata UCHAR volatile SC_OD_MOTION_HIGH_THRESHOLD_MI _at_ 0x84C4;
+ 679          xdata UCHAR volatile SC_OD_MOTION_HIGH_THRESHOLD_HI _at_ 0x84C5;
+ 680          xdata UCHAR volatile SC_OD_MOTION_CHECK_BOUNCE_MONITOR _at_ 0x84C6;
+ 681          xdata UCHAR volatile SC_OD_MOTION_CHECK_THRESHOLD _at_ 0x84C7;
+ 682          xdata UCHAR volatile SC_OD_MOTION_CHECK_DEBOUNCE _at_ 0x84C8;
+ 683          xdata UCHAR volatile SC_OD_MOTION_CHECK_STATUS _at_ 0x84C9;
+ 684          
+ 685          xdata UCHAR volatile SC_AUTO_INTERLACED_CTRL1 _at_ 0x84F0;
+ 686          xdata UCHAR volatile SC_AUTO_INTERLACED_CTRL2 _at_ 0x84F1;
+ 687          xdata UCHAR volatile SC_AUTO_INTERLACED_CTRL3 _at_ 0x84F2;
+ 688          
+ 689          xdata UCHAR volatile SC_FRAME_BUFFER1L_BASE_ADDR_FRC_LO _at_ 0x8508;
+ 690          xdata UCHAR volatile SC_FRAME_BUFFER1L_BASE_ADDR_FRC_MI _at_ 0x8509;
+ 691          xdata UCHAR volatile SC_FRAME_BUFFER1L_BASE_ADDR_FRC_HI _at_ 0x850A;
+ 692          
+ 693          xdata UCHAR volatile SC_FRAME_BUFFER2L_BASE_ADDR_FRC_LO _at_ 0x850E;
+ 694          xdata UCHAR volatile SC_FRAME_BUFFER2L_BASE_ADDR_FRC_MI _at_ 0x850F;
+ 695          xdata UCHAR volatile SC_FRAME_BUFFER2L_BASE_ADDR_FRC_HI _at_ 0x8510;
+ 696          
+ 697          xdata UCHAR volatile SC_FRAME_BUFFER_BASE_ADDR_OD_LO _at_ 0x8514;
+ 698          xdata UCHAR volatile SC_FRAME_BUFFER_BASE_ADDR_OD_MI _at_ 0x8515;
+ 699          xdata UCHAR volatile SC_FRAME_BUFFER_BASE_ADDR_OD_HI _at_ 0x8516;
+ 700          
+ 701          xdata UCHAR volatile SC_FRC_OUTPUT_H_ACTIVE_LO _at_ 0x8540;
+ 702          xdata UCHAR volatile SC_FRC_OUTPUT_H_ACTIVE_HI _at_ 0x8541;
+ 703          xdata UCHAR volatile SC_FRC_OUTPUT_H_TOTAL_LO _at_ 0x8542;
+ 704          xdata UCHAR volatile SC_FRC_OUTPUT_H_TOTAL_HI _at_ 0x8543;
+ 705          xdata UCHAR volatile SC_FRC_OUTPUT_V_ACTIVE_LO _at_ 0x8544;
+ 706          xdata UCHAR volatile SC_FRC_OUTPUT_V_ACTIVE_HI _at_ 0x8545;
+ 707          xdata UCHAR volatile SC_FRC_OUTPUT_V_TOTAL_LO _at_ 0x8546;
+ 708          xdata UCHAR volatile SC_FRC_OUTPUT_V_TOTAL_HI _at_ 0x8547;
+ 709          xdata UCHAR volatile SC_FRC_CTRL _at_ 0x8548;
+ 710          xdata UCHAR volatile SC_FRC_RESET _at_ 0x8549;
+ 711          xdata UCHAR volatile SC_FRC_POINT1_HI _at_ 0x854A;
+ 712          xdata UCHAR volatile SC_FRC_V_POINT1_LO _at_ 0x854B;
+ 713          xdata UCHAR volatile SC_FRC_H_POINT1_LO _at_ 0x854C;
+ 714          xdata UCHAR volatile SC_FRC_POINT2_HI _at_ 0x854D;
+ 715          xdata UCHAR volatile SC_FRC_V_POINT2_LO _at_ 0x854E;
+ 716          xdata UCHAR volatile SC_FRC_H_POINT2_LO _at_ 0x854F;
+ 717          
+ 718          xdata UCHAR volatile SC_DRAM_LINE_BUFFER_DATA_PORT _at_ 0x8550;
+ 719          xdata UCHAR volatile SC_DRAM_LINE_BUFFER_CTRL _at_ 0x8551;
+ 720          xdata UCHAR volatile SC_LINE_BUFFER_BASE_ADDR_LO _at_ 0x8552;
+ 721          xdata UCHAR volatile SC_LINE_BUFFER_BASE_ADDR_MI _at_ 0x8553;
+ 722          xdata UCHAR volatile SC_LINE_BUFFER_BASE_ADDR_HI _at_ 0x8554;
+ 723          xdata UCHAR volatile SC_DRAM_LINE_BUFFER_BASE_QUANTITY _at_ 0x8555;
+ 724          xdata UCHAR volatile SC_LINE_WRITE_SRAM_CTRL_LO _at_ 0x8556;
+ 725          xdata UCHAR volatile SC_LINE_WRITE_SRAM_CTRL_HI _at_ 0x8557;
+ 726          xdata UCHAR volatile SC_LINE_READ_SRAM_CTRL_LO _at_ 0x8558;
+ 727          xdata UCHAR volatile SC_LINE_READ_SRAM_CTRL_HI _at_ 0x8559;
+ 728          xdata UCHAR volatile SC_AUTO_REFLESH_CTRL _at_ 0x855F;
+ 729          xdata UCHAR volatile SC_DRAM_INTERFACE_LO _at_ 0x8580;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 13  
+
+ 730          xdata UCHAR volatile SC_DRAM_INTERFACE_HI _at_ 0x8581;
+ 731          xdata UCHAR volatile SC_DRAM_MMU_MODE _at_ 0x8582;
+ 732          xdata UCHAR volatile SC_DRAM_MMU_MODE_1 _at_ 0x8583;
+ 733          xdata UCHAR volatile SC_DRAM_MMU_MODE_2 _at_ 0x8584;
+ 734          xdata UCHAR volatile SC_DRAM_MMU_MODE_3 _at_ 0x8585;
+ 735          xdata UCHAR volatile SC_DRAM_MMU_REQUEST_W _at_ 0x8586;
+ 736          xdata UCHAR volatile SC_DRAM_MMU_REQUEST_R _at_ 0x8587;
+ 737          xdata UCHAR volatile SC_DDR_PAD_CTRL1 _at_ 0x8588;
+ 738          xdata UCHAR volatile SC_DDR_PAD_CTRL2 _at_ 0x8589;
+ 739          xdata UCHAR volatile SC_MMU_CFG2 _at_ 0x858A;
+ 740          xdata UCHAR volatile SC_MMU_CFG2B _at_ 0x858B;
+ 741          xdata UCHAR volatile SC_MMU_CFG3 _at_ 0x858F;
+ 742          xdata UCHAR volatile SC_FRC_FIFO_CTRL0 _at_ 0x8594;
+ 743          xdata UCHAR volatile SC_FRC_FIFO_CTRL1 _at_ 0x8595;
+ 744          xdata UCHAR volatile SC_FRC_FIFO_CTRL2 _at_ 0x8596;
+ 745          xdata UCHAR volatile SC_FRC_FIFO_CTRL3 _at_ 0x8597;
+ 746          xdata UCHAR volatile SC_OD_FIFO_CTRL1 _at_ 0x8598;
+ 747          xdata UCHAR volatile SC_OD_FIFO_CTRL2 _at_ 0x8599;
+ 748          xdata UCHAR volatile SC_OD_FIFO_CTRL3 _at_ 0x859A;
+ 749          xdata UCHAR volatile SC_PREFRC_FIFO_CTRL1 _at_ 0x859C;
+ 750          xdata UCHAR volatile SC_PREFRC_FIFO_CTRL2 _at_ 0x859D;
+ 751          xdata UCHAR volatile SC_PREFRC_FIFO_CTRL3 _at_ 0x859E;
+ 752          
+ 753          xdata UCHAR volatile SC_INPUT_PROCESSOR_WRITE_FIFO_ADDR_HI _at_ 0x85A0;
+ 754          xdata UCHAR volatile SC_INPUT_PROCESSOR_WRITE_FIFO_ADDR_START _at_ 0x85A1;
+ 755          xdata UCHAR volatile SC_INPUT_PROCESSOR_WRITE_FIFO_ADDR_END _at_ 0x85A2;
+ 756          xdata UCHAR volatile SC_FRC_WRITE_FIFO_ADDR_HI _at_ 0x85A3;
+ 757          xdata UCHAR volatile SC_FRC_WRITE_FIFO_ADDR_START _at_ 0x85A4;
+ 758          xdata UCHAR volatile SC_FRC_WRITE_FIFO_ADDR_END _at_ 0x85A5;
+ 759          xdata UCHAR volatile SC_OD_WRITE_FIFO_ADDR_HI _at_ 0x85A6;
+ 760          xdata UCHAR volatile SC_OD_WRITE_FIFO_ADDR_START _at_ 0x85A7;
+ 761          xdata UCHAR volatile SC_OD_WRITE_FIFO_ADDR_END _at_ 0x85A8;
+ 762          xdata UCHAR volatile SC_PREFRC_WRITE_FIFO_ADDR_CONTROL1 _at_ 0x85A9;
+ 763          xdata UCHAR volatile SC_PREFRC_WRITE_FIFO_ADDR_CONTROL2 _at_ 0x85AA;
+ 764          xdata UCHAR volatile SC_PREFRC_WRITE_FIFO_ADDR_CONTROL3 _at_ 0x85AB;
+ 765          
+ 766          xdata UCHAR volatile SC_DEI_READ_FIFO_F0_ADDR_HI _at_ 0x85B0;
+ 767          xdata UCHAR volatile SC_DEI_READ_FIFO_F0_ADDR_START _at_ 0x85B1;
+ 768          xdata UCHAR volatile SC_DEI_READ_FIFO_F0_ADDR_END _at_ 0x85B2;
+ 769          xdata UCHAR volatile SC_DEI_READ_FIFO_F1_ADDR_HI _at_ 0x85B3;
+ 770          xdata UCHAR volatile SC_DEI_READ_FIFO_F1_ADDR_START _at_ 0x85B4;
+ 771          xdata UCHAR volatile SC_DEI_READ_FIFO_F1_ADDR_END _at_ 0x85B5;
+ 772          xdata UCHAR volatile SC_DEI_READ_FIFO_F2_ADDR_HI _at_ 0x85B6;
+ 773          xdata UCHAR volatile SC_DEI_READ_FIFO_F2_ADDR_START _at_ 0x85B7;
+ 774          xdata UCHAR volatile SC_DEI_READ_FIFO_F2_ADDR_END _at_ 0x85B8;
+ 775          xdata UCHAR volatile SC_DEI_READ_FIFO_F3_ADDR_HI _at_ 0x85B9;
+ 776          xdata UCHAR volatile SC_DEI_READ_FIFO_F3_ADDR_START _at_ 0x85BA;
+ 777          xdata UCHAR volatile SC_DEI_READ_FIFO_F3_ADDR_END _at_ 0x85BB;
+ 778          xdata UCHAR volatile SC_FRC_READ_FIFO_ADDR_HI _at_ 0x85BC;
+ 779          xdata UCHAR volatile SC_FRC_READ_FIFO_ADDR_START _at_ 0x85BD;
+ 780          xdata UCHAR volatile SC_FRC_READ_FIFO_ADDR_END _at_ 0x85BE;
+ 781          xdata UCHAR volatile SC_OD_READ_FIFO_ADDR_HI _at_ 0x85BF;
+ 782          xdata UCHAR volatile SC_OD_READ_FIFO_ADDR_START _at_ 0x85C0;
+ 783          xdata UCHAR volatile SC_OD_READ_FIFO_ADDR_END _at_ 0x85C1;
+ 784          
+ 785          xdata UCHAR volatile SC_PREFRC_READ_FIFO_ADDR1 _at_ 0x85C2;
+ 786          xdata UCHAR volatile SC_PREFRC_READ_FIFO_ADDR2 _at_ 0x85C3;
+ 787          xdata UCHAR volatile SC_PREFRC_READ_FIFO_ADDR3 _at_ 0x85C4;
+ 788          
+ 789          xdata UCHAR volatile SC_MMU_TM_DQS_SEL_7_0 _at_ 0x85EC;
+ 790          xdata UCHAR volatile SC_MMU_TM_DQS_SEL_15_8 _at_ 0x85ED;
+ 791          xdata UCHAR volatile SC_MMU_TM_DQS_SEL_23_16 _at_ 0x85EE;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 14  
+
+ 792          xdata UCHAR volatile SC_MMU_TM_DQS_SEL_31_24 _at_ 0x85EF;
+ 793          
+ 794          xdata UCHAR volatile SC_DRAM_CLOCK_CTRL[8] _at_ 0x85F0;
+ 795          xdata UCHAR volatile SC_DEI_CLK_CTRL _at_ 0x85F8;
+ 796          xdata UCHAR volatile SC_3D_CNV_2D _at_ 0x85F9;
+ 797          xdata UCHAR volatile SC_MMU_DATA_PHASE_SEL _at_ 0x85FA;
+ 798          xdata UCHAR volatile SC_MCU_CLK_INV_APR2 _at_ 0x85FD;
+ 799          xdata UCHAR volatile SC_TMDS_AUTO_CSC _at_ 0x8600;
+ 800          xdata UCHAR volatile SC_SR_AUTO_CSC_CTRL _at_ 0x8601;
+ 801          xdata UCHAR volatile SC_HDMI_SOFTWARE_RESET _at_ 0x8605;
+ 802          xdata UCHAR volatile SC_HDMI_CLK_INT _at_ 0x8608;
+ 803          xdata UCHAR volatile SC_HDCP_BKSV _at_ 0x861A;
+ 804          xdata UCHAR volatile SC_HDCP_BKSV_B2 _at_ 0x861B;
+ 805          xdata UCHAR volatile SC_HDCP_BKSV_B3 _at_ 0x861C;
+ 806          xdata UCHAR volatile SC_HDCP_BKSV_B4 _at_ 0x861D;
+ 807          xdata UCHAR volatile SC_HDCP_BKSV_B5 _at_ 0x861E;
+ 808          xdata UCHAR volatile SC_HDCP_62E _at_ 0x862E;
+ 809          xdata UCHAR volatile SC_HDMI_MHL_MODE_DETECT _at_ 0x8630;
+ 810          xdata UCHAR volatile SC_HDCP_STATUS _at_ 0x8632;
+ 811          xdata UCHAR volatile SC_VIDEO_HTOTAL_LO _at_ 0x863A;
+ 812          xdata UCHAR volatile SC_VIDEO_HTOTAL_HI _at_ 0x863B;
+ 813          xdata UCHAR volatile SC_VIDEO_VTOTAL_LO _at_ 0x863C;
+ 814          xdata UCHAR volatile SC_VIDEO_VTOTAL_HI _at_ 0x863D;
+ 815          xdata UCHAR volatile SC_HDCP_SLAVE_ADDR _at_ 0x863F;
+ 816          xdata UCHAR volatile SC_HDCP_SYNC_SELECT _at_ 0x8640;
+ 817          xdata UCHAR volatile SC_HDCP_INPUT_CTRL _at_ 0x8641;
+ 818          xdata UCHAR volatile SC_FPGA1_FPGA2_DELAY _at_ 0x8642;
+ 819          xdata UCHAR volatile SC_HDCP_CTRL _at_ 0x8643;
+ 820          xdata UCHAR volatile SC_HDCP_PACKING _at_ 0x8645;
+ 821          xdata UCHAR volatile SC_HDCP_CTRL3 _at_ 0x8646;
+ 822          xdata UCHAR volatile SC_ICPCSC_AUTOSTATUS _at_ 0x8649;
+ 823          xdata UCHAR volatile SC_VIDEO_BLANK_BLUE _at_ 0x864B;
+ 824          xdata UCHAR volatile SC_VIDEO_BLANK_GREEN _at_ 0x864C;
+ 825          xdata UCHAR volatile SC_VIDEO_BLANK_RED _at_ 0x864D;
+ 826          xdata UCHAR volatile SC_VIDEO_DE_WIDTH_LO _at_ 0x864E;
+ 827          xdata UCHAR volatile SC_VIDEO_DE_WIDTH_HI _at_ 0x864F;
+ 828          xdata UCHAR volatile SC_VIDEO_DE_LINE_LO _at_ 0x8650;
+ 829          xdata UCHAR volatile SC_VIDEO_DE_LINE_HI _at_ 0x8651;
+ 830          xdata UCHAR volatile SC_HDMI_CLK _at_ 0x866F;
+ 831          xdata UCHAR volatile SC_HDMI_INT_STATE1[5] _at_ 0x8670;
+ 832          xdata UCHAR volatile SC_HDMI_INT_UNMASK1[4] _at_ 0x8675;
+ 833          xdata UCHAR volatile SC_HDMI_INT_STATE2[2] _at_ 0x867B;
+ 834          xdata UCHAR volatile SC_HDMI_INT_UNMASK2[3] _at_ 0x867D;
+ 835          
+ 836          xdata UCHAR volatile SC_HDMI_3D_FORMAT _at_ 0x86B0;
+ 837          xdata UCHAR volatile SC_HDMI_3D_INTERLACE_CTRL _at_ 0x86B2;
+ 838          xdata UCHAR volatile SC_HDMI_VS_INSERT_DISABLE _at_ 0x86B3;
+ 839          xdata UCHAR volatile SC_HDMI_AUTO_DP_COLOR _at_ 0x86B4;
+ 840          xdata UCHAR volatile SC_HDMI_AUTO_CTRL _at_ 0x86B5;
+ 841          xdata UCHAR volatile SC_AEC_EXE_EN[3] _at_ 0x86B6;
+ 842          
+ 843          xdata UCHAR volatile SC_HDMI_3D_DE_LENGTH_LO _at_ 0x86D2;
+ 844          xdata UCHAR volatile SC_HDMI_3D_DE_LENGTH_HI _at_ 0x86D3;
+ 845          xdata UCHAR volatile SC_HDMI_3D_ACTIVE_SPACE _at_ 0x86D4;
+ 846          xdata UCHAR volatile SC_HDMI_3D_RODD_ST_LSB _at_ 0x86D5;
+ 847          xdata UCHAR volatile SC_HDMI_3D_RODD_ST_MSB _at_ 0x86D6;
+ 848          xdata UCHAR volatile SC_HDMI_3D_LEVEN_ST_LSB _at_ 0x86D7;
+ 849          xdata UCHAR volatile SC_HDMI_3D_LEVEN_ST_MSB _at_ 0x86D8;
+ 850          xdata UCHAR volatile SC_HDMI_3D_REVEN_ST_LSB _at_ 0x86D9;
+ 851          xdata UCHAR volatile SC_HDMI_3D_REVEN_ST_MSB _at_ 0x86DA;
+ 852          xdata UCHAR volatile SC_HDMI_3D_ACTIVE_SPACE1 _at_ 0x86DB;
+ 853          xdata UCHAR volatile SC_HDMI_3D_ACTIVE_SPACE2 _at_ 0x86DC;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 15  
+
+ 854          xdata UCHAR volatile SC_HDMI_3D_FP_INTLACED _at_ 0x86DD;
+ 855          xdata UCHAR volatile SC_HDMI_3D_VSYNC_INS_1ST_LO _at_ 0x86DE;
+ 856          xdata UCHAR volatile SC_HDMI_3D_VSYNC_INS_1ST_HI _at_ 0x86DF;
+ 857          xdata UCHAR volatile SC_HDMI_3D_VSYNC_INS_2ND_LO _at_ 0x86E0;
+ 858          xdata UCHAR volatile SC_HDMI_3D_VSYNC_INS_2ND_HI _at_ 0x86E1;
+ 859          xdata UCHAR volatile SC_HDMI_3D_VSYNC_INS_3RD_LO _at_ 0x86E2;
+ 860          xdata UCHAR volatile SC_HDMI_3D_VSYNC_INS_3RD_HI _at_ 0x86E3;
+ 861          
+ 862          xdata UCHAR volatile SC_ACR_CTRL _at_ 0x8700;                   /* Audio Clock Recovery (ACR) */
+ 863          xdata UCHAR volatile SC_ACR_N_VALUE_LO _at_ 0x8703;
+ 864          xdata UCHAR volatile SC_ACR_N_VALUE_MI _at_ 0x8704;
+ 865          xdata UCHAR volatile SC_ACR_N_VALUE_HI _at_ 0x8705;
+ 866          xdata UCHAR volatile SC_ACR_N_HVAL[3] _at_ 0x8706;
+ 867          xdata UCHAR volatile SC_ACR_CTS_VALUE_LO _at_ 0x8709;   /* CTS: Compliance Test Specifiation */
+ 868          xdata UCHAR volatile SC_ACR_CTS_VALUE_MI _at_ 0x870A;
+ 869          xdata UCHAR volatile SC_ACR_CTS_VALUE_HI _at_ 0x870B;
+ 870          xdata UCHAR volatile SC_ACR_CTS_HVAL[3] _at_ 0x870C;
+ 871          xdata UCHAR volatile SC_HDMI_RESET_CTRL _at_ 0x8713;
+ 872          xdata UCHAR volatile SC_AUDIO_EXT_CAP_CTRL _at_ 0x8715;
+ 873          xdata UCHAR volatile SC_AUDIO_HW_EXT_FS _at_ 0x8717;
+ 874          xdata UCHAR volatile SC_AUDIO_DAC_DRIV_CTRL _at_ 0x8719;
+ 875          xdata UCHAR volatile SC_AUDIO_SELECT _at_ 0x871A;
+ 876          xdata UCHAR volatile SC_AUDIO_DELTA_SIGMA_GAIN_CTRL _at_ 0x871B;
+ 877          xdata UCHAR volatile SC_AUDIO_OUTPUT_CTRL _at_ 0x871C;
+ 878          xdata UCHAR volatile SC_AUDIO_DELTA_SIGMA_CTRL _at_ 0x871D;
+ 879          xdata UCHAR volatile SC_AUDIO_TEST1 _at_ 0x8720;
+ 880          xdata UCHAR volatile SC_AUDIO_OUT_CTRL _at_ 0x8721;
+ 881          xdata UCHAR volatile SC_AUDIO_VOLUME_R _at_ 0x8722;                             //140625 mike 
+ 882          xdata UCHAR volatile SC_AUDIO_VOLUME_L _at_ 0x8723;                             //140625 mike 
+ 883          xdata UCHAR volatile SC_AUDIO_ANALOG_OUT_CTRL _at_ 0x8724;
+ 884          xdata UCHAR volatile SC_AUDIO_SMOOTH _at_ 0x8725;
+ 885          xdata UCHAR volatile SC_AUDIO_OUT_IIS_CTRL1 _at_ 0x8726;
+ 886          xdata UCHAR volatile SC_AUDIO_OUT_IIS_CTRL2 _at_ 0x8727;
+ 887          xdata UCHAR volatile SC_AUDIO_OUT_IIS_MAP _at_ 0x8728;
+ 888          xdata UCHAR volatile SC_AUDIO_OUT_IIS_CTRL3 _at_ 0x8729;
+ 889          xdata UCHAR volatile SC_AUDIO_CHANNEL_STATUS1 _at_ 0x872A;
+ 890          xdata UCHAR volatile SC_AUDIO_IN_SPDIF_STATE4 _at_ 0x8730;
+ 891          xdata UCHAR volatile SC_HDMI_DET _at_ 0x8734;
+ 892          xdata UCHAR volatile SC_HDMI_PREAMBLE_CYCLE _at_ 0x8735;
+ 893          xdata UCHAR volatile SC_HDMI_MUTE _at_ 0x8737;
+ 894          xdata UCHAR volatile SC_HDMI_BYPASS _at_ 0x873A;
+ 895          xdata UCHAR volatile SC_HDMI_AVI_TYPE _at_ 0x8740;
+ 896          xdata UCHAR volatile SC_HDMI_AVI_VER _at_ 0x8741;
+ 897          xdata UCHAR volatile SC_HDMI_AVI_LEM _at_ 0x8742;
+ 898          xdata UCHAR volatile SC_HDMI_AVI_CKSM _at_ 0x8743;
+ 899          xdata UCHAR volatile SC_HDMI_AVI[15] _at_ 0x8744;
+ 900          xdata UCHAR volatile SC_AUDIO_INFO_FRAME_DB[10] _at_ 0x8784;
+ 901          xdata UCHAR volatile SC_FPGA_HDMI_DELAY _at_ 0x87F6;
+ 902          xdata UCHAR volatile SC_VSI_PACKET[31] _at_ 0x8860;
+ 903          xdata UCHAR volatile SC_CTRL_PACKET[9] _at_ 0x8880;
+ 904          xdata UCHAR volatile SC_CP_PACKET_TYPE _at_ 0x889F;
+ 905          xdata UCHAR volatile SC_DIG_AUDIO_GAIN_L_LO _at_ 0x88A0;
+ 906          xdata UCHAR volatile SC_DIG_AUDIO_GAIN_L_HI _at_ 0x88A1;
+ 907          xdata UCHAR volatile SC_DIG_AUDIO_GAIN_R_LO _at_ 0x88A2;
+ 908          xdata UCHAR volatile SC_DIG_AUDIO_GAIN_R_HI _at_ 0x88A3;
+ 909          xdata UCHAR volatile SC_DIG_L_OFFSET _at_ 0x88A4;
+ 910          xdata UCHAR volatile SC_DIG_R_OFFSET _at_ 0x88A5;
+ 911          xdata UCHAR volatile SC_AUDIO_AUTO_OFFSET_CTRL _at_ 0x88A6;
+ 912          xdata UCHAR volatile SC_AUDIO_AUTO_CTRL1 _at_ 0x88A7;
+ 913          xdata UCHAR volatile SC_AUDIO_AUTO_CTRL2 _at_ 0x88A8;
+ 914          xdata UCHAR volatile SC_AUDIO_AUTO_CTRL3 _at_ 0x88A9;
+ 915          xdata UCHAR volatile SC_AUDIO_AUTO_CTRL4 _at_ 0x88AA;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 16  
+
+ 916          xdata UCHAR volatile SC_FPGA_AUDIO_PLL _at_ 0x88C4;
+ 917          xdata UCHAR volatile SC_HDCP_BKSV2 _at_ 0x8A9A;
+ 918          xdata UCHAR volatile SC_HDCP_SLAVE_ADDR2 _at_ 0x8ABF;
+ 919          xdata UCHAR volatile SC_SCALER_3D_DEBUG1 _at_ 0x8AEF;
+ 920          xdata UCHAR volatile SC_MCU_PLL _at_ 0x8B04;
+ 921          xdata UCHAR volatile SC_DVI_PLL_M _at_ 0x8B18;
+ 922          xdata UCHAR volatile SC_VPLL_CTRL _at_ 0x8B19;
+ 923          xdata UCHAR volatile SC_VPLL_CTRL1 _at_ 0x8B20;
+ 924          xdata UCHAR volatile SC_VCLK_RATIO_LO _at_ 0x8B21;
+ 925          xdata UCHAR volatile SC_VCLK_RATIO_MI _at_ 0x8B22;
+ 926          xdata UCHAR volatile SC_VCLK_RATIO_HI _at_ 0x8B23;
+ 927          xdata UCHAR volatile SC_MCLK_RATIO_LO _at_ 0x8B31;
+ 928          xdata UCHAR volatile SC_MCLK_RATIO_MI _at_ 0x8B32;
+ 929          xdata UCHAR volatile SC_MCLK_RATIO_HI _at_ 0x8B33;
+ 930          xdata UCHAR volatile SC_MCLK_SSC_CTRL _at_ 0x8B34;
+ 931          xdata UCHAR volatile SC_FRC_RATIO_LO _at_ 0x8B38;
+ 932          xdata UCHAR volatile SC_FRC_RATIO_MI _at_ 0x8B39;
+ 933          xdata UCHAR volatile SC_FRC_RATIO_HI _at_ 0x8B3A;
+ 934          xdata UCHAR volatile SC_MPLL_DIV _at_ 0x8B40;
+ 935          xdata UCHAR volatile SC_MPLL_CTRL_B41 _at_ 0x8B41;
+ 936          xdata UCHAR volatile SC_MPLL_CTRL_B42 _at_ 0x8B42;
+ 937          xdata UCHAR volatile SC_MPLL_LDO_VADJ _at_ 0x8B43;
+ 938          xdata UCHAR volatile SC_MPLL_X2 _at_ 0x8B46;
+ 939          xdata UCHAR volatile SC_SSC_FDEV _at_ 0x8B47;
+ 940          xdata UCHAR volatile SC_SSC_FMOD _at_ 0x8B48;
+ 941          xdata UCHAR volatile SC_MCU_CLK_SSC _at_ 0x8B49;
+ 942          xdata UCHAR volatile SC_MMU_B4E _at_ 0x8B4E;
+ 943          xdata UCHAR volatile SC_ACR_CLK_OUT_SEL _at_ 0x8B50;
+ 944          xdata UCHAR volatile SC_APR_LDO_V_CTRL _at_ 0x8B53;
+ 945          xdata UCHAR volatile SC_MCU_CLK_DIVIDER _at_ 0x8B54;
+ 946          xdata UCHAR volatile SC_ZERO_POWER_LDO18 _at_ 0x8B55;
+ 947          xdata UCHAR volatile SC_OSC_LDO18 _at_ 0x8B56;
+ 948          xdata UCHAR volatile SC_ADC_ZERO_POWER_CTRL _at_ 0x8B57;
+ 949          xdata UCHAR volatile SC_DVI_ZERO_POWER_CTRL _at_ 0x8B58;
+ 950          xdata UCHAR volatile SC_DVI_ZERO_POWER_DETECT _at_ 0x8B59;
+ 951          xdata UCHAR volatile SC_APR_LDO_CTRL _at_ 0x8B5A;
+ 952          xdata UCHAR volatile SC_DVI1_ZERO_POWER_CTRL _at_ 0x8B5B;
+ 953          xdata UCHAR volatile SC_DVI1_ZERO_POWER_DETECT _at_ 0x8B5C;
+ 954          xdata UCHAR volatile SC_DVI2_ZERO_POWER_CTRL _at_ 0x8B5D;
+ 955          xdata UCHAR volatile SC_DVI2_ZERO_POWER_DETECT _at_ 0x8B5E;
+ 956          xdata UCHAR volatile SC_APR_ISOLATION _at_ 0x8B5F;
+ 957          xdata UCHAR volatile SC_VGA_ADC_BIST _at_ 0x8B60;
+ 958          xdata UCHAR volatile SC_ADC_TRIM_CTRL _at_ 0x8B70;
+ 959          xdata UCHAR volatile SC_ADC_CTRL_OPTION1 _at_ 0x8B78;
+ 960          xdata UCHAR volatile SC_ADC_CTRL_OPTION2 _at_ 0x8B79;
+ 961          xdata UCHAR volatile SC_ADC_CTRL_OPTION3 _at_ 0x8B7A;
+ 962          xdata UCHAR volatile SC_ISOLATION_CONTROL _at_ 0x8B61;
+ 963          xdata UCHAR volatile SC_CUT_POWER_CTRL _at_ 0x8B62;
+ 964          xdata UCHAR volatile SC_ADC_LDO _at_ 0x8B63;
+ 965          xdata UCHAR volatile SC_MMU_DLL_CTRL _at_ 0x8B80;
+ 966          xdata UCHAR volatile SC_MMU_DLL_INF _at_ 0x8B81;
+ 967          xdata UCHAR volatile SC_MMU_B82 _at_ 0x8B82;
+ 968          xdata UCHAR volatile SC_MMU_B83 _at_ 0x8B83;
+ 969          xdata UCHAR volatile SC_MMU_B84 _at_ 0x8B84;
+ 970          xdata UCHAR volatile SC_MMU_B85 _at_ 0x8B85;
+ 971          
+ 972          xdata UCHAR volatile SC_MMU_DLL_PHASE_CTRL0 _at_ 0x8B86;
+ 973          #if IS_NT68850_SERIES || IS_NT68790_SERIES
+ 974          xdata UCHAR volatile SC_DP_MASK_AUX_I2C_RW_SEL _at_ 0x8B87;
+ 975          xdata UCHAR volatile SC_DP_FAST_MUTE_CTRL _at_ 0x8B88;
+ 976          xdata UCHAR volatile SC_DP_VS_BLANK_CNT_LO _at_ 0x8B89;
+ 977          xdata UCHAR volatile SC_DP_AUX_CTRL2 _at_ 0x8B8A;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 17  
+
+ 978          #else
+              xdata UCHAR volatile SC_MMU_DLL_PHASE_CTRL1 _at_ 0x8B87;
+              xdata UCHAR volatile SC_MMU_DLL_PHASE_CTRL2 _at_ 0x8B88;
+              xdata UCHAR volatile SC_MMU_DLL_PHASE_CTRL3 _at_ 0x8B89;
+              xdata UCHAR volatile SC_MMU_PLL_SPLL7 _at_ 0x8B8A;
+              #endif
+ 984          
+ 985          xdata UCHAR volatile SC_MMU_PLL_SKEW0 _at_ 0x8B8B;
+ 986          xdata UCHAR volatile SC_MMU_PLL_SKEW1 _at_ 0x8B8C;
+ 987          xdata UCHAR volatile SC_MMU_PLL_SKEW2 _at_ 0x8B8D;
+ 988          xdata UCHAR volatile SC_MMU_PLL_SKEW3 _at_ 0x8B8E;
+ 989          xdata UCHAR volatile SC_MMU_PLL_SKEW4 _at_ 0x8B8F;
+ 990          xdata UCHAR volatile SC_MMU_PLL_SKEW5 _at_ 0x8B90;
+ 991          xdata UCHAR volatile SC_MMU_PLL_SKEW6 _at_ 0x8B91;
+ 992          xdata UCHAR volatile SC_MMU_PLL_SKEW7 _at_ 0x8B92;
+ 993          xdata UCHAR volatile SC_FRC_CLOCK_SEL _at_ 0x8BA0;
+ 994          
+ 995          xdata UCHAR volatile SC_CEC_CTRL _at_ 0x8C00;
+ 996          xdata UCHAR volatile SC_CEC_CLK_BASE _at_ 0x8C01;
+ 997          xdata UCHAR volatile SC_CEC_FREE_CNT1 _at_ 0x8C02;
+ 998          xdata UCHAR volatile SC_CEC_RETRY _at_ 0x8C03;
+ 999          xdata UCHAR volatile SC_CEC_TXR_OFFSET _at_ 0x8C04;
+1000          xdata UCHAR volatile SC_CEC_TXF_OFFSET _at_ 0x8C05;
+1001          xdata UCHAR volatile SC_CEC_SBIT_RANGE _at_ 0x8C06;
+1002          xdata UCHAR volatile SC_CEC_RXD_RANGE _at_ 0x8C07;
+1003          xdata UCHAR volatile SC_CEC_RX_SMP _at_ 0x8C08;
+1004          xdata UCHAR volatile SC_CEC_DEGLITCH _at_ 0x8C09;
+1005          xdata UCHAR volatile SC_CEC_RXL_ERROR _at_ 0x8C0A;
+1006          xdata UCHAR volatile SC_CEC_RXH_ERROR _at_ 0x8C0B;
+1007          xdata UCHAR volatile SC_CEC_INT_EN _at_ 0x8C0C;
+1008          xdata UCHAR volatile SC_CEC_INT_FLAG _at_ 0x8C0D;
+1009          xdata UCHAR volatile SC_CEC_DEBUG _at_ 0x8C0E;
+1010          xdata UCHAR volatile SC_CEC_RX_LENGTH _at_ 0x8C0F;
+1011          xdata UCHAR volatile SC_CEC_TX_LENGTH _at_ 0x8C10;
+1012          xdata UCHAR volatile SC_CEC_FILTER _at_ 0x8C11;
+1013          xdata UCHAR volatile SC_CEC_TX_HEAD _at_ 0x8C20;
+1014          xdata UCHAR volatile SC_CEC_TX_DATA[16] _at_ 0x8C21;
+1015          xdata UCHAR volatile SC_CEC_RX_HEAD _at_ 0x8C31;
+1016          xdata UCHAR volatile SC_CEC_RX_DATA[16] _at_ 0x8C32;
+1017          xdata UCHAR volatile SC_3D_SHUTTER_GLASS_CTRL[32] _at_ 0x8C50;
+1018          xdata UCHAR volatile SC_MCU_IO_CTRL1 _at_ 0x8C80;
+1019          xdata UCHAR volatile SC_MCU_IO_CTRL2 _at_ 0x8C81;
+1020          xdata UCHAR volatile SC_MCU_IO_CTRL3 _at_ 0x8C82;
+1021          xdata UCHAR volatile SC_MCU_IO_CTRL4 _at_ 0x8C83;
+1022          xdata UCHAR volatile SC_MCU_IO_CTRL5 _at_ 0x8C84;
+1023          
+1024          xdata UCHAR volatile SC_OSD_FRAME2_FUNC_CTRL _at_ 0x8D00;
+1025          xdata UCHAR volatile SC_OSD_WIN_HOR_START_LO _at_ 0x8D03;
+1026          xdata UCHAR volatile SC_OSD_WIN_HOR_END_LO _at_ 0x8D04;
+1027          xdata UCHAR volatile SC_OSD_WIN_HOR_HI _at_ 0x8D05;
+1028          xdata UCHAR volatile SC_OSD_WIN_VER_START_LO _at_ 0x8D06;
+1029          xdata UCHAR volatile SC_OSD_WIN_VER_END_LO _at_ 0x8D07;
+1030          xdata UCHAR volatile SC_OSD_WIN_VER_HI _at_ 0x8D08;
+1031          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_CTRL _at_ 0x8D30;
+1032          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_RED_COLOR _at_ 0x8D31;
+1033          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_GREEN_COLOR _at_ 0x8D32;
+1034          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_BLUE_COLOR _at_ 0x8D33;
+1035          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_RED_STEP _at_ 0x8D34;
+1036          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_GREEN_STEP _at_ 0x8D35;
+1037          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_BLUE_STEP _at_ 0x8D36;
+1038          xdata UCHAR volatile SC_OSD_WIN_GRADIENT_COLOR_FRONTGROUND _at_ 0x8D37;
+1039          
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 18  
+
+1040          xdata UCHAR volatile SC_HDCP_TRIM_CTRL _at_ 0x8D50;
+1041          xdata UCHAR volatile SC_HDCP_TRIM_ADDR _at_ 0x8D51;
+1042          xdata UCHAR volatile SC_HDCP_TRIM_DATA_LO _at_ 0x8D52;
+1043          xdata UCHAR volatile SC_HDCP_TRIM_DATA_HI _at_ 0x8D53;
+1044          xdata UCHAR volatile SC_HDCP_TRIM_CTRL2 _at_ 0x8D55;
+1045          
+1046          xdata UCHAR volatile SC_LEDDRIVER_ENABLE _at_ 0x8E00;
+1047          xdata UCHAR volatile SC_LED_PROTECT_CTRL1 _at_ 0x8E02;
+1048          xdata UCHAR volatile SC_LED_PROTECT_CTRL2 _at_ 0x8E07;
+1049          xdata UCHAR volatile SC_LED_SHORT_CTRL _at_ 0x8E06;
+1050          xdata UCHAR volatile SC_ADC_LDO_TRIM _at_ 0x8E0C;
+1051          xdata UCHAR volatile SC_LEDDIMMING_CTRL _at_ 0x8E12;
+1052          xdata UCHAR volatile SC_LED_OPEN_STATUS _at_ 0x8E13;
+1053          xdata UCHAR volatile SC_LED_SHORT_STATUS _at_ 0x8E14;
+1054          xdata UCHAR volatile SC_LEDSTATUS _at_ 0x8E15;
+1055          xdata UCHAR volatile SC_LEDPROTECT_ENABLE _at_ 0x8E1B;
+1056          xdata UCHAR volatile SC_TRIMMING_CONTROL _at_ 0x8E20;
+1057          xdata UCHAR volatile SC_VREF_VOLTAGE_MODE1 _at_ 0x8E22;
+1058          xdata UCHAR volatile SC_VREF_VOLTAGE_MODE2 _at_ 0x8E23;
+1059          xdata UCHAR volatile SC_VREF_VOLTAGE_MODE3 _at_ 0x8E24;
+1060          
+1061          //Local Dimming
+1062          xdata UCHAR volatile SC_LD_CONTROL _at_ 0x8E40;
+1063          xdata UCHAR volatile SC_LD_POSTGAIN _at_ 0x8E46;
+1064          xdata UCHAR volatile SC_LD_POSTDUTY _at_ 0x8E47;
+1065          xdata UCHAR volatile SC_LD_CTRL _at_ 0x8E50;
+1066          xdata UCHAR volatile SC_LD_LEFT_BOUND_LO _at_ 0x8E52;
+1067          xdata UCHAR volatile SC_LD_LEFT_BOUND_HI _at_ 0x8E53;
+1068          xdata UCHAR volatile SC_LD_RIGHT_BOUND_LO _at_ 0x8E54;
+1069          xdata UCHAR volatile SC_LD_RIGHT_BOUND_HI _at_ 0x8E55;
+1070          xdata UCHAR volatile SC_LD_TOP_BOUND_LO _at_ 0x8E56;
+1071          xdata UCHAR volatile SC_LD_TOP_BOUND_HI _at_ 0x8E57;
+1072          xdata UCHAR volatile SC_LD_BOTTOM_BOUND_LO _at_ 0x8E58;
+1073          xdata UCHAR volatile SC_LD_BOTTOM_BOUND_HI _at_ 0x8E59;
+1074          xdata UCHAR volatile SC_LD_INC_SPEED _at_ 0x8E6E;
+1075          xdata UCHAR volatile SC_LD_DEC_SPEED _at_ 0x8E6F;
+1076          xdata UCHAR volatile SC_LD_BLOCK_WIDTH_LO _at_ 0x8E5A;
+1077          xdata UCHAR volatile SC_LD_BLOCK_WIDTH_HI _at_ 0x8E5B;
+1078          xdata UCHAR volatile SC_LD_BLOCK_HEIGHT_LO _at_ 0x8E5C;
+1079          xdata UCHAR volatile SC_LD_BLOCK_HEIGHT_HI _at_ 0x8E5D;
+1080          xdata UCHAR volatile SC_LD_ZONE_PITCH _at_ 0x8E5E;
+1081          xdata UCHAR volatile SC_LD_ABRUPT_CHANGE_CRTL _at_ 0x8E5F;
+1082          
+1083          xdata UCHAR volatile SC_LD_BE_WIDTH _at_ 0x8E61;
+1084          xdata UCHAR volatile SC_LD_BE_HEIGHT _at_ 0x8E62;
+1085          xdata UCHAR volatile SC_LD_BE_HBOUND_LO _at_ 0x8E63;
+1086          xdata UCHAR volatile SC_LD_BE_VBOUND_LO _at_ 0x8E64;
+1087          xdata UCHAR volatile SC_LD_BE_HVBOUND_HI _at_ 0x8E65;
+1088          xdata UCHAR volatile SC_LD_BE_OFFSET_LO _at_ 0x8E66;
+1089          xdata UCHAR volatile SC_LD_BE_PITCH_LO _at_ 0x8E67;
+1090          xdata UCHAR volatile SC_LD_BE_OFFSET_PITCH_HI _at_ 0x8E68;
+1091          
+1092          xdata UCHAR volatile SC_LD_PWMA_CTRL1 _at_ 0x8E6A;
+1093          xdata UCHAR volatile SC_LD_PWMA_CTRL2 _at_ 0x8E6B;
+1094          xdata UCHAR volatile SC_LD_PWMA_CTRL3 _at_ 0x8E6C;
+1095          
+1096          xdata UCHAR volatile SC_LD_DUTY_CONTROL1 _at_ 0x8E71;
+1097          xdata UCHAR volatile SC_LD_PORT_INDEX _at_ 0x8E74;
+1098          xdata UCHAR volatile SC_LD_GRAY_TO_DUTY_TABLE _at_ 0x8E75;
+1099          xdata UCHAR volatile SC_LD_LIGHT_PROFILE_TABLE _at_ 0x8E76;
+1100          xdata UCHAR volatile SC_LD_LV_TO_GAIN_TABLE _at_ 0x8E77;
+1101          xdata UCHAR volatile SC_LD_INDEX_PORT_ADDRESS_LO _at_ 0x8E7B;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 19  
+
+1102          xdata UCHAR volatile SC_LD_INDEX_PORT_ADDRESS_HI _at_ 0x8E7C;
+1103          
+1104          xdata UCHAR volatile SC_LD_MODE_CTRL _at_ 0x8E80;
+1105          xdata UCHAR volatile SC_LD_ADPS_CTRL _at_ 0x8E81;
+1106          xdata UCHAR volatile SC_LD_DUTY_SPEED_CTRL _at_ 0x8E83;
+1107          xdata UCHAR volatile SC_LD_MIN_DUTY _at_ 0x8E85;
+1108          xdata UCHAR volatile SC_LD_BRIGHTNESS _at_ 0x8E86;
+1109              
+1110          xdata UCHAR volatile SC_LD_DYNAMIC_FRAME_THR _at_ 0x8E88;
+1111          
+1112          xdata UCHAR volatile SC_LD_AOS_THRESHOLD_HI _at_ 0x8E8B;
+1113          xdata UCHAR volatile SC_LD_AOS_THRESHOLD_LO _at_ 0x8E8C;
+1114          
+1115          xdata UCHAR volatile SC_LD_DUTY_CONTROL3 _at_ 0x8E91;
+1116          xdata UCHAR volatile SC_LD_HBLK_WIDTH_LO _at_ 0x8E92;
+1117          xdata UCHAR volatile SC_LD_HBLK_WIDTH_HI _at_ 0x8E93;
+1118          xdata UCHAR volatile SC_LD_VBLK_HEIGHT_LO _at_ 0x8E94;
+1119          xdata UCHAR volatile SC_LD_VBLK_HEIGHT_HI _at_ 0x8E95;
+1120          xdata UCHAR volatile SC_LD_H_ZONE_NUM _at_ 0x8E96;
+1121          xdata UCHAR volatile SC_LD_V_ZONE_NUM _at_ 0x8E97;
+1122          xdata UCHAR volatile SC_LD_DIM_DEFINE_CTRL _at_ 0x8E98;
+1123          
+1124          
+1125          xdata UCHAR volatile SC_SR_CTRL _at_ 0x8EA0;
+1126          //FLT1 median Filter
+1127          xdata UCHAR volatile FLT1_TH _at_ 0x8EA4;
+1128          xdata UCHAR volatile FLT1_CUT_SLOP _at_ 0x8EA5;
+1129          xdata UCHAR volatile FLT1_SLOP_TH _at_ 0x8EA6;
+1130          xdata UCHAR volatile FLT1_VAR_TH_LO _at_ 0x8EA7;
+1131          xdata UCHAR volatile FLT1_SLOP_VAR_TH_HI _at_ 0x8EA8;
+1132          
+1133          xdata UCHAR volatile FLT3_MAX_VAR_LO _at_ 0x8EAC;
+1134          xdata UCHAR volatile FLT3_MAX_VAR_HI _at_ 0x8EAD;
+1135          xdata UCHAR volatile FLT3_MEAN_VAR_LO _at_ 0x8EAE;
+1136          xdata UCHAR volatile FLT3_MEAN_VAR_HI _at_ 0x8EAF;
+1137          
+1138          //FLT3 USM
+1139          xdata UCHAR volatile FLT3_CORING_TH _at_ 0x8EB0;
+1140          xdata UCHAR volatile FLT3_GAIN _at_ 0x8EB1;
+1141          xdata UCHAR volatile FLT3_COEFFICENT[12] _at_ 0x8EB2;
+1142          
+1143          //FLT3 Source Select
+1144          xdata UCHAR volatile FLT3_ADD_SUB_SOURCE _at_ 0x8EC0;
+1145          xdata UCHAR volatile FLT3_BRIGHT_DARK_SOURCE _at_ 0x8EC1;
+1146          
+1147          xdata UCHAR volatile FLT3_BRIGHT_DARK_SLOP _at_ 0x8EC2;
+1148          xdata UCHAR volatile FLT3_CORING_SLOP _at_ 0x8EC3;
+1149          //FLT3 USM Demo
+1150          xdata UCHAR volatile USM_DEMO_MODE _at_ 0x8EC4;
+1151          xdata UCHAR volatile USM_DEMO_WIDTH_LO _at_ 0x8EC5;
+1152          xdata UCHAR volatile USM_DEMO_WIDTH_HI _at_ 0x8EC6;
+1153          
+1154          xdata UCHAR volatile FLT1_CONTROL1 _at_ 0x8ECC;
+1155          xdata UCHAR volatile FLT1_CONTROL2 _at_ 0x8ECD;
+1156          
+1157          //FLT3 Coring curve
+1158          xdata UCHAR volatile FLT3_CORING_UP_LOW_TH _at_ 0x8ED0;
+1159          xdata UCHAR volatile FLT3_COR_VAR_TH_LO _at_ 0x8ED1;
+1160          xdata UCHAR volatile FLT3_COR_VAR_TH_HI_SLOP _at_ 0x8ED2;
+1161          //FLT3 Gain curve
+1162          xdata UCHAR volatile FLT3_GAIN_UP_LOW_TH _at_ 0x8ED3;
+1163          xdata UCHAR volatile FLT3_GAIN_VAR_TH_LO _at_ 0x8ED4;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 20  
+
+1164          xdata UCHAR volatile FLT3_GAIN_VAR_TH_HI_SLOP _at_ 0x8ED5;
+1165          
+1166          //FLT3 Low Pass Control
+1167          xdata UCHAR volatile FLT3_LP_VAR_TH_LO _at_ 0x8ED6;
+1168          xdata UCHAR volatile FLT3_LP_VAR_TH_HI_SLOP _at_ 0x8ED7;
+1169          
+1170          xdata UCHAR volatile FLT1_CONTROL_THR _at_ 0x8ED8;
+1171          
+1172          xdata UCHAR volatile SC_SR_HTOTAL_LO _at_ 0x8EE0;
+1173          xdata UCHAR volatile SC_SR_HTOTAL_HI _at_ 0x8EE1;
+1174          xdata UCHAR volatile SC_SR_HACT_LO _at_ 0x8EE2;
+1175          xdata UCHAR volatile SC_SR_HACT_HI _at_ 0x8EE3;
+1176          xdata UCHAR volatile SC_SR_VACT_LO _at_ 0x8EE4;
+1177          xdata UCHAR volatile SC_SR_VACT_HI _at_ 0x8EE5;
+1178          xdata UCHAR volatile SC_SR_HBACKPORCH _at_ 0x8EE6;
+1179          xdata UCHAR volatile SC_SR_PIPEDELAY _at_ 0x8EE7;
+1180          
+1181          xdata UCHAR volatile SC_SR_CONTROL _at_ 0x8EE8;
+1182          
+1183          //DisplayPort
+1184          xdata UCHAR volatile SC_DP_1000 _at_ 0x9000;
+1185          xdata UCHAR volatile SC_DP_1001 _at_ 0x9001;
+1186          xdata UCHAR volatile SC_DP_MANUAL_MAUD_HI _at_ 0x900F;
+1187          xdata UCHAR volatile SC_DP_MANUAL_MAUD_MI _at_ 0x9010;
+1188          xdata UCHAR volatile SC_DP_MANUAL_MAUD_LO _at_ 0x9011;
+1189          xdata UCHAR volatile SC_DP_MANUAL_NAUD_HI _at_ 0x9012;
+1190          xdata UCHAR volatile SC_DP_MANUAL_NAUD_MI _at_ 0x9013;
+1191          xdata UCHAR volatile SC_DP_MANUAL_NAUD_LO _at_ 0x9014;
+1192          xdata UCHAR volatile SC_DP_AUX_DETECT _at_ 0x901A;
+1193          xdata UCHAR volatile SC_DP_AUX_PULSEWIDTH_LO_THD _at_ 0x901B;
+1194          xdata UCHAR volatile SC_DP_AUX_PULSEWIDTH_HI_THD _at_ 0x901C;
+1195          xdata UCHAR volatile SC_DP_AUX_PRECHARGE_NUM _at_ 0x901D;
+1196          xdata UCHAR volatile SC_DP_RESET_FUNCTION _at_ 0x9020;
+1197          xdata UCHAR volatile AUX_I2C_MANUAL     _at_ 0x9024;
+1198          xdata UCHAR volatile AUX_I2C_DATA _at_ 0x9025;  
+1199          xdata UCHAR volatile SC_DP_SCL_HI_HALF_WIDTH _at_ 0x9026;
+1200          xdata UCHAR volatile SC_DP_SCL_HI_WIDTH _at_ 0x9027;
+1201          xdata UCHAR volatile SC_DP_SDA_SETUP _at_ 0x9028;
+1202          xdata UCHAR volatile SC_DP_SDA_HOLD _at_ 0x9029;
+1203          xdata UCHAR volatile SC_DP_AUX_I2C_CTRL _at_ 0x902A;
+1204          xdata UCHAR volatile SC_DP_TX_PRE_CHG_NUM _at_ 0x902B;
+1205          xdata UCHAR volatile SC_DP_RX_PRE_CHG_NUM _at_ 0x902C;
+1206          xdata UCHAR volatile SC_DP_102F _at_ 0x902F;
+1207          xdata UCHAR volatile SC_DP_DEBUG _at_ 0x9030;
+1208          xdata UCHAR volatile SC_DP_HDCP_CTRL _at_ 0x9032;
+1209          xdata UCHAR volatile SC_DP_ERR_DET_CTRL _at_ 0x9033;
+1210          xdata UCHAR volatile SC_DP_CERR_RANGE _at_ 0x9034;
+1211          xdata UCHAR volatile SC_DP_ERR_DET_DISABLE _at_ 0x9037;
+1212          xdata UCHAR volatile SC_DP_HPD_IRQ_WIDTH _at_ 0x903A;
+1213          xdata UCHAR volatile SC_DP_MN_CTRL _at_ 0x903F;
+1214          xdata UCHAR volatile SC_DP_CSC_AUTO_CONF _at_ 0x9040;
+1215          xdata UCHAR volatile SC_DP_VIDEO_FIFO_INT _at_ 0x9044;
+1216          xdata UCHAR volatile SC_DP_VIDEO_CONTROL _at_ 0x9046;
+1217          xdata UCHAR volatile SC_DP_DE_START_POS _at_ 0x9047;
+1218          xdata UCHAR volatile SC_DP_AUDIO_FIFO_CTRL _at_ 0x9050;
+1219          xdata UCHAR volatile SC_DP_AUDIO_ERROR_FLAG _at_ 0x9054;
+1220          xdata UCHAR volatile SC_DP_I2S_CTRL _at_ 0x9055;
+1221          xdata UCHAR volatile SC_DP_CLK_CYCLE_VALUE _at_ 0x9057;
+1222          xdata UCHAR volatile SC_DP_SPDIF_CTRL _at_ 0x9058;
+1223          xdata UCHAR volatile SC_DP_DSD_CTRL _at_ 0x9059;
+1224          xdata UCHAR volatile SC_DP_AUDIO_DAC_CTRL _at_ 0x905A;
+1225          xdata UCHAR volatile SC_DP_INT_GROUP_0 _at_ 0x9073;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 21  
+
+1226          xdata UCHAR volatile SC_DP_INT_GROUP_1 _at_ 0x9074;
+1227          xdata UCHAR volatile SC_DP_INT_GROUP_2 _at_ 0x9075;
+1228          xdata UCHAR volatile SC_DP_INT_GROUP_3 _at_ 0x9076;
+1229          xdata UCHAR volatile SC_DP_INT_GROUP_4 _at_ 0x9077;
+1230          xdata UCHAR volatile SC_DP_MISC_CTRL _at_ 0x9080;
+1231          xdata UCHAR volatile SC_DP_PLL_CTRL _at_ 0x9081;
+1232          xdata UCHAR volatile SC_DP_PLL_M_VID_HI _at_ 0x9082;
+1233          xdata UCHAR volatile SC_DP_PLL_M_VID_MI  _at_ 0x9083;
+1234          xdata UCHAR volatile SC_DP_PLL_M_VID_LO  _at_ 0x9084;
+1235          xdata UCHAR volatile SC_DP_PLL_N_VID_HI _at_ 0x9085;
+1236          xdata UCHAR volatile SC_DP_PLL_N_VID_MI _at_ 0x9086;
+1237          xdata UCHAR volatile SC_DP_PLL_N_VID_LO _at_ 0x9087;
+1238          xdata UCHAR volatile SC_DP_1089 _at_ 0x9089;
+1239          xdata UCHAR volatile SC_DP_108A _at_ 0x908A;
+1240          xdata UCHAR volatile SC_DP_108B _at_ 0x908B;
+1241          xdata UCHAR volatile SC_DP_108C _at_ 0x908C;
+1242          xdata UCHAR volatile SC_DP_MSA_MISC0 _at_ 0x908D;
+1243          xdata UCHAR volatile SC_DP_HTOTAL_LO _at_ 0x9090;
+1244          xdata UCHAR volatile SC_DP_HTOTAL_HI _at_ 0x9091;
+1245          xdata UCHAR volatile SC_DP_VTOTAL_LO _at_ 0x9092;
+1246          xdata UCHAR volatile SC_DP_VTOTAL_HI _at_ 0x9093;
+1247          xdata UCHAR volatile SC_DP_109D _at_ 0x909D;
+1248          xdata UCHAR volatile SC_DP_109E _at_ 0x909E;
+1249          xdata UCHAR volatile SC_DP_PHY_CTRL1 _at_ 0x90A1;
+1250          xdata UCHAR volatile SC_DP_PHY_CTRL3 _at_ 0x90A3;
+1251          xdata UCHAR volatile SC_DP_PHY_CTRL5 _at_ 0x90A5;
+1252          xdata UCHAR volatile SC_DP_PHY_CTRL6 _at_ 0x90A6;
+1253          xdata UCHAR volatile SC_DP_PHY_CTRL10 _at_ 0x90AA;
+1254          xdata UCHAR volatile SC_DP_PHY_CTRL11 _at_ 0x90AB;
+1255          xdata UCHAR volatile SC_DP_10B0 _at_ 0x90B0;
+1256          xdata UCHAR volatile SC_DP_EQR_10B1 _at_ 0x90B1;
+1257          xdata UCHAR volatile SC_DP_EQR_10B3 _at_ 0x90B3;
+1258          xdata UCHAR volatile SC_DP_EQR_10B4 _at_ 0x90B4;
+1259          xdata UCHAR volatile SC_DP_EQR_10B5 _at_ 0x90B5;
+1260          xdata UCHAR volatile SC_DP_EQR_10B6 _at_ 0x90B6;
+1261          xdata UCHAR volatile SC_DP_10B7 _at_ 0x90B7;
+1262          xdata UCHAR volatile SC_DP_AUX_CTRL _at_ 0x90B8;
+1263          xdata UCHAR volatile SC_DP_CDR_10BA _at_ 0x90BA;
+1264          xdata UCHAR volatile SC_DP_CDR_10BB _at_ 0x90BB;
+1265          xdata UCHAR volatile SC_DP_CDR_10BC _at_ 0x90BC;
+1266          xdata UCHAR volatile SC_DP_CDR_10BE _at_ 0x90BE;
+1267          xdata UCHAR volatile SC_DP_CDR_10BF _at_ 0x90BF;
+1268          xdata UCHAR volatile SC_DP_CDR_10C0 _at_ 0x90C0;
+1269          xdata UCHAR volatile SC_DP_CDR_10C1 _at_ 0x90C1;
+1270          xdata UCHAR volatile SC_DP_CDR_10C2 _at_ 0x90C2;
+1271          xdata UCHAR volatile SC_DP_TEST_MODE_EN _at_ 0x90CE;
+1272          xdata UCHAR volatile SC_DP_CRPLL _at_ 0x90D1;
+1273          xdata UCHAR volatile SC_DP_10F1 _at_ 0x90F1;
+1274          xdata UCHAR volatile SC_DP_10F2 _at_ 0x90F2;
+1275          xdata UCHAR volatile SC_DP_10F3 _at_ 0x90F3;
+1276          xdata UCHAR volatile SC_DP_10F4 _at_ 0x90F4;
+1277          xdata UCHAR volatile SC_DP_10F5 _at_ 0x90F5;
+1278          xdata UCHAR volatile AUX_STROBE_CTL     _at_ 0x90F7;
+1279          xdata UCHAR volatile SC_DP_DPCD_00000 _at_ 0x9100;
+1280          xdata UCHAR volatile SC_DP_DPCD_00001 _at_ 0x9101;
+1281          xdata UCHAR volatile SC_DP_DPCD_00002 _at_ 0x9102;
+1282          xdata UCHAR volatile SC_DP_DPCD_00003 _at_ 0x9103;
+1283          xdata UCHAR volatile SC_DP_DPCD_00004 _at_ 0x9104;
+1284          xdata UCHAR volatile SC_DP_DPCD_00006 _at_ 0x9106;
+1285          xdata UCHAR volatile SC_DP_DPCD_00101 _at_ 0x911D;
+1286          xdata UCHAR volatile SC_DP_DPCD_00200 _at_ 0x9125;
+1287          xdata UCHAR volatile SC_DP_DPCD_00201 _at_ 0x9126;
+C51 COMPILER V8.02   SCALERREG                                                             08/07/2015 16:22:24 PAGE 22  
+
+1288          xdata UCHAR volatile SC_DP_DPCD_00246 _at_ 0x9152;
+1289          xdata UCHAR volatile SC_DP_DPCD_00600 _at_ 0x9160;
+1290          xdata UCHAR volatile SC_DP_DPCD_0000D _at_ 0x9161;
+1291          xdata UCHAR volatile SC_DP_HDCP_BKSV _at_ 0x9180;
+1292          xdata UCHAR volatile AUX_STROBE_FUN _at_ 0x9200;
+1293          xdata UCHAR volatile AUX_STROBE_CNT _at_ 0x9201;
+1294          xdata UCHAR volatile AUX_STROBE_PORT _at_ 0x9202;
+1295          xdata UCHAR volatile DP_SC_REG_1224 _at_ 0x9224;
+1296                  #define MASK_NATIVE_AUX                 BIT7            // 0: enable NATIVE_AUX data to strobe, 1: Mask NATIVE_AUX data to strobe
+1297          xdata UCHAR volatile SC_DP_CERR_RST_APHY_RANGE _at_ 0x9231;
+1298          xdata UCHAR volatile SC_DP_CERR_CLR_PHY_RANGE _at_ 0x9232;
+1299          xdata UCHAR volatile SC_DP_CERR_NO_LINK_RANGE _at_ 0x9233;
+1300          xdata UCHAR volatile SC_DP_CERR_NO_LINK_BS_RANGE _at_ 0x9234;
+1301          xdata UCHAR volatile SC_DP_CERR_DET_THRESHOLD _at_ 0x9237;
+1302          
+1303          //******************************************************************************
+1304          // S T A T I C   V A R I A B L E S
+1305          //******************************************************************************
+1306          
+1307          //******************************************************************************
+1308          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+1309          //******************************************************************************
+1310          
+1311          //******************************************************************************
+1312          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+1313          //******************************************************************************
+1314          
+1315          //******************************************************************************
+1316          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+1317          //******************************************************************************
+1318          
+1319          //******************************************************************************
+1320          // F U N C T I O N   B O D Y S
+1321          //******************************************************************************
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

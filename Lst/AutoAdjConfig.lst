@@ -1,0 +1,329 @@
+C51 COMPILER V7.50   AUTOADJCONFIG                                                         11/16/2016 14:31:23 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE AUTOADJCONFIG
+OBJECT MODULE PLACED IN .\Bin\AutoAdjConfig.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\AutoAdjConfig.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.
+                    -\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy
+                    -\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD) DEFINE(SCALER_TYPE=NT68857,NT68857_MODULE,N
+                    -VT_1920X1080,FLASH_BANK=4) PRINT(.\Lst\AutoAdjConfig.lst) OBJECT(.\Bin\AutoAdjConfig.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+*** WARNING C318 IN LINE 254 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\ModelConfig.h'
+*** WARNING C318 IN LINE 255 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\GlobalTimerDef.h'
+*** WARNING C318 IN LINE 256 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\NonSupportTimingList.h'
+*** WARNING C318 IN LINE 257 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\OSDConfig.h'
+*** WARNING C318 IN LINE 258 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\SRConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 15 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 26 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 40 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 54 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 61 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 68 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 75 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 82 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 89 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 96 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 110 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   AUTOADJCONFIG                                                         11/16/2016 14:31:23 PAGE 2   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 117 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 124 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 131 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 140 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 147 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 154 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 161 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 175 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 187 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 194 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 201 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 208 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 215 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 222 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 229 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 236 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 243 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 250 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 259 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 266 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 273 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 280 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 287 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 294 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 301 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 308 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 315 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 322 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 329 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 336 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   AUTOADJCONFIG                                                         11/16/2016 14:31:23 PAGE 3   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 343 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 350 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 360 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 367 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 374 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 381 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 388 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 395 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 402 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 409 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 419 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 426 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 438 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 442 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 452 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 460 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 17 OF .\PHY\SI\NVT\BOARD\BOARD.H: unknown identifier
+*** WARNING C318 IN LINE 18 OF .\PHY\SI\NVT\BOARD\BOARD.H: can't open file 'NT68168_DEMO_BOARD\BoardConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** ERROR C202 IN LINE 74 OF .\LIB\INT.H: 'UART_TX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 74 OF .\LIB\INT.H: invalid dimension size: [0]
+*** ERROR C202 IN LINE 75 OF .\LIB\INT.H: 'UART_RX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 75 OF .\LIB\INT.H: invalid dimension size: [0]
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 16 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: unknown identifier
+*** WARNING C318 IN LINE 17 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: can't open file 'NT68168_DEMO_KEYPAD\KeyPadConfig.h'
+*** WARNING C322 IN LINE 42 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_POWER.H: unknown identifier
+*** WARNING C322 IN LINE 36 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_PWM.H: unknown identifier
+*** WARNING C322 IN LINE 227 OF SYS\NVRAM.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 505 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 97 OF .\APP\OSD\OSDINDEX.H: unknown identifier
+*** WARNING C322 IN LINE 66 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 148 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+C51 COMPILER V7.50   AUTOADJCONFIG                                                         11/16/2016 14:31:23 PAGE 4   
+
+*** WARNING C322 IN LINE 320 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 389 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 475 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** ERROR C320 IN LINE 170 OF .\PHY\PANEL\PANEL.H: "Please choose one panel at least!"
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** ERROR C320 IN LINE 173 OF .\PHY\PANEL\PANEL.H: "Wrong PanelVTotal setting! Please review it!"
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF SYS\SYSAPI.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 111 OF .\APP\INCLUDE.H: unknown identifier
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          
+  30          //******************************************************************************
+  31          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          
+  34          //******************************************************************************
+  35          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  36          //******************************************************************************
+  37          
+  38          //******************************************************************************
+  39          // F U N C T I O N   B O D Y S
+  40          //******************************************************************************
+  41          
+  42          /**************************************************************************//**
+  43           * According to the v start position and v active length, report the present image is full-screen or not.
+  44           * @param v_beg Vertical start position.
+  45           * @param v_act Vertical active length.
+  46           * @return TRUE if the present image is v_act not full-screen else FALSE.
+  47           ******************************************************************************/
+  48          BOOL IsVNonFullScreen(USHRT v_beg, USHRT v_act)
+  49          {
+  50   1          USHRT cap_vlen;
+  51   1          USHRT vtotal;
+  52   1          cap_vlen = GetVCaptureSize();
+  53   1          vtotal = GetInputVTotal();
+  54   1          if ((v_beg > (vtotal-cap_vlen))) {
+  55   2              return TRUE;
+  56   2          }
+  57   1          if (v_act < (cap_vlen - 10)) {
+  58   2              return TRUE;
+  59   2          }
+C51 COMPILER V7.50   AUTOADJCONFIG                                                         11/16/2016 14:31:23 PAGE 5   
+
+  60   1          return FALSE;
+  61   1      }
+  62          
+  63          /**************************************************************************//**
+  64           * According to the h start position and h active length, report the present image is full-screen or not.
+  65           * @param h_beg Horizontal start position.
+  66           * @param h_act Horizontal active length.
+  67           * @return TRUE if the present image h_act is not full-screen else FALSE.
+  68           ******************************************************************************/
+  69          BOOL IsHNonFullScreen(USHRT h_beg, USHRT h_act)
+  70          {
+  71   1          USHRT cap_hwid;
+  72   1          cap_hwid = GetHCaptureSize();
+  73   1          h_beg = 0; // Disable compile warning only.
+  74   1              h_act = (ULONG)h_act * InputTiming.usHTotal50 / GetAngInputHTotal();
+  75   1          if (((cap_hwid/10) < abs(cap_hwid-h_act))) {
+  76   2              return TRUE;
+  77   2          }
+  78   1          return FALSE;
+  79   1      }
+  80          
+  81          /**************************************************************************//**
+  82           * According to the h/v start position and h/v active length, report the present image is full-screen or n
+             -ot.
+  83           * @param h_beg Horizontal start position.
+  84           * @param v_beg Vertical start position.
+  85           * @param h_act Horizontal active length.
+  86           * @param v_act Vertical active length.
+  87           * @return TRUE if the present image is not full-screen else FALSE.
+  88           ******************************************************************************/
+  89          /* 
+  90          BOOL IsNonFullScreen(USHRT h_beg, USHRT v_beg, USHRT h_act, USHRT v_act) 
+  91          {
+  92              USHRT cap_hwid, cap_vlen;
+  93              USHRT vtotal;
+  94          
+  95              cap_hwid = GetHCaptureSize();
+  96              cap_vlen = GetVCaptureSize();
+  97              vtotal = GetInputVTotal();
+  98          
+  99          #if 0
+ 100              if ((v_beg > (vtotal-cap_vlen)) || 
+ 101                  (v_beg < InputTiming.usVStartMin) || 
+ 102                  (v_beg > InputTiming.usVStartMax) ||
+ 103                  (h_beg < InputTiming.usHStartMin) || 
+ 104                  (h_beg > InputTiming.usHStartMax) ||
+ 105                  ((cap_hwid*0.06) < abs(cap_hwid-h_act)) ||
+ 106                  ((cap_vlen*0.06) < abs(cap_vlen-v_act))
+ 107                 ) {
+ 108                  return TRUE;
+ 109              }
+ 110          #else
+ 111                  h_beg = 0; // Disable compile warning only.
+ 112                  h_act = (ULONG)h_act * InputTiming.usHTotal50 / GetAngInputHTotal();
+ 113              if ((v_beg > (vtotal-cap_vlen)) || 
+ 114                  ((cap_hwid/10) < abs(cap_hwid-h_act))) {
+ 115                  return TRUE;
+ 116              }
+ 117          #endif
+ 118              
+ 119              if (v_act < (cap_vlen - 10)) {
+ 120                  return TRUE;
+C51 COMPILER V7.50   AUTOADJCONFIG                                                         11/16/2016 14:31:23 PAGE 6   
+
+ 121              }
+ 122              
+ 123              return FALSE;
+ 124          }
+ 125          */
+
+C51 COMPILATION COMPLETE.  104 WARNING(S),  6 ERROR(S)

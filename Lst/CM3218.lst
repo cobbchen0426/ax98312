@@ -1,0 +1,635 @@
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE CM3218
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\CM3218.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\CM3218.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\Us
+                    -er;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT
+                    -\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_AXI=1,X17N) PRINT(.\Lst\CM3218.lst) O
+                    -BJECT(.\Bin\ADS\AXI\104N\CM3218.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                    Axiomdisplay CO,, LTD.                                  */
+   3          /*                    All Rights Reserved                                     */
+   4          /*                    Ambient Light Sensor Device: Use CAPELLA "CM3218"       */
+   5          /******************************************************************************/
+   6          
+   7          //******************************************************************************
+   8          // I N C L U D E   F I L E S
+   9          //******************************************************************************
+  10          #include "Include.h"
+  11          //#include <math.h>             //george: ALS  used_function: abs(x)
+  12          /*
+  13          SetBrightness()                                                                 : void BacklightOn() / BacklightOff(set SetBrightness:0),  SetBrightnessPWMMax(Pre
+             -SetBrightnessPWMMax=TRUE, SetBrightness())
+  14          SetScalerPWM(BKL_PWM_PORT, (unsigned short)br); : SYSAPI_SetInverterVal(), SetBrightness(), PanelPowerOffS
+             -equence(set SetScalerPWM:0)
+  15          SYSAPI_SetInverterVal()                                                 : APPInitSystem(), FactorySetValue(), UserRecallConfiguration()
+  16          SetBrightnessPWMMax(PreSetBrightnessPWMMax=TRUE, SetBrightness()):  APPTimerRoutine() 
+  17          
+  18          
+  19          tack: SetScalerPWM()
+  20                    * DisableDCR() -> UserSetBrightness();
+  21          */
+  22          
+  23          #if (ALS_EnDis == ALSMODE) || (ALS_EnDis == ALSOffSET)
+  24          //******************************************************************************
+  25          // M A C R O   D E F I N I T I O N S
+  26          //******************************************************************************
+  27          #define CM3218_DEVICE   0x90            /* Slave_Address(8bit): 0x90 */
+  28          #define CM3218_CMD_00   0x00            /* Set ALS_SM, ALS_IT, ALS_PERS, INT_En/Dis, Power-On/ShutDown */
+  29          #define CM3218_CMD_HTWS 0x01            /* (when INT Enable) High Threshold Window setting. */
+  30          #define CM3218_CMD_LTWS 0x02            /* (when INT Enable) Low Threshold Window setting.  */
+  31          #define CM3218_CMD_03   0x03            /* Default Setting : 0x0000 */
+  32          #define CM3218_CMD_READ 0x04            /* CM3218 Output Data */
+  33          #define ALS_SHUTDOWN    0x1005          /* 0x1005 =>  Sen*0.5,  INT_Dis,  PWR_Shutdown */
+  34          #define DEFAULT_SET             0x0000          /* 0x1005 =>  Sen*0.5,  INT_Dis,  PWR_Shutdown */
+  35          #define ALS_INIT0               0x1084          /* 0x1084 => ALS_SM:10(*0.5),  ALS_IT:10,  ALS_PERS:00,  "INT_Dis", Power-On */
+  36          #define ALS_INIT1               0x0084          /* 0x0084 => ALS_SM:00(*1  ),  ALS_IT:10,  ALS_PERS:00,  "INT_Dis", Power-On */
+  37          #define ALS_INIT2               0x0884          /* 0x0084 => ALS_SM:00(*2  ),  ALS_IT:10,  ALS_PERS:00,  "INT_Dis", Power-On */
+  38          
+  39          #define BOUNCE_FST_CNT          5               /* when bALSOnOff switch "ON" at first-timing to set BOUNCE */
+  40          #define BOUNCE_CNT                      200             /* Count-out to Reflsh "NowAlsBright" value action ++ or --.: [Prefer-Range]: 50
+             -,100,(150) */
+  41          #define CNT_SENS_STABLE         2               /* when ALSDATA_TOL=0x00ff, [Prefer-Range]: 0~2 */
+  42          #define CNT_BRIG_STABLE         20              //100
+  43          
+  44          #define ALSDATA_TOL                     0x00ff  /* get ALSens_tmp Tolerance Range */
+  45          
+  46          //-------------------------------------------------
+  47          #define CheckNowAlsBrigMaxRange(a,b) {if (a > b) a = b;}
+  48          #define MAXIMUM_ALS_BRIG        100             /* ALS auto-dim BRIG. MAX */
+  49          //******************************************************************************
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 2   
+
+  50          // S T A T I C   V A R I A B L E S
+  51          //******************************************************************************
+  52          
+  53          //******************************************************************************
+  54          // G L O B A L   V A R I A B L E S
+  55          //******************************************************************************
+  56          // Is --/++ DeBuncSens or CntBrigStable at Time0 / Time1 .
+  57          xdata UCHAR DeBuncSens;                 /* [IN-PUT ] tmpALSdata <-> DeBounceALS <-> ALSdata(stable-value) */
+  58          xdata UCHAR CntBrigStable;                      /* [OUT-PUT] tmpALSdata <-> DeBounceALS <-> ALSdata(stable-value) */
+  59          xdata UCHAR CntSensStable;
+  60          xdata USHRT     NowAlsSens, AlsSens_tmp, AlsSens_buf; //, ALSdata_buffer ;
+  61          
+  62          xdata UCHAR NowAlsBright, AlsBrigTarg;  /* (ALSBright + UserData.ucALSBaseVal) = ALSBrigTarg(set target pwm
+             -) */
+  63          
+  64          xdata UCHAR div_ALSBaseVal=0; //new add
+  65          //xxxxxxx no-used *******  xdata UCHAR ucALSOnSetBrigVal;       //for replace UserData.ucBrightness to set brigh
+             -tness
+  66          //Ref: UserData.bALSOnOff                               //OSDALSOnOffUp() OSDALSOnOffDown()
+  67          //Ref: ucALSBaseVal
+  68          //-----------------------------------------------
+  69          xdata UCHAR Brig_max=100,Brig_min=0;    //george
+  70          
+  71          
+  72          //******************************************************************************
+  73          // S T A T I C   V A R I A B L E S
+  74          //******************************************************************************
+  75              
+  76          //******************************************************************************
+  77          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  78          //******************************************************************************
+  79          
+  80          //******************************************************************************
+  81          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  82          //******************************************************************************
+  83          
+  84          //******************************************************************************
+  85          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  86          //******************************************************************************
+  87          
+  88          
+  89          BOOL CM3218Initialize(void)                             //george: F_CM3218_00
+  90          {
+  91   1      UCHAR const ARA=0x0C;   //ARA, Alert Response Address
+  92   1      UCHAR const ARA_DATA=0x90;
+  93   1              //at Initialize to Check Device:   if( NvramCheckDevice(CM3218_DEVICE) == TRUE)   "always don't used";
+  94   1      // [* if no device *] " ??? how to do some-thing ???
+  95   1      
+  96   1      
+  97   1              //(1) Clear INT:  ReadByte, slave_addr:0x19, ack, Data:CM3218-AD 0x90
+  98   1              if(ReadIICCM3218ARA(ARA, ARA_DATA) != TRUE)
+  99   1                      return 0;       //Fail.
+ 100   1      
+ 101   1              //(2) Shutdown ALS
+ 102   1              WriteIICWordSeq(CM3218_DEVICE, CM3218_CMD_00, ALS_SHUTDOWN);    //0x1005
+ 103   1      
+ 104   1              //(3) Default Setting
+ 105   1              WriteIICWordSeq(CM3218_DEVICE, CM3218_CMD_03, DEFAULT_SET);             //0x0000
+ 106   1      
+ 107   1              //(4) Power On:
+ 108   1              WriteIICWordSeq(CM3218_DEVICE, CM3218_CMD_00, ALS_INIT0);               //0x1084
+ 109   1              //      printf("WriteIICWordSeq_0x00= 0x%4x \n",(USHRT) ALS_INIT );
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 3   
+
+ 110   1              
+ 111   1              DeBuncSens = BOUNCE_CNT;
+ 112   1              CntSensStable = CNT_SENS_STABLE;
+ 113   1              CntBrigStable = CNT_BRIG_STABLE;
+ 114   1      
+ 115   1              NowAlsSens=AlsSens_buf=AlsSens_tmp=0;
+ 116   1              AlsBrigTarg=NowAlsBright=0;
+ 117   1      
+ 118   1              return 1;       //OK
+ 119   1      }
+ 120          
+ 121          void CM3218_BacklightOn_Init(void)              //george: F_CM3218_01   //at Power-On used: BacklightOn()
+ 122          {
+ 123   1              CntBrigStable = CntSensStable = DeBuncSens = BOUNCE_FST_CNT;
+ 124   1              AlsBrigTarg  = UserData.ucALSBaseVal;
+*** ERROR C204 IN LINE 124 OF APP\CM3218.C: 'ucALSBaseVal': undefined member
+ 125   1              NowAlsBright = UserData.ucALSBaseVal;
+*** ERROR C204 IN LINE 125 OF APP\CM3218.C: 'ucALSBaseVal': undefined member
+ 126   1      }
+ 127          
+ 128          
+ 129          void CM3218_ALSOnInit(void)                             //george: F_CM3218_02   //at OSDALSOnOffUp() or OSDALSOnOffDown()  used.
+ 130          {
+ 131   1              CntBrigStable = CntSensStable = DeBuncSens = BOUNCE_FST_CNT;                                                                                                            
+ 132   1              AlsBrigTarg  = UserData.ucBrightness;
+ 133   1              NowAlsBright = UserData.ucBrightness;                   
+ 134   1      
+ 135   1      }
+ 136          
+ 137          void SetNowALSBrig(void)                                        //george: F_CM3218_01
+ 138          {
+ 139   1              CheckNowAlsBrigMaxRange(NowAlsBright, MAXIMUM_ALS_BRIG);
+ 140   1              SetBrightness(GetNowAlsBright1023());
+ 141   1      }
+ 142          
+ 143          
+ 144          
+ 145          void CM3218_Process(void)                                       //george: F_CM3218_03
+ 146          {
+ 147   1              static xdata USHRT CkDevice_timer=0, DataReflash_time=0, BrigReflash_time;
+ 148   1              static UCHAR SS=0;      /* SS=0: device_not_exist(set ALSOnOff=OFF).   SS=1: CM3218_Init  SS=2: Read_data */
+ 149   1              UCHAR i=0;
+ 150   1              
+ 151   1              // if ALS: CM3218 OFF return;
+ 152   1              if(UserData.bALSOnOff == OFF)   return;
+*** ERROR C204 IN LINE 152 OF APP\CM3218.C: 'bALSOnOff': undefined member
+ 153   1      
+ 154   1              //(A) Check Device      
+ 155   1              if ((GetTimerTick() - CkDevice_timer) > 3000) 
+ 156   1              {
+ 157   2                      CkDevice_timer = GetTimerTick();
+ 158   2      
+ 159   2                      for (i=0; i<5; i++) {
+ 160   3                              if (NvramCheckDevice(CM3218_DEVICE) == TRUE) {
+ 161   4                                      if(SS==2)
+ 162   4                                              SS=2;   //no need change.
+ 163   4                                      else
+ 164   4                                              SS=1;   //CM3218 device exist.
+ 165   4                          break;
+ 166   4                              }
+ 167   3                      }
+ 168   2                  if (i == 5) {  
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 4   
+
+ 169   3                              SS=0;           //CM3218 device not exist.
+ 170   3                              //------------------------------------
+ 171   3                              UserData.bALSOnOff = OFF;
+*** ERROR C204 IN LINE 171 OF APP\CM3218.C: 'bALSOnOff': undefined member
+ 172   3                              UserSetALSOnOff();
+ 173   3                              //SetOSDUpdUsrFlag();
+ 174   3                              UserSetBrightness();
+ 175   3                      return;
+ 176   3                  }
+ 177   2              }
+ 178   1      
+ 179   1      
+ 180   1              //(B) CM3218 Initialize
+ 181   1              if(SS==1)
+ 182   1              {
+ 183   2                      if (CM3218Initialize() == TRUE)
+ 184   2                              SS=2;
+ 185   2                      else
+ 186   2                              SS=0;
+ 187   2              }
+ 188   1      
+ 189   1      
+ 190   1      
+ 191   1              //(C) (at SS=2) CM3218 Read Data (need Delay > 400ms)
+ 192   1              // (1). [IN-PUT] : Count-out to Reflish "ALSens" Value.  to IIC none busy.      
+ 193   1              if ((GetTimerTick() - DataReflash_time) > 600) 
+ 194   1              {
+ 195   2                      DataReflash_time = GetTimerTick();
+ 196   2                              
+ 197   2                              if(--DeBuncSens == 0)
+ 198   2                              {       
+ 199   3                                      DeBuncSens = BOUNCE_CNT;
+ 200   3      
+ 201   3                                      ResetWDTimer();                         
+ 202   3                                      ReadIICWordSeq(CM3218_DEVICE, CM3218_CMD_READ, &AlsSens_tmp);
+ 203   3                      
+ 204   3                                      if( AlsSens_buf < ALSDATA_TOL )                                 // if TRUE: set ALSens_buf = MINMUM_VALUE;
+ 205   3                                              AlsSens_buf = ALSDATA_TOL;
+ 206   3                                      else if( AlsSens_buf > (0xffff-ALSDATA_TOL) )   // if TRUE: set ALSens_buf = MAXMUM_VALUE;
+ 207   3                                              AlsSens_buf = (0xffff-ALSDATA_TOL);
+ 208   3                                      
+ 209   3                                      if( (AlsSens_buf+ALSDATA_TOL >= AlsSens_tmp ) && (AlsSens_tmp >= AlsSens_buf-ALSDATA_TOL) )     // if TRU
+             -E: the "AlsSens_tmp" Value Stable.
+ 210   3                                      {
+ 211   4                                              //xxx AlsSens_buf = AlsSens_tmp;
+ 212   4                      
+ 213   4                                              if( --CntSensStable == 0 )                                              // [ OK ]: ths "CntSensStable" times equal  "CNT_SENS_STABLE-1", the
+             -n set "NowAlsSens" Value Stable.
+ 214   4                                              {
+ 215   5                                                      CntSensStable = CNT_SENS_STABLE;
+ 216   5                                                      NowAlsSens    = AlsSens_buf;
+ 217   5                      
+ 218   5                      
+ 219   5                              // (2). [CONVERTER]:
+ 220   5                                                      /*      
+ 221   5                                                              493 > X > 378 nits: factor=26.0  ==>  (374 nits) * (26.0) = AlsSens_Value(12818= 0x3212);
+ 222   5                                                              374 > X > 278 nits: factor=26.1  ==>  (374 nits) * (26.1) = AlsSens_Value( 9761= 0x2621);
+ 223   5                                                              278 > X > 221 nits: factor=26.2  ==>  (278 nits) * (26.2) = AlsSens_Value( 7283= 0x1C73);
+ 224   5                                                              221 > X > 187 nits: factor=26.4  ==>  (221 nits) * (26.4) = AlsSens_Value( 5834= 0x16CA);
+ 225   5                                                              187 > X > 110 nits: factor=26.6  ==>  (187 nits) * (26.6) = AlsSens_Value( 4974= 0x136E);
+ 226   5                                                                              < 110nits : factor=27.0  ==>  (110 nits) * (27.0) = AlsSens_Value( 2907= 0x0B9A);               
+ 227   5                                                      */
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 5   
+
+ 228   5                                                      /* { //George_Source
+ 229   5                                                              if( NowAlsSens > 0x3212 )               //0x3212: 500nits
+ 230   5                                                                      AlsBrigTarg = 100;
+ 231   5                                                              else if( NowAlsSens > 0x2DC0 )  //0x2DC0: 451nits
+ 232   5                                                                      AlsBrigTarg = 90;
+ 233   5                                                              else if( NowAlsSens > 0x2990 )  //0x2990: 408nits
+ 234   5                                                                      AlsBrigTarg = 80;
+ 235   5                                                              else if( NowAlsSens > 0x2540 )  //0x2540: 365nits
+ 236   5                                                                      AlsBrigTarg = 70;
+ 237   5                                                              else if( NowAlsSens > 0x20E0 )  //0x20E0: 322nits
+ 238   5                                                                      AlsBrigTarg = 60;
+ 239   5                                                              else if( NowAlsSens > 0x1C70 )  //0x1C70: 278nits
+ 240   5                                                                      AlsBrigTarg = 50;
+ 241   5                                                              else if( NowAlsSens > 0x17F0 )  //0x17F0: 234nits
+ 242   5                                                                      AlsBrigTarg = 40;
+ 243   5                                                              else if( NowAlsSens > 0x1360 )  //0x1360: 187nits
+ 244   5                                                                      AlsBrigTarg = 30;
+ 245   5                                                              else if( NowAlsSens > 0x0ED0 )  //0x0ED0: 143nits
+ 246   5                                                                      AlsBrigTarg = 20;
+ 247   5                                                              else if( NowAlsSens > 0x0A20 )  //0x0A20:  98nits
+ 248   5                                                                      AlsBrigTarg = 10;
+ 249   5                                                              else if( NowAlsSens < 0x0A20 )  //0x07D0 )      //0x07D0:  74nits
+ 250   5                                                                      AlsBrigTarg = 10;
+ 251   5                                                      }  */
+ 252   5                      
+ 253   5                                                      { //Adam_Request
+ 254   6                                                              if( NowAlsSens > 0x5034 )               //0x3212: 500nits
+ 255   6                                                                      AlsBrigTarg = 100;
+ 256   6                                                              else if( NowAlsSens > 0x4620 )  //0x2DC0: 451nits
+ 257   6                                                                      AlsBrigTarg = 90;
+ 258   6                                                              else if( NowAlsSens > 0x3C26 )  //0x2990: 408nits
+ 259   6                                                                      AlsBrigTarg = 80;
+ 260   6                                                              else if( NowAlsSens > 0x3220 )  //0x2540: 365nits
+ 261   6                                                                      AlsBrigTarg = 70;
+ 262   6                                                              else if( NowAlsSens > 0x2189 )  //0x20E0: 322nits
+ 263   6                                                                      AlsBrigTarg = 60;
+ 264   6                                                              else if( NowAlsSens > 0x1E13 )  //0x1C70: 278nits
+ 265   6                                                                      AlsBrigTarg = 50;
+ 266   6                                                              else if( NowAlsSens > 0x149A )  //0x17F0: 234nits
+ 267   6                                                                      AlsBrigTarg = 40;
+ 268   6                                                              else if( NowAlsSens > 0x0F73 )  //0x1360: 187nits
+ 269   6                                                                      AlsBrigTarg = 30;
+ 270   6                                                              else if( NowAlsSens > 0x0A4D )  //0x0ED0: 143nits
+ 271   6                                                                      AlsBrigTarg = 20;
+ 272   6                                                              else if( NowAlsSens > 0x0834 )  //0x0A20:  98nits
+ 273   6                                                                      AlsBrigTarg = 10;
+ 274   6                                                              else if( NowAlsSens < 0x0834 )  //0x07D0 )      //0x07D0:  74nits
+ 275   6                                                                      AlsBrigTarg = 10;
+ 276   6                                                      }
+ 277   5                                              }//End if( CntSensStable == 0 )
+ 278   4                                      }else {
+ 279   4                                              CntSensStable = CNT_SENS_STABLE;        
+ 280   4                                              AlsSens_buf   = AlsSens_tmp;
+ 281   4                                      }
+ 282   3                              }//End if(--DeBuncSens == 0)
+ 283   2              }//End (C) CM3218 Read Data
+ 284   1                      
+ 285   1              
+ 286   1      
+ 287   1              // (3). [OUT-PUT]: Count-out to Reflsh "NowAlsBright" Value.
+ 288   1              if ((GetTimerTick() - BrigReflash_time) > 700) 
+ 289   1              {
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 6   
+
+ 290   2                      BrigReflash_time = GetTimerTick();              
+ 291   2                              
+ 292   2                              if(--CntBrigStable == 0)        
+ 293   2                              {
+ 294   3                                      CntBrigStable = CNT_BRIG_STABLE;
+ 295   3      
+ 296   3      //==================================== ALSBaseOffsetValue ====================================
+ 297   3                                      if(AlsBrigTarg+ (UserData.ucALSBaseVal / 10) > 100)
+ 298   3                                              AlsBrigTarg;
+ 299   3                                      AlsBrigTarg = AlsBrigTarg+ UserData.ucALSBaseVal;
+ 300   3      
+ 301   3      //--------------------------------------------------------------------------------------------                          
+ 302   3                                      div_ALSBaseVal = UserData.ucALSBaseVal; ///2;           //new add (PWM Range 0~100% ==chang-to=> 10~50%)
+ 303   3                      /*              if(AlsBrigTarg ==10 && (div_ALSBaseVal ==0) )   //new add (foucus ALSBV=0 && AlsBrigTarg=10, to NowAls
+             -Birg=>10)
+ 304   3                                      {
+ 305   3                                              if(NowAlsBright < 10){
+ 306   3                                                      NowAlsBright++;
+ 307   3                                                      SetNowALSBrig();
+ 308   3                                              }else if(NowAlsBright > 10){
+ 309   3                                                      NowAlsBright--;
+ 310   3                                                      SetNowALSBrig();
+ 311   3                                              }
+ 312   3                                      } */
+ 313   3                      
+ 314   3                                      if(AlsBrigTarg < div_ALSBaseVal)                                                                                        // Focus_Set_Brig: at "UserData.ucALSBaseVal"
+ 315   3                                      {
+ 316   4                                              if(div_ALSBaseVal > NowAlsBright) {
+ 317   5                                                      NowAlsBright++; 
+ 318   5                                                      SetNowALSBrig();
+ 319   5                                              }else if(div_ALSBaseVal < NowAlsBright) {
+ 320   5                                                      NowAlsBright--;
+ 321   5                                                      SetNowALSBrig();
+ 322   5                                              }else{
+ 323   5                                                      // when "ucALSBaseVal == NowAlsBright" to Dummy!
+ 324   5                                              }
+ 325   4                                      }
+ 326   3                                      else // when (AlsBrigTarg > ucALSBaseVal) or (AlsBrigTarg == ucALSBaseVal)              // Focus_Set_Brig: at "Als
+             -BrigTarg"
+ 327   3                                      {
+ 328   4                                              if(AlsBrigTarg > NowAlsBright) {                        
+ 329   5                                                      NowAlsBright++;
+ 330   5                                                      SetNowALSBrig();
+ 331   5                                              }else if(AlsBrigTarg < NowAlsBright) {
+ 332   5                                                      NowAlsBright--;
+ 333   5                                                      SetNowALSBrig();
+ 334   5                                              }else{
+ 335   5                                                      // when "AlsBrigTarg == NowAlsBright" or "ucALSBaseVal == NowAlsBright"  to Dummy!
+ 336   5                                              }
+ 337   4                                      }
+ 338   3                              }//End if(--CntBrigStable == 0)
+ 339   2      
+ 340   2              }//End (3). [OUT-PUT]
+ 341   1      
+ 342   1      
+ 343   1      
+ 344   1      
+ 345   1      
+ 346   1      }
+ 347          
+ 348          
+ 349          
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 7   
+
+ 350          
+ 351          void Analy_CMD(void)
+ 352          {
+ 353   1      
+ 354   1              UCHAR i=0,CkCRC=0;
+ 355   1      
+ 356   1              if(ucIsRecivCMDSS==1)
+ 357   1              {
+ 358   2                      ucIsRecivCMDSS=0;
+ 359   2                      putchar(0xEE);  return;
+ 360   2                      if(ucUARTRxBuffer[1] == 0x00) //Read -> putchar()
+ 361   2                      {
+ 362   3                              switch(ucUARTRxBuffer[2]) //Focus_Item
+ 363   3                              {                                                 //Focus_value_return;
+ 364   4                                      case 0x10:      putchar(0xAA);  putchar(UserData.ucBrightness); putchar( 0x100-UserData.ucBrightness);  break
+             -;        //Brightness
+ 365   4                                      case 0x11:      putchar(0xAA);  putchar(UserData.ucContrast);   putchar( 0x100-UserData.ucContrast);    break;  //
+             -Contrast
+ 366   4                                      //case 0x17:    break;  //AutoTurn;      don't need Read.
+ 367   4                                      case 0x20:      putchar(0xAA);  putchar(3-UserData.ucColorTemp);        putchar( 0x100-(3-UserData.ucColorTemp));       b
+             -reak;        //ColorTemp
+ 368   4      
+ 369   4                                      case 0x40:      putchar(0xAA);  putchar(UserData.ucInputSource);        putchar( 0x100-UserData.ucInputSource);         br
+             -eak; //InputSource
+ 370   4                                      //      if(ucUARTRxBuffer[3] == 0)      //VGA
+ 371   4                                      //      {
+ 372   4                                      //              //UserData.ucInputSource = GetInputPortName((GetInputPortIndex(UserData.ucInputSource)+1)%NUM_INPU
+             -T_SC);
+ 373   4                      //              //UserSetInputSource();
+ 374   4                                      //      }else if(ucUARTRxBuffer[2] == 1)        //DVI
+ 375   4                                      //      {
+ 376   4                                      //      
+ 377   4                                      //      }
+ 378   4                                      //      break;  //UserData.ucInputSource,  GetInputPortName(),  UserSetInputSource(); 
+ 379   4                                      case 0x50:      putchar(0xAA);  putchar(UserData.bALSOnOff);    putchar(UserData.bALSOnOff);                    break;  //Auto Di
+             -ming
+ 380   4                                      case 0x51:      putchar(0xAA);  putchar(0xFF);  putchar(0x01);                  break;                                                                  //PIR, "Disable"
+ 381   4                                      case 0x52:      putchar(0xAA);  putchar(0xFF);  putchar(0x01);                  break;                                                                  //Video-Disable(Detect) (0x52
+             -), "Disable"
+ 382   4                                      case 0xE1:      putchar(0xAA);  putchar(UserData.bPowerStatus); putchar( 0x100-UserData.bPowerStatus);  break
+             -;        //PWR
+ 383   4                                      case 0x12:      putchar(0xAA);  putchar(Brig_max);      putchar(0x100-Brig_max);        //Bright_MAX (0x12), set "100%"
+ 384   4                                      case 0x13:      putchar(0xAA);  putchar(Brig_min);      putchar(0x100-Brig_min);        //Bright_MIN (0x13), set "0%"
+ 385   4                                      default:
+ 386   4                                              ucUARTRxIn=0; ucIsRecivCMDSS=0; return;
+ 387   4                                              break;
+ 388   4                              }
+ 389   3                      }
+ 390   2                      else if (ucUARTRxBuffer[1] == 0x01) //Write -> set UserData.
+ 391   2                      {
+ 392   3                              switch(ucUARTRxBuffer[2]) //Focus_Item
+ 393   3                              {
+ 394   4                                      
+ 395   4                                      case 0x10:
+ 396   4                                              UserData.ucBrightness = ucUARTRxBuffer[3];
+ 397   4                                              UserSetBrightness();        
+ 398   4                                              //can't find: SetOSDUpdUsrFlag();
+ 399   4                                              break;
+ 400   4                                      case 0x11:
+ 401   4                                              UserData.ucContrast = ucUARTRxBuffer[3];
+ 402   4                                              UserSetContrast();          
+ 403   4                                              //can't find: SetOSDUpdUsrFlag();
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 8   
+
+ 404   4                                              break;
+ 405   4                                      case 0x17:      //Autotune Active (0x0x17),  when "VGA-Input" used.
+ 406   4                                              UserPerformAutoTune();
+ 407   4                                              break;
+ 408   4                                      case 0x20:
+ 409   4                                              UserData.ucColorTemp = 3- ucUARTRxBuffer[3];
+ 410   4                                              UserSetColorTemp();
+ 411   4                                              //can't find: SetOSDUpdUsrFlag();
+ 412   4                                              break;
+ 413   4      
+ 414   4                                      //case 0x40:    //InputSource (0x40)
+ 415   4                                      //      no need write.
+ 416   4                                      //      break;
+ 417   4                                                                                                                                                                                                                                      
+ 418   4      
+ 419   4      
+ 420   4                                      case 0x50:
+ 421   4                                              if(ucUARTRxBuffer[3] == 0x00)           //Auto-Dimming (0x50)
+ 422   4                                              {
+ 423   5                                                      //UserData.ucInputSource = GetInputPortName((GetInputPortIndex(UserData.ucInputSource)+1)%NUM_INPUT_
+             -SC);
+ 424   5                                      //UserSetInputSource();
+ 425   5                                              }else if(ucUARTRxBuffer[3] == 0x01)     //Auto-Dimming_ON
+ 426   4                                              {
+ 427   5                                                      UserData.bALSOnOff = ON;
+ 428   5                                                  //UserSetALSOnOff();
+ 429   5                                                      CM3218_ALSOnInit();
+ 430   5                                                  //can't find: SetOSDUpdUsrFlag();
+ 431   5                                              }else if(ucUARTRxBuffer[3] == 0xFF)     //Auto-Dimming Disable          void OSDALSOnOffDown(void)
+ 432   4                                              {
+ 433   5                                                      UserData.bALSOnOff = ON;
+ 434   5                                                  //UserSetALSOnOff();
+ 435   5                                                      UserSetBrightness();
+ 436   5                                                  //can't find: SetOSDUpdUsrFlag();
+ 437   5                                              }
+ 438   4                                              break;
+ 439   4      
+ 440   4                                      case 0x51:      //PIR (0x51)
+ 441   4                                              break;
+ 442   4                                      case 0x52: //Video-Disable(Detect)      (0x52)
+ 443   4                                              break; 
+ 444   4      
+ 445   4                                      case 0xE1:      //putchar(0xAA);        putchar(UserData.bPowerStatus); putchar( 0x100-UserData.bPowerStatus);  
+ 446   4                                              if(ucUARTRxBuffer[3]== 0x01)    //UserData.bPowerStatus == ON)
+ 447   4                                              {
+ 448   5                                          //can't find: APPSetSystemPowerState(APPSTATE_PWR_ON);
+ 449   5                                          //can't find: SetGlobalTimer(GLOBAL_TMR_DATA_UPDATE, GBTM_DATA_UPDATE);
+ 450   5                                          //can't find: SetAPPUpdUsrFlag(); 
+ 451   5                                              }else if(ucUARTRxBuffer[3]== 0x00)      //else if (UserData.bPowerStatus == OFF)
+ 452   4                                              {
+ 453   5                                          //can't find: APPSetSystemPowerState(APPSTATE_PWR_OFF);
+ 454   5                                          //can't find: SetGlobalTimer(GLOBAL_TMR_DATA_UPDATE, GBTM_DATA_UPDATE);
+ 455   5                                          //can't find: SetAPPUpdUsrFlag();                                   
+ 456   5                                              }
+ 457   4                                              break;
+ 458   4      
+ 459   4                                      case 0x12:      //Bright_MAX (0x12)
+ 460   4                                              Brig_max = ucUARTRxBuffer[3]; 
+ 461   4                                              break;
+ 462   4      
+ 463   4                                      case 0x13:      //Bright_MIN (0x13)
+ 464   4                                              Brig_min = ucUARTRxBuffer[3];
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 9   
+
+ 465   4                                              break;
+ 466   4      
+ 467   4                                      default:
+ 468   4                                              break;
+ 469   4                              }// End switch()
+ 470   3                      }
+ 471   2              }//End if(ucIsRecivCMDSS==1)
+ 472   1                      
+ 473   1      
+ 474   1      //      if(ucIsRecivCMDSS==1)
+ 475   1      //      {
+ 476   1      //              ucIsRecivCMDSS=2;
+ 477   1      //              putchar(0xA0);          // send ACK
+ 478   1      //      }else if(ucIsRecivCMDSS==3)
+ 479   1      //      {
+ 480   1      //              if (ucUARTRxBuffer[0] != 0xAA) { ucIsRecivCMDSS=0; ucUARTRxIn=0; return; }
+ 481   1      //
+ 482   1      //              // [From Monitor to PC]
+ 483   1      //              if(ucUARTRxBuffer[1] == 0x00)           //Read Command
+ 484   1      //              {
+ 485   1      //                      switch( ucUARTRxBuffer[2] )                                             
+ 486   1      //                      {               
+ 487   1      //                                                      //Start                 //Value                                                  //CRC
+ 488   1      //                              case 0x10:      putchar(0xAA);  putchar(UserData.ucBrightness);  putchar( 0x100-UserData.ucBrightness); 
+ 489   1      //                                      break;
+ 490   1      //
+ 491   1      //                              case 0x11:      putchar(0xAA);  putchar(UserData.ucContrast);  putchar( 0x100-UserData.ucContrast);     
+ 492   1      //                                      break;
+ 493   1      //                              
+ 494   1      //                              default:
+ 495   1      //                                      ucUARTRxIn=0; ucIsRecivCMDSS=0; return;
+ 496   1      //                                      break;
+ 497   1      //                      }
+ 498   1      //              }
+ 499   1      //              else if(ucUARTRxBuffer[1] == 0x01)      //Write Command
+ 500   1      //              {
+ 501   1      //                      switch( ucUARTRxBuffer[2] )
+ 502   1      //                      {
+ 503   1      //                              case 0x00:      
+ 504   1      //                                      break;
+ 505   1      //
+ 506   1      //                              default:
+ 507   1      //                                      ucUARTRxIn=0; ucIsRecivCMDSS=0; return;
+ 508   1      //                                      break;
+ 509   1      //                      }
+ 510   1      //              }else{
+ 511   1      //                      ucIsRecivCMDSS=0; ucUARTRxIn=0; return;
+ 512   1      //              }
+ 513   1      //
+ 514   1      //      }
+ 515   1      
+ 516   1      } 
+ 517          
+ 518          
+ 519          
+ 520          
+ 521          
+ 522          void CM3218_Print(void)
+ 523          {
+ 524   1              UCHAR ckDevice=0;       //, tmp=0;
+ 525   1      //      static UCHAR i=0;
+ 526   1      //       printf("AlsSens_tmp= %4x, AlsSens_buf= %4x, NowAlsSens= %4x, NowAlsBright=%d, div_ALSBaseVal= %d%\n", 
+C51 COMPILER V8.02   CM3218                                                                07/23/2015 11:30:47 PAGE 10  
+
+             -AlsSens_tmp, AlsSens_buf, NowAlsSens, (USHRT)NowAlsBright, (USHRT)(div_ALSBaseVal) ); 
+ 527   1              
+ 528   1              ckDevice = NvramCheckDevice(0x90);
+ 529   1      
+ 530   1              printf("Ck_Dvi= %d, AlsSens_tmp= %4x, NowAlsSens= %4x, %5u, NowAlsBright=%d \n", (USHRT)ckDevice, AlsSens
+             -_tmp, (USHRT)NowAlsSens, NowAlsSens, (USHRT)NowAlsBright );   
+ 531   1      //      putchar('2');
+ 532   1      }
+ 533          /*      USHRT A, B, C;
+ 534                  C=0;
+ 535                  A=0xff00;
+ 536                  B=0xffff;
+ 537          */
+ 538          //      printf("UserData.ucBrightness= %d\n", (USHRT) UserData.ucBrightness);
+ 539          //      printf("GetBrightness1023()  = %d\n", (USHRT) GetBrightness1023() );
+ 540          //      printf("GetScalerPWM         = %d\n\n", (USHRT) GetScalerPWM(BKL_PWM_PORT) );
+ 541          
+ 542          //      printf("MIN_BACKLIGHT_VALUE= %d\n", (USHRT) MIN_BACKLIGHT_VALUE);
+ 543          //      printf("Remap100ToAny()    = %d\n", (USHRT) Remap100ToAny(UserData.ucBrightness, 1023 - MIN_BACKLIGHT_V
+             -ALUE) );
+ 544          //      printf("GetBrightness1023()= %d\n\n", (USHRT) GetBrightness1023() );
+ 545          // ++   printf("DeBuncSens= %d, AlsSens_tmp= 0x%4x, NowAlsSens= %d\n", (USHRT) DeBuncSens, (USHRT)AlsSens_tm
+             -p, (USHRT) NowAlsSens);
+ 546          //      printf("ucBrightness=%d,  ucALSBaseVal= %d, NowAlsBright= %d\n", (USHRT)UserData.ucBrightness, (USHRT) 
+             -UserData.ucALSBaseVal, (USHRT)NowAlsBright);
+ 547          //      printf("GetALSBaseValue1023()= %d\n", (USHRT) GetALSBaseValue1023() );
+ 548          
+ 549          
+ 550          /*      C= abs(A-B);
+ 551                  printf("A-B= %d, %4x\n", (USHRT) C,  (USHRT) C);
+ 552          
+ 553                  C= abs(B-A);
+ 554                  printf("B-A= %d, %4x\n", (USHRT) C,  (USHRT) C);
+ 555          
+ 556                  C= abs(A+B);
+ 557                  printf("A+B= %d, %4x\n\n", (USHRT) C,  (USHRT) C);   */
+ 558          
+ 559          /*      if(C<0) printf("--_C < 0\n");
+ 560                  if(C==0) printf("00_C=0\n");
+ 561                  if(C>0) printf("++_C > 0\n");
+ 562          */
+ 563          //      if( (ALSdata_tmp- ALSdata) < ALSDATA_TOL) can --; ok
+ 564            
+ 565          //printf("AlsSens_tmp= %4x, AlsSens_buf= %4x, NowAlsSens= %4x, ALSBVPWM= %d%\n", AlsSens_tmp, AlsSens_buf,
+             - NowAlsSens, (USHRT)(UserData.ucALSBaseVal) );
+ 566          
+ 567          /*
+ 568          printf("ALSSW=%d, ucBrightness=%d; NowAlsSens= 0x%4x; ", (USHRT)UserData.bALSOnOff, (USHRT)UserData.ucBrig
+             -htness, (USHRT)NowAlsSens);
+ 569          printf("AlsBrigTarg= %d, ucALSBaseVal= %d, ", (USHRT)AlsBrigTarg, (USHRT)UserData.ucALSBaseVal);
+ 570          printf("NowAlsBright= %d\n", (USHRT) NowAlsBright);
+ 571          */
+ 572          //}
+ 573          
+ 574          #endif //#if ALS_EnDis == ENABLE
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  4 ERROR(S)

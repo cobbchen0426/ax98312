@@ -1,0 +1,1128 @@
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE FOSDVIEW
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\FOSDView.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\OSD\FOSDView.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\
+                    -App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\
+                    -SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\FOSDView.
+                    -lst) OBJECT(.\Bin\ADS\AXI\104N\FOSDView.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          #define SetFactUpdFlag()    {ucUpdateFlag = 1;}
+  19          #define ClearFactUpdFlag()  {ucUpdateFlag = 0;}
+  20          
+  21          //******************************************************************************
+  22          // G L O B A L   V A R I A B L E S
+  23          //******************************************************************************
+  24          //============== CHIU
+  25          //******************************************************************************
+  26          // S T A T I C   V A R I A B L E S
+  27          //******************************************************************************
+  28          
+  29          //============== CHIU
+  30          //static code UCHAR ucVersionText[]={16,'V',VERSION+'0','.',(REVERSION>>4)+'0',(REVERSION&0x0F)+'0',' ',DA
+             -TE};
+  31          //static code UCHAR ucScalerText[]={7,SCALER_TEXT};
+  32          
+  33          #ifdef USE_X18_BOARD
+              static code UCHAR ucModelText[]={4,"X18 "};
+              #else
+  36          static code UCHAR ucModelText[]={4,"X215"};     //"X10N"};
+  37          #endif
+  38          
+  39          static code UCHAR ucPanelText[]={sizeof(PANEL_NAME)-1,PANEL_NAME};
+  40          static code UCHAR ucDateText[]={sizeof(__DATE__)-1 ,__DATE__};          
+  41          //============== CHIU
+  42          
+  43          
+  44          static code UCHAR ucAutoLevelText[]={10,"Auto Level"};
+  45          static code UCHAR ucBurnInText[]={6,"Burnin"};
+  46          static code UCHAR ucBrightnessText[]= {6,"Bright."};
+  47          static code UCHAR ucContrastText[]= {6,"Contr."};
+  48          static code UCHAR ucGainText[]={4,"Gain"};
+  49          static code UCHAR ucOffsetText[]={6,"Offset"};
+  50          static code UCHAR ucSRGBText[]={4,"sRGB"};
+  51          static code UCHAR ucColor5000Text[]={4,"5000"};
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 2   
+
+  52          static code UCHAR ucColor6500Text[]={4,"6500"};
+  53          static code UCHAR ucColor7500Text[]={4,"7500"};
+  54          static code UCHAR ucColor8200Text[]={4,"8200"};
+  55          static code UCHAR ucColor9300Text[]={4,"9300"};
+  56          static code UCHAR ucColor11500Text[]={5,"11500"};
+  57          static code UCHAR ucAddressText[]={5,"Addr."};
+  58          static code UCHAR ucWRText[]={2,"WR"};
+  59          static code UCHAR ucResetText[]={5,"Reset"};
+  60          static code UCHAR ucPOTText[]={3,"POT"};
+  61          static code UCHAR ucExitText[] = {4,"Exit"};
+  62          static code UCHAR ucH_Text[]={1,"H"};
+  63          static code UCHAR ucR_Text[]={1,"R"};
+  64          static code UCHAR ucG_Text[]={1,"G"};
+  65          static code UCHAR ucB_Text[]={1,"B"};
+  66          static code UCHAR ucSymbol1[]={1,"="};
+  67          static code UCHAR ucYesText[]={3,"YES"};
+  68          static code UCHAR ucNoText[]={2,"NO"};
+  69          static code UCHAR ucOkText[]={2,"OK"};
+  70          static code UCHAR ucGammaText[]= {6,"GAMMA:"};
+  71          static code UCHAR ucBacklightText[]= {10,"BACKLIGHT:"};
+  72          
+  73          
+  74          
+  75          typedef struct _LIGHTBAR_ {
+  76              UCHAR x;
+  77              UCHAR y;
+  78              UCHAR len;
+  79          } LightBar ;
+  80          
+  81          code LightBar LBar[] = {
+  82                  {0, 0,5},   {7, 0,10 },    {17, 0,4},
+  83                  {0, 1,6},       {10, 1,10},             //GAMMA , BACKLITE
+  84                  {7, 2,1},{12,2,1},{17,2,1},
+  85              {7, 3,1},{12,3,1},{17,3,1},
+  86              {7, 4,1},{12,4,1},{17,4,1},
+  87          //    {7, 5,1},{12,5,1},{17,5,1},
+  88              {7, 5,1},{12,5,1},{17,5,1},
+  89              {7, 6,1},{12,6,1},{17,6,1},    
+  90              {0, 8,6},
+  91              {0, 9,6},   
+  92          };
+  93          
+  94          enum OSD_FACTORY {
+  95                  mfFIRST = 0,
+  96                  mfRESET = mfFIRST,    mfAUTO,    mfRETURN,
+  97                  mfGAMMA,        mfBACKLIGHT,
+  98                  mf6500R,    mf6500G,    mf6500B,
+  99                  mf7500R,    mf7500G,    mf7500B,
+ 100                  mf9300R,    mf9300G,    mf9300B,
+ 101          //      mfSRGBR,    mfSRGBG,    mfSRGBB,
+ 102                  mfGAINR,    mfGAING,    mfGAINB,
+ 103              mfOFFSETR,  mfOFFSETG,  mfOFFSETB,          
+ 104              
+ 105              mfBRIGHTNESS,
+ 106              mfCONTRAST,    
+ 107              mfLAST = mfCONTRAST,
+ 108          };
+ 109          
+ 110          
+ 111          
+ 112          static xdata UCHAR ucUpdateFlag;
+ 113          static xdata UCHAR ucFactoryIndex;
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 3   
+
+ 114          static xdata USHRT usRegAddr;
+ 115          static xdata UCHAR ucRegValue;
+ 116          static xdata OSDState usOSDState = OSD_OFF_STATE;
+ 117          
+ 118          //******************************************************************************
+ 119          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+ 120          //******************************************************************************
+ 121          
+ 122          //******************************************************************************
+ 123          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+ 124          //******************************************************************************
+ 125          static void FactorySelect(void);
+ 126          static void FactoryUnSelect(void);
+ 127          static void FactorySelectValue(void);
+ 128          static void FactoryUnSelectValue(void);
+ 129          static void FactoryShowValue(UCHAR index, USHRT value);
+ 130          //static void FactoryShowBurnin(void);
+ 131          static void FactoryShowAutoColor(UCHAR result);
+ 132          static void FactoryValueUp(UCHAR *val);
+ 133          static void FactoryValueDown(UCHAR *val);
+ 134          static void FactorySetValue(void);
+ 135          
+ 136          //******************************************************************************
+ 137          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+ 138          //******************************************************************************
+ 139          
+ 140          //******************************************************************************
+ 141          // Prototype:
+ 142          //  UCHAR OSDFactoryUpdate(void)
+ 143          // Parameters:
+ 144          //  None
+ 145          // Return:
+ 146          //  None
+ 147          // Purpose:
+ 148          //  Return flag for informing system to save caldata
+ 149          // Notes:
+ 150          //  None
+ 151          //******************************************************************************
+ 152          UCHAR OSDFactoryUpdate(void)
+ 153          {
+ 154   1          UCHAR tmp;
+ 155   1          tmp = ucUpdateFlag;
+ 156   1          ClearFactUpdFlag();
+ 157   1          return tmp;
+ 158   1      }
+ 159          
+ 160          
+ 161          
+ 162          //============ CHIU ================
+ 163          #include "string.h"
+ 164          /*
+ 165          typedef struct _INPUT_TIMING_FORMAT_ {
+ 166              USHRT usHSyncFreq;
+ 167              USHRT usVSyncFreq;
+ 168              UCHAR ucHVPolarity;
+ 169              UCHAR ucHSyncWidth;
+ 170              UCHAR ucVSyncWidth;
+ 171              USHRT usHTotal;
+ 172              USHRT usVTotal;
+ 173              USHRT usModeHActive;
+ 174              USHRT usModeVActive;
+ 175              USHRT usCapHActive;
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 4   
+
+ 176              USHRT usCapVActive;
+ 177              USHRT usHStart;
+ 178              USHRT usVStart;
+ 179              UCHAR ucPhase;
+ 180              USHRT usHTotal50;
+ 181              USHRT usHStart50;
+ 182              USHRT usVStart50;
+ 183              USHRT usHTotalMin;
+ 184              USHRT usHTotalMax;
+ 185              USHRT usHStartMin;
+ 186              USHRT usHStartMax;
+ 187              USHRT usVStartMin;
+ 188              USHRT usVStartMax;
+ 189              UCHAR ucAutoTune;
+ 190              USHRT usModeIndex;
+ 191          } InputTimingFormat;
+ 192          */
+ 193          
+ 194          //HVPolarity Definition
+ 195          //#define HNVN  0x01 /*!< H/V polarities are -/-. */
+ 196          //#define HNVP  0x02 /*!< H/V polarities are -/+. */
+ 197          //#define HPVN  0x04 /*!< H/V polarities are +/-. */
+ 198          //#define HPVP  0x08 /*!< H/V polarities are +/+. */
+ 199          
+ 200          
+ 201          //extern xdata ULONG ulDisplayClk;
+ 202          
+ 203          void OSDShowInTiming(void)
+ 204          {
+ 205   1      //      UCHAR i;
+ 206   1          UCHAR buff[32];
+ 207   1              char pol;
+ 208   1              
+ 209   1              OSDAPI_SetAlignType(OSD_ALIGN_LEFT);
+ 210   1              
+ 211   1              //SHOW H
+ 212   1              pol = InputTiming.ucHVPolarity & 0x0C ? '+' : '-';
+ 213   1          sprintf(buff,"nH(%c)%d %d %d %d",  
+ 214   1          pol,InputTiming.usHSyncFreq, InputTiming.usHStart, InputTiming.usModeHActive,InputTiming.usHTotal);   
+             -     
+ 215   1          buff[0] = strlen(buff) - 1;    OSDAPI_ShowIndentString(FALSE, 0, LBar[mfLAST].y+1, buff[0] , buff);         
+ 216   1              
+ 217   1              
+ 218   1              //SHOW V
+ 219   1              pol = InputTiming.ucHVPolarity & 0x03 ? '+' : '-';
+ 220   1          sprintf(buff,"nV(%c)%d %d %d %d",  
+ 221   1          pol,InputTiming.usVSyncFreq, InputTiming.usVStart, InputTiming.usModeVActive,InputTiming.usVTotal);
+ 222   1          buff[0] = strlen(buff) - 1;    OSDAPI_ShowIndentString(FALSE, 0, LBar[mfLAST].y+2, buff[0] , buff);         
+ 223   1              
+ 224   1              //SHOW OTHER
+ 225   1              sprintf(buff,"n(%d)(%d)",  
+ 226   1              InputTiming.usModeIndex,0);
+ 227   1              buff[0] = strlen(buff) - 1;    OSDAPI_ShowIndentString(FALSE, 0, LBar[mfLAST].y+3, buff[0] , buff);             
+ 228   1      }
+ 229          //
+ 230          void ShowGammaValue(void)
+ 231          {       
+ 232   1              static code UCHAR ucGamma0Text[]= {3,"1.9"};
+ 233   1              static code UCHAR ucGamma1Text[]= {3,"2.0"};
+ 234   1              static code UCHAR ucGamma2Text[]= {3,"2.1"};
+ 235   1              static code UCHAR ucGamma3Text[]= {3,"2.2"};
+ 236   1              static code UCHAR ucGamma4Text[]= {3,"2.3"};
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 5   
+
+ 237   1              static code UCHAR ucGamma5Text[]= {3,"2.4"};
+ 238   1              static code UCHAR ucGamma6Text[]= {3,"2.5"};
+ 239   1              
+ 240   1              static code UCHAR *tab[] = {ucGamma0Text,ucGamma1Text,ucGamma2Text,ucGamma3Text,ucGamma4Text,ucGamma5Text
+             -,ucGamma6Text,};
+ 241   1              
+ 242   1              OSDAPI_SetIndentIndex(100);
+ 243   1          OSDAPI_SetAlignType(OSD_ALIGN_LEFT);
+ 244   1          
+ 245   1          OSDAPI_ShowIndentString(FALSE, 7, LBar[mfGAMMA].y,1,tab[CalibData.ucGammaVal]);    
+ 246   1         
+ 247   1      }
+ 248          
+ 249          
+ 250          //============ CHIU ================
+ 251          
+ 252          
+ 253          
+ 254          
+ 255          
+ 256          
+ 257          //******************************************************************************
+ 258          // Prototype:
+ 259          //  void OSDShowFactory(void)
+ 260          // Parameters:
+ 261          //  None
+ 262          // Return:
+ 263          //  None
+ 264          // Purpose:
+ 265          //  Show Factory OSD
+ 266          // Notes:
+ 267          //  None
+ 268          //******************************************************************************
+ 269          void OSDShowFactory(void)
+ 270          {
+ 271   1          UCHAR i;
+ 272   1      
+ 273   1          OSDAPI_TurnOffOSD();
+ 274   1          OSDInitFrame(OSD_FACTORY_W,OSD_FACTORY_H,FACTORY_FRAME_COLOR);
+ 275   1          OSDAPI_SetPosition(99,98);
+ 276   1          // ----------------------------------------
+ 277   1      
+ 278   1          OSDAPI_SetIndentIndex(32);
+ 279   1          OSDAPI_SetAlignType(OSD_ALIGN_LEFT);
+ 280   1              
+ 281   1              //SAME AS BRIGHTNESS
+ 282   1              OSDAPI_ShowIndentString(TRUE, 10, LBar[mfBRIGHTNESS].y,1,ucModelText);          OSDAPI_ShowIndentString(FAL
+             -SE,10 + 5, LBar[mfBRIGHTNESS].y,1,ucDateText);  
+ 283   1              //SAME AS CONTRAST
+ 284   1          OSDAPI_ShowIndentString(TRUE, 10, LBar[mfCONTRAST].y,1,ucPanelText); 
+ 285   1              
+ 286   1          OSDAPI_ShowIndentString(FALSE, LBar[mfGAMMA].x, LBar[mfGAMMA].y,1,ucGammaText); 
+ 287   1          ShowGammaValue();
+ 288   1          
+ 289   1          
+ 290   1          
+ 291   1          OSDAPI_ShowIndentString(FALSE, LBar[mfBACKLIGHT].x, LBar[mfBACKLIGHT].y,1,ucBacklightText);     
+ 292   1          FactoryShowValue(mfBACKLIGHT, (USHRT)(CalibData.ucBacklite));
+ 293   1          
+ 294   1          
+ 295   1          OSDAPI_ShowIndentString(FALSE, 0, LBar[mf6500R].y,1,ucColor6500Text);
+ 296   1          OSDAPI_ShowIndentString(FALSE, 0, LBar[mf7500R].y,1,ucColor7500Text);
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 6   
+
+ 297   1          OSDAPI_ShowIndentString(FALSE, 0, LBar[mf9300R].y,1,ucColor9300Text);
+ 298   1          //OSDAPI_ShowIndentString(FALSE, 0, LBar[mfSRGBR].y,1,ucSRGBText);  
+ 299   1          OSDAPI_ShowIndentString(FALSE, 0, LBar[mfGAINR].y,1,ucGainText);
+ 300   1          OSDAPI_ShowIndentString(FALSE, 0, LBar[mfOFFSETR].y,1,ucOffsetText);     
+ 301   1      
+ 302   1          OSDAPI_ShowIndentString(FALSE, LBar[mfBRIGHTNESS].x, LBar[mfBRIGHTNESS].y,1,ucBrightnessText);
+ 303   1          OSDAPI_ShowIndentString(FALSE, LBar[mfCONTRAST].x, LBar[mfCONTRAST].y,1,ucContrastText);
+ 304   1          
+ 305   1          OSDAPI_ShowIndentString(FALSE, LBar[mfRESET].x, LBar[mfRESET].y,1,ucResetText);
+ 306   1          OSDAPI_ShowIndentString(FALSE, LBar[mfAUTO].x, LBar[mfAUTO].y,1,ucAutoLevelText);
+ 307   1              OSDAPI_ShowIndentString(FALSE, LBar[mfRETURN].x, LBar[mfRETURN].y,1,ucExitText); 
+ 308   1      
+ 309   1              //SHOW R,G,B TEXT               
+ 310   1          for (i=0;i<5;i++)
+ 311   1              OSDAPI_ShowIndentString(FALSE, LBar[mf6500R].x,  LBar[mf6500R].y+i,1,ucR_Text);
+ 312   1          for (i=0;i<5;i++)
+ 313   1              OSDAPI_ShowIndentString(FALSE, LBar[mf6500G].x,  LBar[mf6500R].y+i,1,ucG_Text);
+ 314   1          for (i=0;i<5;i++)
+ 315   1              OSDAPI_ShowIndentString(FALSE, LBar[mf6500B].x,  LBar[mf6500R].y+i,1,ucB_Text); 
+ 316   1              
+ 317   1              //SHOW R,G,B VALUE
+ 318   1          FactoryShowValue(mfGAINR, (USHRT)(CalibData.ucADCRGain));
+ 319   1          FactoryShowValue(mfGAING, (USHRT)(CalibData.ucADCGGain));
+ 320   1          FactoryShowValue(mfGAINB, (USHRT)(CalibData.ucADCBGain));
+ 321   1          FactoryShowValue(mfOFFSETR, (USHRT)(CalibData.ucADCROffset));
+ 322   1          FactoryShowValue(mfOFFSETG, (USHRT)(CalibData.ucADCGOffset));
+ 323   1          FactoryShowValue(mfOFFSETB, (USHRT)(CalibData.ucADCBOffset));
+ 324   1          FactoryShowValue(mf9300R, (USHRT)CalibData.uc9300KRGain);
+ 325   1          FactoryShowValue(mf9300G, (USHRT)CalibData.uc9300KGGain);
+ 326   1          FactoryShowValue(mf9300B, (USHRT)CalibData.uc9300KBGain);
+ 327   1          FactoryShowValue(mf7500R, (USHRT)CalibData.uc7500KRGain);
+ 328   1          FactoryShowValue(mf7500G, (USHRT)CalibData.uc7500KGGain);
+ 329   1          FactoryShowValue(mf7500B, (USHRT)CalibData.uc7500KBGain);
+ 330   1          FactoryShowValue(mf6500R, (USHRT)CalibData.uc6500KRGain);
+ 331   1          FactoryShowValue(mf6500G, (USHRT)CalibData.uc6500KGGain);
+ 332   1          FactoryShowValue(mf6500B, (USHRT)CalibData.uc6500KBGain);
+ 333   1      //    FactoryShowValue(mfSRGBR, (USHRT)CalibData.ucsRGBRGain);
+ 334   1      //    FactoryShowValue(mfSRGBG, (USHRT)CalibData.ucsRGBGGain);
+ 335   1      //    FactoryShowValue(mfSRGBB, (USHRT)CalibData.ucsRGBBGain);
+ 336   1          FactoryShowValue(mfBRIGHTNESS, (USHRT)UserData.ucBrightness);
+ 337   1          FactoryShowValue(mfCONTRAST, (USHRT)UserData.ucContrast);
+ 338   1          
+ 339   1          //SHOW DEBUG INPUT TIMING
+ 340   1              OSDShowInTiming();
+ 341   1           
+ 342   1          
+ 343   1          
+ 344   1          ucFactoryIndex = mfFIRST;
+ 345   1          FactorySelect();
+ 346   1      
+ 347   1          OSDTurnOnOSD();
+ 348   1      }
+ 349          
+ 350          //******************************************************************************
+ 351          // Prototype:
+ 352          //  void OSDFactoryUp(void)
+ 353          // Parameters:
+ 354          //  None
+ 355          // Return:
+ 356          //  None
+ 357          // Purpose:
+ 358          //  None
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 7   
+
+ 359          // Notes:
+ 360          //  None
+ 361          //******************************************************************************
+ 362          void OSDFactoryUp(void)
+ 363          {
+ 364   1          FactoryUnSelect();
+ 365   1          //if(--ucFactoryIndex > mfRETURN)        ucFactoryIndex = mfRETURN;
+ 366   1          
+ 367   1              if(ucFactoryIndex == mfFIRST)   ucFactoryIndex = mfLAST;
+ 368   1              else    ucFactoryIndex--;
+ 369   1              
+ 370   1          FactorySelect();
+ 371   1      
+ 372   1          if(ucFactoryIndex == mf9300B){
+ 373   2              UserData.ucColorTemp = CLRTMP_9300K;
+ 374   2              UserSetColorTemp();
+ 375   2          }
+ 376   1          else if(ucFactoryIndex == mf7500B){
+ 377   2              UserData.ucColorTemp = CLRTMP_7500K;
+ 378   2              UserSetColorTemp();
+ 379   2          }
+ 380   1          else if(ucFactoryIndex == mf6500B){
+ 381   2              UserData.ucColorTemp = CLRTMP_6500K;
+ 382   2              UserSetColorTemp();
+ 383   2          }
+ 384   1       //   else if(ucFactoryIndex == mfSRGBB){
+ 385   1       //       UserData.ucColorTemp = CLRTMP_sRGB;
+ 386   1       //       UserSetColorTemp();
+ 387   1       //  }
+ 388   1      
+ 389   1       //   else if(ucFactoryIndex == mf8200B){
+ 390   1       //       UserData.ucColorTemp = CLRTMP_8200K;
+ 391   1       //       UserSetColorTemp();
+ 392   1       //   }
+ 393   1       //   else if(ucFactoryIndex == mf9300B){
+ 394   1       //       UserData.ucColorTemp = CLRTMP_9300K;
+ 395   1       //       UserSetColorTemp();
+ 396   1       //   }
+ 397   1       //   else if(ucFactoryIndex == mf11500B){
+ 398   1       //       UserData.ucColorTemp = CLRTMP_11500K;
+ 399   1       //       UserSetColorTemp();
+ 400   1       //   }
+ 401   1          else if(ucFactoryIndex == mfOFFSETB){
+ 402   2              UserData.ucColorTemp = CLRTMP_9300K;
+ 403   2              UserSetColorTemp();
+ 404   2          }
+ 405   1      }
+ 406          
+ 407          //******************************************************************************
+ 408          // Prototype:
+ 409          //  void OSDFactoryDown(void)
+ 410          // Parameters:
+ 411          //  None
+ 412          // Return:
+ 413          //  None
+ 414          // Purpose:
+ 415          //  None
+ 416          // Notes:
+ 417          //  None
+ 418          //******************************************************************************
+ 419          void OSDFactoryDown(void)
+ 420          {
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 8   
+
+ 421   1          FactoryUnSelect();
+ 422   1          //if(++ucFactoryIndex > mfRETURN)        ucFactoryIndex = mfFIRST;    
+ 423   1          
+ 424   1          if(ucFactoryIndex == mfLAST)        ucFactoryIndex = mfFIRST;
+ 425   1              else    ucFactoryIndex++;
+ 426   1          
+ 427   1          
+ 428   1          FactorySelect();
+ 429   1      
+ 430   1      
+ 431   1          if(ucFactoryIndex == mf9300R){
+ 432   2              UserData.ucColorTemp = CLRTMP_9300K;
+ 433   2              UserSetColorTemp();
+ 434   2          }
+ 435   1          else if(ucFactoryIndex == mf7500R){
+ 436   2              UserData.ucColorTemp = CLRTMP_7500K;
+ 437   2              UserSetColorTemp();
+ 438   2          }
+ 439   1          else if(ucFactoryIndex == mf6500R){
+ 440   2              UserData.ucColorTemp = CLRTMP_6500K;
+ 441   2              UserSetColorTemp();
+ 442   2          }
+ 443   1      //    else if(ucFactoryIndex == mfSRGBR){
+ 444   1      //        UserData.ucColorTemp = CLRTMP_sRGB;
+ 445   1      //        UserSetColorTemp();
+ 446   1      //    }
+ 447   1      //    else if(ucFactoryIndex == mf8200R){
+ 448   1      //        UserData.ucColorTemp = CLRTMP_8200K;
+ 449   1      //        UserSetColorTemp();
+ 450   1      //    }
+ 451   1      //    else if(ucFactoryIndex == mf9300R){
+ 452   1      //        UserData.ucColorTemp = CLRTMP_9300K;
+ 453   1      //        UserSetColorTemp();
+ 454   1      //    }
+ 455   1       //   else if(ucFactoryIndex == mf11500R){
+ 456   1       //       UserData.ucColorTemp = CLRTMP_11500K;
+ 457   1       //       UserSetColorTemp();
+ 458   1       //   }
+ 459   1      //    else if(ucFactoryIndex == mfADDRESS){
+ 460   1       //       UserData.ucColorTemp = CLRTMP_6500K;
+ 461   1       //       UserSetColorTemp();
+ 462   1       //   }
+ 463   1      
+ 464   1      }
+ 465          
+ 466          //******************************************************************************
+ 467          // Prototype:
+ 468          //  void OSDFactoryEnterItm(void)
+ 469          // Parameters:
+ 470          //  None
+ 471          // Return:
+ 472          //  None
+ 473          // Purpose:
+ 474          //  None
+ 475          // Notes:
+ 476          //  None
+ 477          //******************************************************************************
+ 478          void OSDFactoryEnterItm(void)
+ 479          {
+ 480   1          UCHAR auto_color;
+ 481   1      
+ 482   1          if(ucFactoryIndex == mfAUTO) {
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 9   
+
+ 483   2              OSDAPI_TurnOffOSD();
+ 484   2              auto_color = AutoColor();
+ 485   2              if (auto_color) {
+ 486   3                  CalibData.ucADCRGain = GetADCRGain();
+ 487   3                  CalibData.ucADCGGain = GetADCGGain();
+ 488   3                  CalibData.ucADCBGain = GetADCBGain();
+ 489   3                  CalibData.ucADCROffset = GetADCROffset();
+ 490   3                  CalibData.ucADCGOffset = GetADCGOffset();
+ 491   3                  CalibData.ucADCBOffset = GetADCBOffset();
+ 492   3                  SetFactUpdFlag();
+ 493   3              }
+ 494   2              //OSDShowFactory(); //jacky
+ 495   2              OSDEnterFactory();  //CHIU MOVE TO SAME POSITION
+ 496   2              OSDDnFactory();
+ 497   2              //FactoryShowAutoColor(auto_color);
+ 498   2              return;
+ 499   2          }
+ 500   1          else if(ucFactoryIndex == mfRESET){
+ 501   2              NvramInitialize(NVRAM_UPDATE_ALL);
+ 502   2              NvramLoadData();
+ 503   2              OSDAPI_TurnOffOSD();
+ 504   2              UserRecallConfiguration();      
+ 505   2              //OSDShowFactory(); //jacky
+ 506   2              OSDEnterFactory();  //jacky
+ 507   2              SetFactUpdFlag();
+ 508   2              NvramWriteCalibData(&CalibData);        //CHIU SAVE DATA EVERY VALUE CHANGE
+ 509   2              return;
+ 510   2          }
+ 511   1          else if(ucFactoryIndex == mfRETURN)
+ 512   1          {
+ 513   2              //CHIU SET 6500 AS DEFAULT
+ 514   2              UserData.ucColorTemp = CLRTMP_6500K;
+ 515   2              UserSetColorTemp();
+ 516   2              SystemData.bFactory = FALSE;
+ 517   2              NvramWriteSystemData(&SystemData);  //jacky         
+ 518   2              
+ 519   2              //UserData.ucColorTemp = CLRTMP_6500K; //FEFANJACKY
+ 520   2              //UserSetColorTemp(); //FEFANJACKY     
+ 521   2              OSDCloseAll();  //jacky
+ 522   2              OSDEnterMainMenu(); //fefanjacky add for factory into user mode
+ 523   2              //DPHPDOff();  //jacky add for factory to user mode not into dp mode  ; // not add for windows xp
+ 524   2              return;   
+ 525   2          }
+ 526   1          else 
+ 527   1          {
+ 528   2              FactoryUnSelect();
+ 529   2              FactorySelectValue();
+ 530   2          }
+ 531   1      }
+ 532          
+ 533          //******************************************************************************
+ 534          // Prototype:
+ 535          //  void OSDFactoryExitItm(void)
+ 536          // Parameters:
+ 537          //  None
+ 538          // Return:
+ 539          //  None
+ 540          // Purpose:
+ 541          //  None
+ 542          // Notes:
+ 543          //  None
+ 544          //******************************************************************************
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 10  
+
+ 545          void OSDFactoryExitItm(void)
+ 546          {
+ 547   1          FactoryUnSelectValue();
+ 548   1          FactorySelect();
+ 549   1      }
+ 550          
+ 551          //******************************************************************************
+ 552          // Prototype:
+ 553          //  void OSDFactoryItmUp(void)
+ 554          // Parameters:
+ 555          //  None
+ 556          // Return:
+ 557          //  None
+ 558          // Purpose:
+ 559          //  None
+ 560          // Notes:
+ 561          //  None
+ 562          //******************************************************************************
+ 563          void OSDFactoryItmUp(void)
+ 564          {
+ 565   1          switch(ucFactoryIndex) {
+ 566   2      //        case mfBURNING:
+ 567   2      //            SystemData.bBurnIn = ~SystemData.bBurnIn;
+ 568   2      //            FactoryShowBurnin();
+ 569   2      //            break;
+ 570   2              case mfGAINR:
+ 571   2                  FactoryValueUp(&CalibData.ucADCRGain);
+ 572   2                  FactoryShowValue(mfGAINR, (USHRT)CalibData.ucADCRGain);
+ 573   2                  break;
+ 574   2              case mfGAING:
+ 575   2                  FactoryValueUp(&CalibData.ucADCGGain);
+ 576   2                  FactoryShowValue(mfGAING, (USHRT)CalibData.ucADCGGain);
+ 577   2                  break;
+ 578   2              case mfGAINB:
+ 579   2                  FactoryValueUp(&CalibData.ucADCBGain);
+ 580   2                  FactoryShowValue(mfGAINB, (USHRT)CalibData.ucADCBGain);
+ 581   2                  break;
+ 582   2              case mfOFFSETR:
+ 583   2                  FactoryValueUp(&CalibData.ucADCROffset);
+ 584   2                  FactoryShowValue(mfOFFSETR, (USHRT)CalibData.ucADCROffset);
+ 585   2                  break;
+ 586   2              case mfOFFSETG:
+ 587   2                  FactoryValueUp(&CalibData.ucADCGOffset);
+ 588   2                  FactoryShowValue(mfOFFSETG, (USHRT)CalibData.ucADCGOffset);
+ 589   2                  break;
+ 590   2              case mfOFFSETB:
+ 591   2                  FactoryValueUp(&CalibData.ucADCBOffset);
+ 592   2                  FactoryShowValue(mfOFFSETB, (USHRT)CalibData.ucADCBOffset);
+ 593   2                  break;
+ 594   2              case mf9300R:
+ 595   2                  FactoryValueUp(&CalibData.uc9300KRGain);
+ 596   2                  FactoryShowValue(mf9300R, (USHRT)CalibData.uc9300KRGain);
+ 597   2                  break;
+ 598   2              case mf9300G:
+ 599   2                  FactoryValueUp(&CalibData.uc9300KGGain);
+ 600   2                  FactoryShowValue(mf9300G, (USHRT)CalibData.uc9300KGGain);
+ 601   2                  break;
+ 602   2              case mf9300B:
+ 603   2                  FactoryValueUp(&CalibData.uc9300KBGain);
+ 604   2                  FactoryShowValue(mf9300B, (USHRT)CalibData.uc9300KBGain);
+ 605   2                  break;
+ 606   2              case mf7500R:
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 11  
+
+ 607   2                  FactoryValueUp(&CalibData.uc7500KRGain);
+ 608   2                  FactoryShowValue(mf7500R, (USHRT)CalibData.uc7500KRGain);
+ 609   2                  break;
+ 610   2              case mf7500G:
+ 611   2                  FactoryValueUp(&CalibData.uc7500KGGain);
+ 612   2                  FactoryShowValue(mf7500G, (USHRT)CalibData.uc7500KGGain);
+ 613   2                  break;
+ 614   2              case mf7500B:
+ 615   2                  FactoryValueUp(&CalibData.uc7500KBGain);
+ 616   2                  FactoryShowValue(mf7500B, (USHRT)CalibData.uc7500KBGain);
+ 617   2                  break;
+ 618   2              case mf6500R:
+ 619   2                  FactoryValueUp(&CalibData.uc6500KRGain);
+ 620   2                  FactoryShowValue(mf6500R, (USHRT)CalibData.uc6500KRGain);
+ 621   2                  break;
+ 622   2              case mf6500G:
+ 623   2                  FactoryValueUp(&CalibData.uc6500KGGain);
+ 624   2                  FactoryShowValue(mf6500G, (USHRT)CalibData.uc6500KGGain);
+ 625   2                  break;
+ 626   2              case mf6500B:
+ 627   2                  FactoryValueUp(&CalibData.uc6500KBGain);
+ 628   2                  FactoryShowValue(mf6500B, (USHRT)CalibData.uc6500KBGain);
+ 629   2                  break;
+ 630   2      /*
+ 631   2              case mfSRGBR:
+ 632   2                  FactoryValueUp(&CalibData.ucsRGBRGain);
+ 633   2                  FactoryShowValue(mfSRGBR, (USHRT)CalibData.ucsRGBRGain);
+ 634   2                  break;
+ 635   2              case mfSRGBG:
+ 636   2                  FactoryValueUp(&CalibData.ucsRGBGGain);
+ 637   2                  FactoryShowValue(mfSRGBG, (USHRT)CalibData.ucsRGBGGain);
+ 638   2                  break;
+ 639   2              case mfSRGBB:
+ 640   2                  FactoryValueUp(&CalibData.ucsRGBBGain);
+ 641   2                  FactoryShowValue(mfSRGBB, (USHRT)CalibData.ucsRGBBGain);
+ 642   2                  break;
+ 643   2      */            
+ 644   2               //CHIU
+ 645   2              case mfGAMMA:           
+ 646   2                      if(CalibData.ucGammaVal < GAMMA_TOTAL_STEP - 1)         //CHECK MAX GAMMA
+ 647   2                  {
+ 648   3                      CalibData.ucGammaVal++;
+ 649   3                  }
+ 650   2                              
+ 651   2                  //OSDAPI_ShowIndentString(FALSE, LBar[mfGAMMA].x+ucGammaText[0]+1, LBar[mfGAMMA].y,1,*(ucGamma
+             -TextTable + (USHRT)(CalibData.ucGammaVal) )); 
+ 652   2                  //FactoryShowValue(mfGAMMA, (USHRT)CalibData.ucGammaVal);  
+ 653   2                  ShowGammaValue();            
+ 654   2                  break;
+ 655   2              case mfBACKLIGHT:
+ 656   2                  FactoryValueUp(&CalibData.ucBacklite);
+ 657   2                  FactoryShowValue(mfBACKLIGHT, (USHRT)CalibData.ucBacklite);
+ 658   2                  break;
+ 659   2      /*
+ 660   2              case mf8200R:
+ 661   2                  FactoryValueUp(&CalibData.uc8200KRGain);
+ 662   2                  FactoryShowValue(mf8200R, (USHRT)CalibData.uc8200KRGain);
+ 663   2                  break;
+ 664   2              case mf8200G:
+ 665   2                  FactoryValueUp(&CalibData.uc8200KGGain);
+ 666   2                  FactoryShowValue(mf8200G, (USHRT)CalibData.uc8200KGGain);
+ 667   2                  break;
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 12  
+
+ 668   2              case mf8200B:
+ 669   2                  FactoryValueUp(&CalibData.uc8200KBGain);
+ 670   2                  FactoryShowValue(mf8200B, (USHRT)CalibData.uc8200KBGain);
+ 671   2                  break;
+ 672   2              case mf9300R:
+ 673   2                  FactoryValueUp(&CalibData.uc9300KRGain);
+ 674   2                  FactoryShowValue(mf9300R, (USHRT)CalibData.uc9300KRGain);
+ 675   2                  break;
+ 676   2              case mf9300G:
+ 677   2                  FactoryValueUp(&CalibData.uc9300KGGain);
+ 678   2                  FactoryShowValue(mf9300G, (USHRT)CalibData.uc9300KGGain);
+ 679   2                  break;
+ 680   2              case mf9300B:
+ 681   2                  FactoryValueUp(&CalibData.uc9300KBGain);
+ 682   2                  FactoryShowValue(mf9300B, (USHRT)CalibData.uc9300KBGain);
+ 683   2                  break;
+ 684   2      */
+ 685   2      /*
+ 686   2              case mf11500R:
+ 687   2                  FactoryValueUp(&CalibData.uc11500KRGain);
+ 688   2                  FactoryShowValue(mf11500R, (USHRT)CalibData.uc11500KRGain);
+ 689   2                  break;
+ 690   2              case mf11500G:
+ 691   2                  FactoryValueUp(&CalibData.uc11500KGGain);
+ 692   2                  FactoryShowValue(mf11500G, (USHRT)CalibData.uc11500KGGain);
+ 693   2                  break;
+ 694   2              case mf11500B:
+ 695   2                  FactoryValueUp(&CalibData.uc11500KBGain);
+ 696   2                  FactoryShowValue(mf11500B, (USHRT)CalibData.uc11500KBGain);
+ 697   2                  break;
+ 698   2      */
+ 699   2      //        case mfADDRESS:
+ 700   2      //            FactoryShowValue(mfADDRESS, (USHRT)usRegAddr);
+ 701   2      //            break;
+ 702   2      //        case mfWR:
+ 703   2      //            FactoryShowValue(mfWR, (USHRT)ucRegValue);
+ 704   2      //            break;
+ 705   2          }
+ 706   1          FactorySetValue();
+ 707   1          
+ 708   1          NvramWriteCalibData(&CalibData);    //CHIU SAVE DATA EVERY VALUE CHANGE
+ 709   1      }
+ 710          
+ 711          //******************************************************************************
+ 712          // Prototype:
+ 713          //  void OSDFactoryItmDown(void)
+ 714          // Parameters:
+ 715          //  None
+ 716          // Return:
+ 717          //  None
+ 718          // Purpose:
+ 719          //  None
+ 720          // Notes:
+ 721          //  None
+ 722          //******************************************************************************
+ 723          void OSDFactoryItmDown(void)
+ 724          {
+ 725   1          switch(ucFactoryIndex) {
+ 726   2      /*
+ 727   2              case mfBURNING:
+ 728   2                  SystemData.bBurnIn = ~SystemData.bBurnIn;
+ 729   2                  FactoryShowBurnin();
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 13  
+
+ 730   2                  break;
+ 731   2      */
+ 732   2              case mfGAINR:
+ 733   2                  FactoryValueDown(&CalibData.ucADCRGain);
+ 734   2                  FactoryShowValue(mfGAINR, (USHRT)CalibData.ucADCRGain);
+ 735   2                  break;
+ 736   2              case mfGAING:
+ 737   2                  FactoryValueDown(&CalibData.ucADCGGain);
+ 738   2                  FactoryShowValue(mfGAING, (USHRT)CalibData.ucADCGGain);
+ 739   2                  break;
+ 740   2              case mfGAINB:
+ 741   2                  FactoryValueDown(&CalibData.ucADCBGain);
+ 742   2                  FactoryShowValue(mfGAINB, (USHRT)CalibData.ucADCBGain);
+ 743   2                  break;
+ 744   2              case mfOFFSETR:
+ 745   2                  FactoryValueDown(&CalibData.ucADCROffset);
+ 746   2                  FactoryShowValue(mfOFFSETR, (USHRT)CalibData.ucADCROffset);
+ 747   2                  break;
+ 748   2              case mfOFFSETG:
+ 749   2                  FactoryValueDown(&CalibData.ucADCGOffset);
+ 750   2                  FactoryShowValue(mfOFFSETG, (USHRT)CalibData.ucADCGOffset);
+ 751   2                  break;
+ 752   2              case mfOFFSETB:
+ 753   2                  FactoryValueDown(&CalibData.ucADCBOffset);
+ 754   2                  FactoryShowValue(mfOFFSETB, (USHRT)CalibData.ucADCBOffset);
+ 755   2                  break;
+ 756   2              case mf9300R:
+ 757   2                  FactoryValueDown(&CalibData.uc9300KRGain);
+ 758   2                  FactoryShowValue(mf9300R, (USHRT)CalibData.uc9300KRGain);
+ 759   2                  break;
+ 760   2              case mf9300G:
+ 761   2                  FactoryValueDown(&CalibData.uc9300KGGain);
+ 762   2                  FactoryShowValue(mf9300G, (USHRT)CalibData.uc9300KGGain);
+ 763   2                  break;
+ 764   2              case mf9300B:
+ 765   2                  FactoryValueDown(&CalibData.uc9300KBGain);
+ 766   2                  FactoryShowValue(mf9300B, (USHRT)CalibData.uc9300KBGain);
+ 767   2                  break;
+ 768   2              case mf7500R:
+ 769   2                  FactoryValueDown(&CalibData.uc7500KRGain);
+ 770   2                  FactoryShowValue(mf7500R, (USHRT)CalibData.uc7500KRGain);
+ 771   2                  break;
+ 772   2              case mf7500G:
+ 773   2                  FactoryValueDown(&CalibData.uc7500KGGain);
+ 774   2                  FactoryShowValue(mf7500G, (USHRT)CalibData.uc7500KGGain);
+ 775   2                  break;
+ 776   2              case mf7500B:
+ 777   2                  FactoryValueDown(&CalibData.uc7500KBGain);
+ 778   2                  FactoryShowValue(mf7500B, (USHRT)CalibData.uc7500KBGain);
+ 779   2                  break;
+ 780   2              case mf6500R:
+ 781   2                  FactoryValueDown(&CalibData.uc6500KRGain);
+ 782   2                  FactoryShowValue(mf6500R, (USHRT)CalibData.uc6500KRGain);
+ 783   2                  break;
+ 784   2              case mf6500G:
+ 785   2                  FactoryValueDown(&CalibData.uc6500KGGain);
+ 786   2                  FactoryShowValue(mf6500G, (USHRT)CalibData.uc6500KGGain);
+ 787   2                  break;
+ 788   2              case mf6500B:
+ 789   2                  FactoryValueDown(&CalibData.uc6500KBGain);
+ 790   2                  FactoryShowValue(mf6500B, (USHRT)CalibData.uc6500KBGain);
+ 791   2                  break;
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 14  
+
+ 792   2      /*
+ 793   2              case mfSRGBR:
+ 794   2                  FactoryValueDown(&CalibData.ucsRGBRGain);
+ 795   2                  FactoryShowValue(mfSRGBR, (USHRT)CalibData.ucsRGBRGain);
+ 796   2                  break;
+ 797   2              case mfSRGBG:
+ 798   2                  FactoryValueDown(&CalibData.ucsRGBGGain);
+ 799   2                  FactoryShowValue(mfSRGBG, (USHRT)CalibData.ucsRGBGGain);
+ 800   2                  break;
+ 801   2              case mfSRGBB:
+ 802   2                  FactoryValueDown(&CalibData.ucsRGBBGain);
+ 803   2                  FactoryShowValue(mfSRGBB, (USHRT)CalibData.ucsRGBBGain);
+ 804   2                  break;
+ 805   2      */            
+ 806   2              //CHIU
+ 807   2              case mfGAMMA:
+ 808   2                      if(CalibData.ucGammaVal > 0)    //CHECK MIN GAMMA
+ 809   2                  {
+ 810   3                      CalibData.ucGammaVal--;
+ 811   3                  }        
+ 812   2                  
+ 813   2                  //OSDAPI_ShowIndentString(FALSE, LBar[mfGAMMA].x+ucGammaText[0]+1, LBar[mfGAMMA].y,1,*(ucGamma
+             -TextTable +  (USHRT)(CalibData.ucGammaVal) ));     
+ 814   2                  ShowGammaValue();
+ 815   2                  
+ 816   2                  break;
+ 817   2              case mfBACKLIGHT:
+ 818   2                  FactoryValueDown(&CalibData.ucBacklite);
+ 819   2                  FactoryShowValue(mfBACKLIGHT, (USHRT)CalibData.ucBacklite);
+ 820   2                  break;
+ 821   2                  
+ 822   2                  
+ 823   2      /*
+ 824   2              case mf8200R:
+ 825   2                  FactoryValueDown(&CalibData.uc8200KRGain);
+ 826   2                  FactoryShowValue(mf8200R, (USHRT)CalibData.uc8200KRGain);
+ 827   2                  break;
+ 828   2              case mf8200G:
+ 829   2                  FactoryValueDown(&CalibData.uc8200KGGain);
+ 830   2                  FactoryShowValue(mf8200G, (USHRT)CalibData.uc8200KGGain);
+ 831   2                  break;
+ 832   2              case mf8200B:
+ 833   2                  FactoryValueDown(&CalibData.uc8200KBGain);
+ 834   2                  FactoryShowValue(mf8200B, (USHRT)CalibData.uc8200KBGain);
+ 835   2                  break;
+ 836   2              case mf9300R:
+ 837   2                  FactoryValueDown(&CalibData.uc9300KRGain);
+ 838   2                  FactoryShowValue(mf9300R, (USHRT)CalibData.uc9300KRGain);
+ 839   2                  break;
+ 840   2              case mf9300G:
+ 841   2                  FactoryValueDown(&CalibData.uc9300KGGain);
+ 842   2                  FactoryShowValue(mf9300G, (USHRT)CalibData.uc9300KGGain);
+ 843   2                  break;
+ 844   2              case mf9300B:
+ 845   2                  FactoryValueDown(&CalibData.uc9300KBGain);
+ 846   2                  FactoryShowValue(mf9300B, (USHRT)CalibData.uc9300KBGain);
+ 847   2                  break;
+ 848   2      */
+ 849   2      /*
+ 850   2              case mf11500R:
+ 851   2                  FactoryValueDown(&CalibData.uc11500KRGain);
+ 852   2                  FactoryShowValue(mf11500R, (USHRT)CalibData.uc11500KRGain);
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 15  
+
+ 853   2                  break;
+ 854   2              case mf11500G:
+ 855   2                  FactoryValueDown(&CalibData.uc11500KGGain);
+ 856   2                  FactoryShowValue(mf11500G, (USHRT)CalibData.uc11500KGGain);
+ 857   2                  break;
+ 858   2              case mf11500B:
+ 859   2                  FactoryValueDown(&CalibData.uc11500KBGain);
+ 860   2                  FactoryShowValue(mf11500B, (USHRT)CalibData.uc11500KBGain);
+ 861   2                  break;
+ 862   2      */
+ 863   2      //        case mfADDRESS:
+ 864   2      //            FactoryShowValue(mfADDRESS, (USHRT)usRegAddr);
+ 865   2      //            break;
+ 866   2      //        case mfWR:
+ 867   2      //            FactoryShowValue(mfWR, (USHRT)ucRegValue);
+ 868   2      //            break;
+ 869   2          }
+ 870   1          FactorySetValue();
+ 871   1          
+ 872   1          NvramWriteCalibData(&CalibData);    //CHIU SAVE DATA EVERY VALUE CHANGE
+ 873   1      }
+ 874          
+ 875          
+ 876          void FactorySelect(void)
+ 877          {
+ 878   1          OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x, LBar[ucFactoryIndex].y, LBar[ucFactoryIndex].len,FACTORY_I
+             -TEM_COLOR);
+ 879   1      }
+ 880          
+ 881          void FactoryUnSelect(void)
+ 882          {
+ 883   1          OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x, LBar[ucFactoryIndex].y, LBar[ucFactoryIndex].len, FACTORY_
+             -FRAME_COLOR);
+ 884   1      }
+ 885          
+ 886          
+ 887          void FactorySelectValue(void)
+ 888          {
+ 889   1          if ((ucFactoryIndex >= mfGAINR) && (ucFactoryIndex <= mf9300B)) {
+ 890   2              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x+LBar[ucFactoryIndex].len,
+ 891   2                                  LBar[ucFactoryIndex].y,
+ 892   2                                  3, FACTORY_ITEM_COLOR);
+ 893   2          }
+ 894   1      /*
+ 895   1          else if (ucFactoryIndex == mfBURNING) {
+ 896   1              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x+LBar[ucFactoryIndex].len,
+ 897   1                                  LBar[ucFactoryIndex].y,
+ 898   1                                  5, FACTORY_ITEM_COLOR);
+ 899   1          }
+ 900   1      */
+ 901   1      
+ 902   1          else if ( ucFactoryIndex == mfGAMMA ) {
+ 903   2              OSDAPI_FillLineAttr(6,
+ 904   2                                  1,
+ 905   2                                  3, FACTORY_ITEM_COLOR);
+ 906   2          }
+ 907   1      
+ 908   1          else {
+ 909   2              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x+LBar[ucFactoryIndex].len,
+ 910   2                                  LBar[ucFactoryIndex].y,
+ 911   2                                  4, FACTORY_ITEM_COLOR);
+ 912   2          }
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 16  
+
+ 913   1      }
+ 914          
+ 915          void FactoryUnSelectValue(void)
+ 916          {
+ 917   1          if ((ucFactoryIndex >= mfGAINR) && (ucFactoryIndex <= mf6500B)) {
+ 918   2              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x+LBar[ucFactoryIndex].len,
+ 919   2                                  LBar[ucFactoryIndex].y,
+ 920   2                                  3, FACTORY_FRAME_COLOR);
+ 921   2          }
+ 922   1      /*
+ 923   1          else if (ucFactoryIndex == mfBURNING) {
+ 924   1              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x+LBar[ucFactoryIndex].len,
+ 925   1                                  LBar[ucFactoryIndex].y,
+ 926   1                                  5, FACTORY_FRAME_COLOR);
+ 927   1          }
+ 928   1      */
+ 929   1      /*
+ 930   1          else if ( ucFactoryIndex == mfWR ) {
+ 931   1              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x-5,
+ 932   1                                  LBar[ucFactoryIndex].y,
+ 933   1                                  4, FACTORY_FRAME_COLOR);
+ 934   1          }
+ 935   1      */
+ 936   1          else {
+ 937   2              OSDAPI_FillLineAttr(LBar[ucFactoryIndex].x+LBar[ucFactoryIndex].len,
+ 938   2                                  LBar[ucFactoryIndex].y,
+ 939   2                                  4, FACTORY_FRAME_COLOR);
+ 940   2          }
+ 941   1      }
+ 942          
+ 943          void FactoryShowValue(UCHAR index, USHRT value)
+ 944          {
+ 945   1          if(index >= mfGAINR &&  index <= mfOFFSETB){
+ 946   2              OSDShowNum(LBar[index].x+1, LBar[index].y, 255-value);
+ 947   2          }
+ 948   1          else if(index >= mf6500R &&  index <= mf9300B){
+ 949   2              OSDShowNum(LBar[index].x+1, LBar[index].y, value);
+ 950   2          }
+ 951   1      //    else if(index == mfADDRESS){
+ 952   1      //        OSDShowNum(LBar[index].x+LBar[index].len+2, LBar[index].y, (UCHAR)(value>>8));
+ 953   1      //        OSDShowNum(LBar[index].x+LBar[index].len, LBar[index].y, value);
+ 954   1      //    }
+ 955   1      //    else if(index == mfWR){
+ 956   1      //        OSDShowNum(LBar[index].x-5, LBar[index].y, value);
+ 957   1      //    }
+ 958   1          else{
+ 959   2              OSDShowNum(LBar[index].x+LBar[index].len, LBar[index].y, value);
+ 960   2          }
+ 961   1      }
+ 962          
+ 963          /*
+ 964          void FactoryShowBurnin(void)
+ 965          {
+ 966              OSDAPI_SetIndentIndex(0xF8);
+ 967              OSDAPI_SetAlignType(OSD_ALIGN_LEFT);
+ 968              if (SystemData.bBurnIn == 1)
+ 969                  OSDAPI_ShowIndentString(FALSE, LBar[mfBURNING].x+8, LBar[mfBURNING].y, 3, ucYesText);
+ 970              else
+ 971                  OSDAPI_ShowIndentString(FALSE, LBar[mfBURNING].x+8, LBar[mfBURNING].y, 3, ucNoText);
+ 972          }
+ 973          */
+ 974          
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 17  
+
+ 975          /*
+ 976          void FactoryShowAutoColor(UCHAR result)
+ 977          {
+ 978              //OSDAPI_SetIndentIndex(0xF0);
+ 979              OSDAPI_SetIndentIndex(128);
+ 980              OSDAPI_SetAlignType(OSD_ALIGN_LEFT);
+ 981          
+ 982              if (result == 1)
+ 983                  OSDAPI_ShowIndentString(FALSE, LBar[mfAUTO].x+8, LBar[mfAUTO].y, 3, ucOkText);
+ 984              else
+ 985                  OSDAPI_ShowIndentString(FALSE, LBar[mfAUTO].x+8, LBar[mfAUTO].y, 3, ucNoText);
+ 986          }
+ 987          */
+ 988          
+ 989          void FactoryValueUp(UCHAR *val)
+ 990          {
+ 991   1          if(++(*val) == 0x00) {
+ 992   2              (*val) = 0xFF;
+ 993   2          }
+ 994   1      }
+ 995          
+ 996          void FactoryValueDown(UCHAR *val)
+ 997          {
+ 998   1          if(--(*val) == 0xFF) {
+ 999   2              (*val) = 0;
+1000   2          }
+1001   1      }
+1002          
+1003          void FactorySetValue(void)
+1004          {
+1005   1          switch(ucFactoryIndex) {
+1006   2      /*
+1007   2              case mfBURNING:
+1008   2                  break;
+1009   2      */
+1010   2              case mfGAINR:
+1011   2              case mfGAING:
+1012   2              case mfGAINB:
+1013   2              case mfOFFSETR:
+1014   2              case mfOFFSETG:
+1015   2              case mfOFFSETB:
+1016   2                  SetADCRGain(CalibData.ucADCRGain);
+1017   2                  SetADCGGain(CalibData.ucADCGGain);
+1018   2                  SetADCBGain(CalibData.ucADCBGain);
+1019   2                  SetADCROffset(CalibData.ucADCROffset);
+1020   2                  SetADCGOffset(CalibData.ucADCGOffset);
+1021   2                  SetADCBOffset(CalibData.ucADCBOffset);
+1022   2                  SetFactUpdFlag();
+1023   2                  break;
+1024   2              case mf9300R:
+1025   2              case mf9300G:
+1026   2              case mf9300B:
+1027   2              case mf7500R:
+1028   2              case mf7500G:
+1029   2              case mf7500B:
+1030   2              case mf6500R:
+1031   2              case mf6500G:
+1032   2              case mf6500B:
+1033   2      /*
+1034   2              case mfSRGBR:
+1035   2              case mfSRGBG:
+1036   2              case mfSRGBB:
+C51 COMPILER V8.02   FOSDVIEW                                                              08/07/2015 16:22:28 PAGE 18  
+
+1037   2              case mf8200R:
+1038   2              case mf8200G:
+1039   2              case mf8200B:
+1040   2              case mf9300R:
+1041   2              case mf9300G:
+1042   2              case mf9300B:
+1043   2              case mf11500R:
+1044   2              case mf11500G:
+1045   2              case mf11500B:
+1046   2      */
+1047   2                  UserSetColorTemp();
+1048   2                  SetFactUpdFlag();
+1049   2                  break;
+1050   2      
+1051   2             case mfGAMMA:
+1052   2                      LoadGamma();
+1053   2                 break;
+1054   2             case mfBACKLIGHT:
+1055   2                      //CalibData.ucBacklite = CalibData.ucBacklite ? 0 : 226;
+1056   2                      SYSAPI_SetInverterVal(CalibData.ucBacklite);                                    
+1057   2                 break;
+1058   2      
+1059   2          }
+1060   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2720    ----
+   CONSTANT SIZE    =    372    ----
+   XDATA SIZE       =     12      37
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

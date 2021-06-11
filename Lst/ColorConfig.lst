@@ -1,0 +1,589 @@
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE COLORCONFIG
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\ColorConfig.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\ColorConfig.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\A
+                    -pp\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\S
+                    -I\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\ColorConfi
+                    -g.lst) OBJECT(.\Bin\ADS\AXI\104N\ColorConfig.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          #define DBC_ULTRA_LOW
+  18          #ifdef DBC_ULTRA_LOW
+  19          #define DBC_TIME_TO_OFF     10000
+  20          #define DBC_BACKLIGHT_OFF   ULTRA_MIN_BACKLIGHT_VALUE
+  21          #define DBC_LTHD_BLANK      4
+  22          #define DBC_HTHD_BLANK      7
+  23          #endif
+  24          #define MapDBCBacklight(s)  ((ULONG)s * (1023 - MIN_BACKLIGHT_VALUE) / 1023 + MIN_BACKLIGHT_VALUE)
+  25          
+  26          //******************************************************************************
+  27          // S T A T I C   V A R I A B L E S
+  28          //******************************************************************************
+  29          static code IGBlock IGModes[NUMBER_IG_MODES] = {
+  30              {16,   0,  16,  88, 156, 228, 300, 368, 440, 508, 584, 652, 724, 796, 864, 936,1008,1024}, //IG_STD_1
+  31              {16,   0,  16,  32, 112, 192, 272, 352, 432, 512, 592, 672, 752, 832, 912, 992,1008,1024}, //IG_STD_2
+  32              {16,   0,  58, 116, 168, 228, 288, 356, 428, 504, 584, 660, 732, 800, 860, 920, 972,1024}, //IG_S_CURV
+             -E
+  33              {16,   0,  58, 128, 216, 288, 352, 412, 468, 520, 568, 620, 676, 736, 800, 872, 964,1024}, //IG_RS_CUR
+             -VE
+  34              {16,   0,  48, 100, 152, 204, 260, 320, 380, 440, 504, 572, 640, 712, 784, 864, 964,1024}, //IG_RC_CUR
+             -VE
+  35              {16,   0,  84, 164, 240, 312, 384, 452, 520, 584, 648, 708, 764, 820, 876, 928, 976,1024}, //IG_C_CURV
+             -E
+  36              {16,   0,  64, 116, 184, 252, 332, 408, 472, 552, 620, 676, 732, 800, 860, 920, 972,1024}, //IG_NVT_CU
+             -RVE_1
+  37              {16,   0,  48, 108, 164, 228, 276, 340, 408, 488, 540, 596, 664, 736, 804, 876, 948,1024}, //IG_NVT_CU
+             -RVE_2
+  38              {16,   0,  64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960,1024}, //IG_DEFAUL
+             -T
+  39          };
+  40          
+  41          static code UCHAR DefaultMinIGPoints[] = {
+  42              40, 40, 52, 52, 58, 58, 58, 58, 58, 58, 58, 58, 52, 40, 40, 40
+  43          };
+  44          
+  45          static code HHBlock HHModes[NUMBER_HH_MODES] = {
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 2   
+
+  46              {
+  47                  24,
+  48                  0x00,
+  49                  0x00,0x04,0x02,0x04,
+  50                  0x18,0x20,0x88,0x04,
+  51                  0x08,0x04,0x00,0x00,
+  52                  0x00,0x08,0x10,0x08,
+  53                  0x00,0x00,0x00,0x00,
+  54                  0x00,0x00,0x00,0x10,
+  55              },{
+  56                  24,
+  57                  0x00,
+  58                  0x00,0x04,0x02,0x04,
+  59                  0x18,0x20,0x83,0x04,
+  60                  0x08,0x04,0x00,0x00,
+  61                  0x00,0x08,0x10,0x08,
+  62                  0x00,0x00,0x00,0x00,
+  63                  0x00,0x00,0x00,0x10,
+  64              },{
+  65                  24,
+  66                  0x00,
+  67                  0x00,0x04,0x02,0x04,
+  68                  0x18,0x20,0x83,0x04,
+  69                  0x08,0x04,0x00,0x00,
+  70                  0x00,0x08,0x10,0x08,
+  71                  0x00,0x00,0x00,0x00,
+  72                  0x00,0x00,0x00,0x10,
+  73              },
+  74          };
+  75          
+  76          static code HSBlock HSModes[NUMBER_HS_MODES] = {
+  77              {
+  78                  24,
+  79                  0x00,
+  80                  0x98,0x90,0x88,0xA0,
+  81                  0xa8,0xa8,0x90,0x88,
+  82                  0x90,0x88,0x80,0x80,
+  83                  0x80,0x90,0xa0,0x90,
+  84                  0x80,0x80,0x80,0x80,
+  85                  0x80,0x80,0x80,0x90,
+  86              },{
+  87                  24,
+  88                  0x00,
+  89                  0x8e,0x90,0x70,0xA0,
+  90                  0xa8,0xa8,0x98,0x88,
+  91                  0x90,0x88,0x80,0x80,
+  92                  0x80,0x90,0xa0,0x90,
+  93                  0x80,0x80,0x80,0x80,
+  94                  0x80,0x80,0x80,0x90,
+  95              },{
+  96                  24,
+  97                  0x00,
+  98                  0x8e,0x90,0x70,0xA0,
+  99                  0xa8,0xa8,0x98,0x88,
+ 100                  0x90,0x88,0x80,0x80,
+ 101                  0x80,0x90,0xa0,0x90,
+ 102                  0x80,0x80,0x80,0x80,
+ 103                  0x80,0x80,0x80,0x90,
+ 104              },
+ 105          };
+ 106          
+ 107          static code CMBlock CMModes[NUMBER_CE_MODES] = {
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 3   
+
+ 108              {// 76% NTSC
+ 109                  0x80,    //R Offset
+ 110                  0x80,    //G Offset
+ 111                  0x80,    //B Offset
+ 112                  0x80,    //R Gain
+ 113                  0x80,    //G Gain
+ 114                  0x80,    //B Gain
+ 115                  0x80,    // Saturation
+ 116                  0x80,    // Intensity
+ 117                  0x80,    // Hue
+ 118                  0x80,    // BlueMore
+ 119                  0x80,    // GreenMore
+ 120                  0x80,    // RedMore
+ 121                  0x00,    // FTMore
+ 122                  0x00,    // Sharpness
+ 123                  0x00,    // Peaking
+ 124                  0x00,    // TextEn
+ 125                  BF_COLOR_NVT76,
+ 126                  &IGModes[IG_DEFAULT],
+ 127                  NULLPTR, // HH Table
+ 128                  NULLPTR, // HS Table
+ 129                  NULLPTR, // HI Table
+ 130              },{// 80% NTSC
+ 131                  0x80,    //R Offset
+ 132                  0x80,    //G Offset
+ 133                  0x80,    //B Offset
+ 134                  0x80,    //R Gain
+ 135                  0x80,    //G Gain
+ 136                  0x80,    //B Gain
+ 137                  0x80,    // Saturation
+ 138                  0x80,    // Intensity
+ 139                  0x80,    // Hue
+ 140                  0x80,    // BlueMore
+ 141                  0x80,    // GreenMore
+ 142                  0x80,    // RedMore
+ 143                  0x00,    // FTMore
+ 144                  0x00,    // Sharpness
+ 145                  0x00,    // Peaking
+ 146                  0x00,    // TextEn
+ 147                  BF_COLOR_NVT80,
+ 148                  &IGModes[IG_DEFAULT],
+ 149                  NULLPTR, // HH Table
+ 150                  NULLPTR, // HS Table
+ 151                  NULLPTR, // HI Table
+ 152              },/*{// Color 1
+ 153                  0x80,    //R Offset
+ 154                  0x80,    //G Offset
+ 155                  0x80,    //B Offset
+ 156                  0x80,    //R Gain
+ 157                  0x80,    //G Gain
+ 158                  0x80,    //B Gain
+ 159                  0x98,    // Saturation
+ 160                  0x80,    // Intensity
+ 161                  0x82,    // Hue
+ 162                  0x80,    // BlueMore
+ 163                  0x80,    // GreenMore
+ 164                  0x80,    // RedMore
+ 165                  0x00,    // FTMore
+ 166                  0x01,    // Sharpness
+ 167                  0x01,    // Peaking
+ 168                  0x00,    // TextEn
+ 169                  BF_COLOR_NVT72,
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 4   
+
+ 170                  &IGModes[IG_NVT_CURVE_1],
+ 171                  &HHModes[HH_MODE_1],
+ 172                  &HSModes[HS_MODE_1],
+ 173                  NULLPTR, // HI Table
+ 174              },{// Color 2
+ 175                  0x80,    //R Offset
+ 176                  0x80,    //G Offset
+ 177                  0x80,    //B Offset
+ 178                  0x80,    //R Gain
+ 179                  0x80,    //G Gain
+ 180                  0x80,    //B Gain
+ 181                  0x90,    // Saturation
+ 182                  0x80,    // Intensity
+ 183                  0x82,    // Hue
+ 184                  0x80,    // BlueMore
+ 185                  0x80,    // GreenMore
+ 186                  0x80,    // RedMore
+ 187                  0x00,    // FTMore
+ 188                  0x01,    // Sharpness
+ 189                  0x01,    // Peaking
+ 190                  0x00,    // TextEn
+ 191                  BF_COLOR_NVT72,
+ 192                  &IGModes[IG_NVT_CURVE_2],
+ 193                  &HHModes[HH_MODE_2],
+ 194                  &HSModes[HS_MODE_2],
+ 195                  NULLPTR, // HI Table
+ 196              },*/{//OFF
+ 197                  0x80,    //R Offset
+ 198                  0x80,    //G Offset
+ 199                  0x80,    //B Offset
+ 200                  0x80,    //R Gain
+ 201                  0x80,    //G Gain
+ 202                  0x80,    //B Gain
+ 203                  0x80,    // Saturation
+ 204                  0x80,    // Intensity
+ 205                  0x80,    // Hue
+ 206                  0x80,    // BlueMore
+ 207                  0x80,    // GreenMore
+ 208                  0x80,    // RedMore
+ 209                  0x00,    // FTMore
+ 210                  0x00,    // Sharpness
+ 211                  0x00,    // Peaking
+ 212                  0x00,    // TextEn
+ 213                  BF_COLOR_INIT,
+ 214                  &IGModes[IG_DEFAULT],
+ 215                  NULLPTR, // HH Table
+ 216                  NULLPTR, // HS Table
+ 217                  NULLPTR, // HI Table
+ 218              },
+ 219          };
+ 220          
+ 221          //******************************************************************************
+ 222          // Prototype: 
+ 223          //  void InitColor(void)
+ 224          // Parameters:
+ 225          //  None
+ 226          // Return:
+ 227          //  None
+ 228          // Purpose:
+ 229          //  Color setting initialization.
+ 230          // Notes:
+ 231          //  None
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 5   
+
+ 232          //******************************************************************************
+ 233          void InitColor(void)
+ 234          {
+ 235   1          #if ENABLE_CM2 == ON
+ 236   1              BFAPI_Init(BF_TWO_GEN);
+ 237   1          #else
+                      BFAPI_Init(BF_ONE_GEN);
+                  #endif
+ 240   1              BFAPI_SetActiveWindow(BF_WINDOW_2);
+ 241   1      
+ 242   1              // Always access global 3x3 matrix when adjust contrast and colortemp.
+ 243   1              // P.S. MTXAPI_EnableLocalMatrix must be after BFAPI_Init.
+ 244   1              MTXAPI_SelMatrix(MTX_GLOBAL);
+ 245   1              MTXAPI_EnableLocalMatrix(FALSE);
+ 246   1          }
+ 247              
+ 248          //******************************************************************************
+ 249          // Prototype: 
+ 250          //  void SetThemeMode(UCHAR mode)
+ 251          // Parameters:
+ 252          //  None
+ 253          // Return:
+ 254          //  None
+ 255          // Purpose:
+ 256          //  Set Color Theme
+ 257          // Notes:
+ 258          //  None
+ 259          //******************************************************************************
+ 260          void SetThemeMode(UCHAR mode)
+ 261          {
+ 262   1          BFAPI_EnableCM(CM_ALL);
+ 263   1          BFAPI_SetROffset(CMModes[mode].ROffset);
+ 264   1          BFAPI_SetGOffset(CMModes[mode].GOffset);
+ 265   1          BFAPI_SetBOffset(CMModes[mode].BOffset);
+ 266   1          BFAPI_SetRGain(CMModes[mode].RGain);
+ 267   1          BFAPI_SetGGain(CMModes[mode].GGain);
+ 268   1          BFAPI_SetBGain(CMModes[mode].BGain);
+ 269   1          BFAPI_SetHue(CMModes[mode].Hue);
+ 270   1          BFAPI_SetSaturation(CMModes[mode].Saturation);
+ 271   1          BFAPI_SetIntensity(CMModes[mode].Intensity);
+ 272   1          BFAPI_CorrectFleshTone(CMModes[mode].FTMore);
+ 273   1          BFAPI_EnhanceRed(CMModes[mode].RedMore);
+ 274   1          BFAPI_EnhanceGreen(CMModes[mode].GreenMore);
+ 275   1          BFAPI_EnhanceBlue(CMModes[mode].BlueMore);
+ 276   1          BFAPI_SetSharpness(CMModes[mode].Sharpness);
+ 277   1          BFAPI_SetYPeaking(CMModes[mode].Peaking);
+ 278   1          BFAPI_SetTextEnhancement(CMModes[mode].TextEn);
+ 279   1          BFAPI_ColorEnhance(CMModes[mode].ClrMode);
+ 280   1          if (UserData.ucDCRMode != BKL_CTRL_DCR)
+ 281   1              BFAPI_SetPreACEMode(CMModes[mode].pIG);
+ 282   1          BFAPI_SetHHTable(CMModes[mode].pHH);
+ 283   1          BFAPI_SetHSTable(CMModes[mode].pHS);
+ 284   1          BFAPI_SetHITable(CMModes[mode].pHI);
+ 285   1          BFAPI_SetWindowSize(BF_WINDOW_FULLSCREEN);
+ 286   1          BFAPI_EnableWindow(BF_WINDOW_2);
+ 287   1      }
+ 288          
+ 289          //#if ENABLE_DBC == OFF
+ 290          #ifdef DBC_ULTRA_LOW
+ 291          //******************************************************************************
+ 292          // Prototype: 
+ 293          //  static BOOL IsBlankVideo(void)
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 6   
+
+ 294          // Parameters:
+ 295          //  None
+ 296          // Return:
+ 297          //  Return TRUE/FALSE
+ 298          // Purpose:
+ 299          //  Check the current input video is blank or not.
+ 300          // Notes:
+ 301          //  None
+ 302          //******************************************************************************
+ 303          static BOOL IsBlankVideo(void)
+ 304          {
+ 305   1          static BOOL blank_flag = FALSE;
+ 306   1          UCHAR rcode, gcode, bcode;
+ 307   1      
+ 308   1          if (DCR_IsReadyToGetMax()) {
+ 309   2              rcode = DCR_GetRMax();
+ 310   2              gcode = DCR_GetGMax();
+ 311   2              bcode = DCR_GetBMax();
+ 312   2      
+ 313   2              if ((rcode < DBC_LTHD_BLANK) && (gcode < DBC_LTHD_BLANK) && (bcode < DBC_LTHD_BLANK)) {
+ 314   3                  blank_flag = TRUE;
+ 315   3              }
+ 316   2              else if ((rcode > DBC_HTHD_BLANK) || (gcode > DBC_HTHD_BLANK) || (bcode > DBC_HTHD_BLANK)) {
+ 317   3                  blank_flag = FALSE;
+ 318   3              }
+ 319   2          }
+ 320   1      
+ 321   1          return blank_flag;
+ 322   1      }
+ 323          
+ 324          //******************************************************************************
+ 325          // Prototype:
+ 326          //  static void PerformDBC(void)
+ 327          // Parameters:
+ 328          //  None
+ 329          // Return:
+ 330          //  None
+ 331          // Purpose:
+ 332          //  Periodic DBC routine
+ 333          // Notes:
+ 334          //  None
+ 335          //******************************************************************************
+ 336          static void PerformDBC(void)
+ 337          {
+ 338   1          static BOOL is_spr_dcr = FALSE;
+ 339   1          static xdata USHRT local_timer = 0;
+ 340   1      
+ 341   1          if (!IsBlankVideo()) {
+ 342   2              local_timer = GetTimerTick();
+ 343   2      
+ 344   2              if (is_spr_dcr) {
+ 345   3                  is_spr_dcr = FALSE;
+ 346   3                  DCR_ResetDymBacklight(0);
+ 347   3              }
+ 348   2          }
+ 349   1          else {
+ 350   2              if ((GetTimerTick() - local_timer) > DBC_TIME_TO_OFF) {
+ 351   3                  local_timer = GetTimerTick();
+ 352   3                  if (is_spr_dcr == FALSE) {
+ 353   4                      is_spr_dcr = TRUE;
+ 354   4                      SetBrightness(DBC_BACKLIGHT_OFF);
+ 355   4                  }
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 7   
+
+ 356   3              }
+ 357   2          }
+ 358   1      
+ 359   1          if (is_spr_dcr == FALSE) {
+ 360   2              DCR_SetDymBacklight();
+ 361   2          }
+ 362   1      }
+ 363          #endif
+ 364          
+ 365          //******************************************************************************
+ 366          // Prototype:
+ 367          //  void PerformDCR(UCHAR reset)
+ 368          // Parameters:
+ 369          //  None
+ 370          // Return:
+ 371          //  None
+ 372          // Purpose:
+ 373          //  Periodic DCR routine
+ 374          // Notes:
+ 375          //  None
+ 376          //******************************************************************************
+ 377          void PerformDCR(UCHAR reset)
+ 378          {
+ 379   1          if (reset) {
+ 380   2              DCR_SetDynACEType(ACE_SMOOTH);
+ 381   2              DCR_SetDynACEPnts(DefaultMinIGPoints);
+ 382   2          }
+ 383   1      
+ 384   1          if ( UserData.ucDCRMode == BKL_CTRL_DCR ) {
+ 385   2              DCR_UpdateHistogram(reset);
+ 386   2              DCR_SetDymACE(reset);
+ 387   2              if (reset) {
+ 388   3                  DCR_ResetDymBacklight(GetBrightness1023());
+ 389   3              }
+ 390   2              else {
+ 391   3              #ifdef DBC_ULTRA_LOW
+ 392   3                  PerformDBC();
+ 393   3              #else
+                          DCR_SetDymBacklight();
+                      #endif
+ 396   3              }
+ 397   2          }
+ 398   1      }
+ 399          
+ 400          //******************************************************************************
+ 401          // Prototype: 
+ 402          //  void DisableDCR(void)
+ 403          // Parameters:
+ 404          //  None
+ 405          // Return:
+ 406          //  None
+ 407          // Purpose:
+ 408          //  Recall brightness setting while turn off DCR function
+ 409          // Notes:
+ 410          //  None
+ 411          //******************************************************************************
+ 412          void DisableDCR(void)
+ 413          {
+ 414   1          UserSetBF();
+ 415   1      
+ 416   1      #if ALS_EnDis == ALSMODE
+                      if(UserData.ucALSMode == ALS_OFF) {
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 8   
+
+                      UserSetBrightness();
+                      }else {  //if(UserData.ucALSMode == INDOOR || UserData.ucALSMode == OUTDOOR) {                                                          //george: F_CM3218_
+             -01
+                              CM3218_BacklightOn_Init();
+                              SetNowALSBrig();
+                      }
+              #elif ALS_EnDis == ALSOffSET    
+                      if(UserData.bALSOnOff == OFF) {
+                      UserSetBrightness();
+                      }else{                                                          //george: F_CM3218_01
+                              CM3218_BacklightOn_Init();
+                              SetNowALSBrig();
+                      }
+              #elif ALS_EnDis == ALSRange
+                      if(UserData.bALSOnOff == OFF) {
+                      UserSetBrightness();
+                      }else {  //if(UserData.ucALSMode == INDOOR || UserData.ucALSMode == OUTDOOR) {                                                          //george: F_CM3218_
+             -01
+                              LS3101_ALSOnInit();
+                              SetNowALSBrig();
+                      }
+              #else   //Normal
+ 438   1              UserSetBrightness();
+ 439   1      #endif  //#if ALS_EnDis == ENABLE
+ 440   1      
+ 441   1      
+ 442   1      }
+ 443          
+ 444          //******************************************************************************
+ 445          // Prototype: 
+ 446          //  void SetDBCBacklight(USHRT brightness)
+ 447          // Parameters:
+ 448          //  brightness : range is 0~1023
+ 449          // Return:
+ 450          //  None
+ 451          // Purpose:
+ 452          //  This is call-back function for ColorEngine library.
+ 453          // Notes:
+ 454          //  None
+ 455          //******************************************************************************
+ 456          void SetDBCBacklight(USHRT brightness)
+ 457          {
+ 458   1          // Remap backlight is to avoid backlight shutdown
+ 459   1          brightness = MapDBCBacklight(brightness);
+ 460   1          SetBrightness(brightness);
+ 461   1      }
+ 462          //#endif //ENABLE_DBC == OFF
+ 463          
+ 464          //******************************************************************************
+ 465          // Prototype: 
+ 466          //  void SetColorTemperature(UCHAR mode)
+ 467          // Parameters:
+ 468          //  None
+ 469          // Return:
+ 470          //  None
+ 471          // Purpose:
+ 472          //  Set Color Temperature
+ 473          // Notes:
+ 474          //  None
+ 475          //******************************************************************************
+ 476          void SetColorTemperature(UCHAR mode)
+ 477          {
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 9   
+
+ 478   1          USHRT r,g,b;
+ 479   1          switch (mode) {
+ 480   2      /*
+ 481   2              case CLRTMP_5000K:
+ 482   2                  r = CalibData.uc5000KRGain;
+ 483   2                  g = CalibData.uc5000KGGain;
+ 484   2                  b = CalibData.uc5000KBGain;
+ 485   2                  break;
+ 486   2      */
+ 487   2              case CLRTMP_6500K:
+ 488   2                  r = CalibData.uc6500KRGain;
+ 489   2                  g = CalibData.uc6500KGGain;
+ 490   2                  b = CalibData.uc6500KBGain;
+ 491   2                  break;
+ 492   2              case CLRTMP_7500K:
+ 493   2                  r = CalibData.uc7500KRGain;
+ 494   2                  g = CalibData.uc7500KGGain;
+ 495   2                  b = CalibData.uc7500KBGain;
+ 496   2                  break;
+ 497   2      /*
+ 498   2              case CLRTMP_8200K:
+ 499   2                  r = CalibData.uc8200KRGain;
+ 500   2                  g = CalibData.uc8200KGGain;
+ 501   2                  b = CalibData.uc8200KBGain;
+ 502   2                  break;
+ 503   2      */
+ 504   2              case CLRTMP_9300K:
+ 505   2                  r = CalibData.uc9300KRGain;
+ 506   2                  g = CalibData.uc9300KGGain;
+ 507   2                  b = CalibData.uc9300KBGain;
+ 508   2                  break;
+ 509   2      /*
+ 510   2              case CLRTMP_11500K:
+ 511   2                  r = CalibData.uc11500KRGain;
+ 512   2                  g = CalibData.uc11500KGGain;
+ 513   2                  b = CalibData.uc11500KBGain;
+ 514   2                  break;
+ 515   2      */
+ 516   2      /*
+ 517   2              case CLRTMP_sRGB:
+ 518   2                  r = CalibData.ucsRGBRGain;
+ 519   2                  g = CalibData.ucsRGBGGain;
+ 520   2                  b = CalibData.ucsRGBBGain;
+ 521   2                  break;
+ 522   2      */
+ 523   2              case CLRTMP_USER:
+ 524   2              default:
+ 525   2                  r = (USHRT)GetRGain255();
+ 526   2                  g = (USHRT)GetGGain255();
+ 527   2                  b = (USHRT)GetBGain255();
+ 528   2                  break;
+ 529   2          };
+ 530   1          
+ 531   1          // To bypass the 3x3 matrix, we need to assign 0x100 to MTXAPI_SetRGBGain.
+ 532   1          // However, the max gain value in this function is 0xFF.
+ 533   1          // So, we plus one to achieve bypassing 3x3 matrix
+ 534   1          // Jude 2011/07/28
+ 535   1          MTXAPI_SetRGBGain(r + 1,g + 1,b + 1);
+ 536   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V8.02   COLORCONFIG                                                           08/07/2015 16:22:29 PAGE 10  
+
+   CODE SIZE        =    940    ----
+   CONSTANT SIZE    =    574    ----
+   XDATA SIZE       =      8      10
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

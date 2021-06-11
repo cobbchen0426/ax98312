@@ -1,0 +1,94 @@
+C51 COMPILER V8.02   PANEL                                                                 08/07/2015 16:22:23 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE PANEL
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Panel.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Phy\Panel\Panel.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\A
+                    -pp\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\S
+                    -I\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\Panel.lst)
+                    - OBJECT(.\Bin\ADS\AXI\104N\Panel.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          //******************************************************************************
+   9          // I N C L U D E   F I L E S
+  10          //******************************************************************************
+  11          #include "Include.h"
+  12          
+  13          //******************************************************************************
+  14          // G L O B A L   D E F I N I T I O N S
+  15          //******************************************************************************
+  16          
+  17          //******************************************************************************
+  18          // G L O B A L   V A R I A B L E S
+  19          //******************************************************************************
+  20          code PanelData PanelDataDefault = {
+  21              PANEL_LVDS_SWING, //UCHAR ucLVDS_Swing : 5;
+  22              PANEL_DUAL_PORT_LVDS, //UCHAR bDualPortLVDS : 1;
+  23              0x01, //UCHAR bEnableSSC : 1;
+  24              PANEL_DE_MODE, //UCHAR bDEMode : 1;
+  25              PANEL_PORT_SWAP, //UCHAR bPortSwap : 1;
+  26              PANEL_BIT_SHIFT, //UCHAR bBitShift : 1;
+  27              PANEL_COLOR_DEPTH, //UCHAR ucColorDepth;
+  28              PANEL_WIDTH, //USHRT usWidth;
+  29              PANEL_HEIGHT, //USHRT usHeight;
+  30              PANEL_MIN_LVDS_CLK, //ULONG ulMinPClk;
+  31              PANEL_MAX_LVDS_CLK, //ULONG ulMaxPClk;
+  32              PANEL_MIN_HTOTAL, //USHRT usMinHTotal;
+  33              PANEL_TYP_HTOTAL, //USHRT usTypHTotal;
+  34              PANEL_MAX_HTOTAL, //USHRT usMaxHTotal;
+  35              PANEL_HSYNC_WIDTH, //USHRT usMinHSyncWidth;
+  36              PANEL_HSYNC_BACKPORCH, //USHRT usMinHSyncBackPorch;
+  37              PANEL_MIN_VTOTAL, //USHRT usMinVTotal;
+  38              PANEL_TYP_VTOTAL, //USHRT usTypVTotal;
+  39              PANEL_MAX_VTOTAL, //USHRT usMaxVTotal;
+  40              PANEL_VSYNC_WIDTH, //USHRT usMinVSyncWidth;
+  41              PANEL_VSYNC_BACKPORCH, //USHRT usMinVSyncBackPorch;
+  42              (ULONG)PANEL_FRC_OUTPUT_VSYNC*PANEL_TYP_VTOTAL, //ULONG ulFreeRunH_Freq;
+  43              PANEL_POWER_UP_TIME, //USHRT usPowerUpPanelTime;
+  44              PANEL_INVTER_UP_TIME, //USHRT usPowerUpInvTime;
+  45              PANEL_POWER_DOWN_TIME, //USHRT usPowerDownPanelTime;
+  46              PANEL_INVTER_DOWN_TIME, //USHRT usPowerDownInvTime;
+  47              PANEL_OFF_ON_TIME,//USHRT usPowerOffOnPanelTime
+  48              PANEL_DCLK_SSC //UCHAR ucSpreadSpectrumCtrl;
+  49          };
+  50          //******************************************************************************
+  51          // S T A T I C   V A R I A B L E S
+  52          //******************************************************************************
+C51 COMPILER V8.02   PANEL                                                                 08/07/2015 16:22:23 PAGE 2   
+
+  53          
+  54          //******************************************************************************
+  55          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  56          //******************************************************************************
+  57          
+  58          //******************************************************************************
+  59          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  60          //******************************************************************************
+  61          
+  62          //******************************************************************************
+  63          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  64          //******************************************************************************
+  65          
+  66          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =     50    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

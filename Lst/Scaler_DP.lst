@@ -1,0 +1,1266 @@
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_DP
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_DP.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_DP.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDI
+                    -R(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\
+                    -NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) P
+                    -RINT(.\Lst\Scaler_DP.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_DP.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          #if (INPUT_INTERFACE&INPUT_DP)
+  16          //******************************************************************************
+  17          // M A C R O   D E F I N I T I O N S
+  18          //******************************************************************************
+  19          
+  20          //******************************************************************************
+  21          // G L O B A L   V A R I A B L E S
+  22          //******************************************************************************
+  23          static xdata UCHAR ucPowerState = 0;
+  24          static code UCHAR MCU_CLK[9] = CPU_CLK_TABLE;
+  25          static xdata USHRT usDPTimer = 0;
+  26          static xdata BOOL bAudioMNChecking = FALSE;
+  27          #if EN_AUX_STROBE_FUNC == ON
+              xdata UCHAR bDP_AUX_DETECT = 0;
+              #endif
+  30          
+  31          //******************************************************************************
+  32          // S T A T I C   V A R I A B L E S
+  33          //******************************************************************************
+  34          #if DP_DDC_CHANNEL == 0x00
+              //    xdata UCHAR volatile EDID_SRAM_DP[256] _at_ 0xF800;
+                  #define EDID_SRAM_DP EDID_SRAM_BUFF0
+                  #define DP_DDC_PORT    DDC_CTL0
+                  #define DP_IIC_MASK    0x0E
+              #elif DP_DDC_CHANNEL == 0x01
+              //    xdata UCHAR volatile EDID_SRAM_DP[256] _at_ 0xF900;
+                  #define EDID_SRAM_DP EDID_SRAM_BUFF1
+                  #define DP_DDC_PORT    DDC_CTL1
+                  #define DP_IIC_MASK    0x0D
+              #elif DP_DDC_CHANNEL == 0x02
+              //    xdata UCHAR volatile EDID_SRAM_DP[256] _at_ 0xFA00;
+                  #define EDID_SRAM_DP EDID_SRAM_BUFF2
+                  #define DP_DDC_PORT    DDC_CTL2
+                  #define DP_IIC_MASK    0x0B
+              #elif DP_DDC_CHANNEL == 0x03
+  50          //    xdata UCHAR volatile EDID_SRAM_DP[256] _at_ 0xFB00;
+  51              #define EDID_SRAM_DP EDID_SRAM_BUFF3
+  52              #define DP_DDC_PORT    DDC_CTL3
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 2   
+
+  53              #define DP_IIC_MASK    0x07
+  54          #endif
+  55          
+  56          //CHIU
+  57          #if SPECIALAPP == ON
+              //Tatung1850x1036-NO_1920X1080
+              static code UCHAR _Default_DP_EDID[]={
+                 0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x3A,0xD4,0x5A,0x66,0x01,0x00,0x00,0x00,
+                 0x0F,0x17,0x01,0x04,0xA5,0x3A,0x20,0x78,0xEF,0x36,0xD5,0xA2,0x56,0x53,0x99,0x27,
+                 0x0D,0x50,0x54,0xA3,0x08,0x00,0x81,0x80,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+                 0x01,0x01,0x01,0x01,0x01,0x01,0x09,0x3B,0x3A,0x5E,0x71,0x0C,0x6D,0x40,0x6E,0x37,
+                 0x85,0x04,0x40,0x44,0x21,0x00,0x00,0x18,0x66,0x21,0x50,0xB0,0x51,0x00,0x1B,0x30,
+                 0x40,0x70,0x36,0x00,0x40,0x44,0x21,0x00,0x00,0x1E,0x00,0x00,0x00,0xFD,0x00,0x32,
+                 0x41,0x1E,0x64,0x16,0x00,0x0A,0x20,0x20,0x20,0x20,0x20,0x20,0x00,0x00,0x00,0xFC,
+                 0x00,0x54,0x55,0x53,0x20,0x4C,0x32,0x36,0x58,0x58,0x58,0x0A,0x0A,0x0A,0x01,0xA3,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+              };
+              
+              #else
+  79          
+  80          #include "EDID.c"               
+  81          
+  82          #endif  //#if SPECIALAPP == ON
+  83          
+  84          //******************************************************************************
+  85          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  86          //******************************************************************************
+  87          
+  88          //******************************************************************************
+  89          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  90          //******************************************************************************
+  91          
+  92          //******************************************************************************
+  93          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  94          //******************************************************************************
+  95          
+  96          //******************************************************************************
+  97          // F U N C T I O N   B O D Y S
+  98          //******************************************************************************
+  99          
+ 100          //******************************************************************************
+ 101          // Prototype: 
+ 102          //  void DPInit()
+ 103          // Parameters:
+ 104          //
+ 105          // Return:
+ 106          //  None
+ 107          // Purpose:
+ 108          //
+ 109          // Notes:
+ 110          //  None
+ 111          //******************************************************************************
+ 112          void DPInit(void)
+ 113          {
+ 114   1          SC_TMDS_LINK_CLK_SEL = SCREG_1E7 | BIT0;;  // dp_refclk select
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 3   
+
+ 115   1          SC_DP_102F = REF_CLK*4/1000000;  // if 0x1E7[4:3] = 2'b00, dp_refclk = OSC clock*4
+ 116   1      
+ 117   1          DP_PowerOn();
+ 118   1          DPConfigAUXDetect();
+ 119   1      
+ 120   1      #if ENABLE_DEMO_DP_EDID == ON
+                      {
+                              USHRT i;
+                      bit diff;
+                  // Init EDID data
+                      diff = FALSE;
+                              
+                              for (i=0; i<256; i++) {
+                          if ((EDID_SRAM_DP[i] != _Default_DP_EDID[i]) && (i < 8)) {//check head
+                              diff = TRUE;
+                                      EDID_SRAM_DP[i] = _Default_DP_EDID[i];
+                              }       
+                                      else if ((i > 7) && (diff == TRUE)) {//copy
+                                              EDID_SRAM_DP[i] = _Default_DP_EDID[i];
+                                      }
+                      }
+                  }
+              #endif
+ 138   1      
+ 139   1      
+ 140   1      #if EN_AUX_STROBE_FUNC == ON
+                              INTSC_EN |= BIT1;               // DP_EN        
+                              AUX_STROBE_CTL = (DP_AUX_STROBE_EN|DP_AUX_STROBE_RST|DP_AUX_STROBE_INT_EN);     // AUX strobe enable, interr
+             -upt enable
+                              AUX_STROBE_CTL = (DP_AUX_STROBE_EN|DP_AUX_STROBE_INT_EN|DP_AUX_STROBE_MASK_RX);//0x1d;  // clear AUX stro
+             -be interrupt
+                              AUX_I2C_MANUAL = (AUX_I2C_MODE);                // enable I2C-over-AUX to manual mode
+                              SC_DP_RESET_FUNCTION |= DP_AUX_RST;
+                              SC_DP_RESET_FUNCTION &= ~DP_AUX_RST;
+                      #if 1
+                              DP_SC_REG_1224 |= (MASK_NATIVE_AUX);
+                              SC_DP_AUX_CTRL2 |= (DP_AUX_INTR_SEL);
+                      #endif
+                      SC_DP_10F4 = 0xA0;
+              #else
+ 153   1      
+ 154   1              #if (ENABLE_DP_AUX_MONITOR==OFF)
+ 155   1                              INTSC_EN &= ~BIT1;
+ 156   1                              AUX_STROBE_CTL = 0x00;
+ 157   1                  #if (ENABLE_DEMO_DP_EDID == ON) || ((USE_INTERNAL_EDID == 1) && (DP_DDC_CHANNEL != 0xFF))
+ 158   1                      DP_DDC_PORT |= BIT7;//DDC_CTL1 |= BIT7;
+ 159   1                      IIC_MASK_CTRL = DP_IIC_MASK;//0x0D;
+ 160   1                      DP_CTRL = (DP_DDC_CHANNEL << 2) | BIT1;// | BIT0;//0x06;
+ 161   1                      #else
+                              IIC_MASK_CTRL = DP_IIC_MASK;//0x0D;
+                              DP_CTRL = (DP_DDC_CHANNEL << 2) | BIT1 | BIT0;//0x06;
+                              #endif
+ 165   1              
+ 166   1              #endif
+ 167   1      
+ 168   1      #endif
+ 169   1      
+ 170   1          DP_ConfigAUX2IICSpeed();
+ 171   1      
+ 172   1          if(IsDPTrainingDone() == FALSE){
+ 173   2            DP_InitPHY();
+ 174   2            DP_InitDPCD();//DP TrainingDone don't do it
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 4   
+
+ 175   2            
+ 176   2            SC_DP_AUX_CTRL = 0x31; // AUX
+ 177   2                  
+ 178   2            DP_InitDPConfigPage();
+ 179   2          }
+ 180   1      }
+ 181          
+ 182          //******************************************************************************
+ 183          // Prototype: 
+ 184          //  void DP_PowerOn()
+ 185          // Parameters:
+ 186          //
+ 187          // Return:
+ 188          //  None
+ 189          // Purpose:
+ 190          //
+ 191          // Notes:
+ 192          //  None
+ 193          //******************************************************************************
+ 194          void DP_PowerOn(void)
+ 195          {
+ 196   1          DP_CLKOn();
+ 197   1          DPPHY_PowerOn();
+ 198   1      }
+ 199          
+ 200          //******************************************************************************
+ 201          // Prototype: 
+ 202          //  void DP_PowerOFF()
+ 203          // Parameters:
+ 204          //
+ 205          // Return:
+ 206          //  None
+ 207          // Purpose:
+ 208          //
+ 209          // Notes:
+ 210          //  None
+ 211          //******************************************************************************
+ 212          void DP_PowerOFF(void)
+ 213          {
+ 214   1          DP_CLKOff();
+ 215   1          DPPHY_PowerOff();
+ 216   1      }
+ 217          
+ 218          //******************************************************************************
+ 219          // Prototype: 
+ 220          //  void GetDPInputHDEImmediate()
+ 221          // Parameters:
+ 222          //
+ 223          // Return:
+ 224          //  None
+ 225          // Purpose:
+ 226          //
+ 227          // Notes:
+ 228          //  None
+ 229          //******************************************************************************
+ 230          USHRT GetDPInputHDEImmediate(void)
+ 231          {
+ 232   1          return (SC_DP_1089<<8)+(SC_DP_108A);
+ 233   1      }
+ 234          
+ 235          //******************************************************************************
+ 236          // Prototype: 
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 5   
+
+ 237          //  void GetDPInputVDEImmediate()
+ 238          // Parameters:
+ 239          //
+ 240          // Return:
+ 241          //  None
+ 242          // Purpose:
+ 243          //
+ 244          // Notes:
+ 245          //  None
+ 246          //******************************************************************************
+ 247          USHRT GetDPInputVDEImmediate(void)
+ 248          {
+ 249   1          return (SC_DP_108B<<8)+(SC_DP_108C);
+ 250   1      }
+ 251          
+ 252          //******************************************************************************
+ 253          // Prototype: 
+ 254          //  void DP_GetClock()
+ 255          // Parameters:
+ 256          //
+ 257          // Return:
+ 258          //  None
+ 259          // Purpose:
+ 260          //
+ 261          // Notes:
+ 262          //  None
+ 263          //******************************************************************************
+ 264          USHRT DP_GetClock(void)
+ 265          {
+ 266   1      #if 0
+                      #if REF_CLK==12000000
+                          if ((SC_DP_10F2 & BIT6) != 0) {
+                              return SC_DP_10F5;
+                          }
+                      #else
+              
+                              #define OSC_FREQ_RATIO ((float)REF_CLK/12000000)
+                          if ((SC_DP_10F2 & BIT6) != 0) {
+                              return (USHRT)(SC_DP_10F5*OSC_FREQ_RATIO);
+                          }
+              
+                      #undef OSC_FREQ_RATIO
+              
+                      #endif
+              
+                  return 0;
+              
+              #else
+ 285   1              #define DP162M 162000000
+ 286   1              #define DP270M 270000000
+ 287   1              #define DP540M 540000000
+ 288   1      
+ 289   1          xdata ULONG M, N, ulDPClock;
+ 290   1      
+ 291   1          M = SC_DP_PLL_M_VID_HI;
+ 292   1          M <<= 8;
+ 293   1          M |= SC_DP_PLL_M_VID_MI;
+ 294   1          M <<= 8;
+ 295   1          M |= SC_DP_PLL_M_VID_LO;
+ 296   1      
+ 297   1          N = SC_DP_PLL_N_VID_HI;
+ 298   1          N <<= 8;
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 6   
+
+ 299   1          N |= SC_DP_PLL_N_VID_MI;
+ 300   1          N <<= 8;
+ 301   1          N |= SC_DP_PLL_N_VID_LO;
+ 302   1      
+ 303   1          switch (SC_DP_MISC_CTRL&0x03) {
+ 304   2          case 0:
+ 305   2              ulDPClock = (double)DP162M*M/N;
+ 306   2              break;
+ 307   2          case 1:
+ 308   2              ulDPClock = (double)DP270M*M/N;
+ 309   2              break;
+ 310   2          case 2:
+ 311   2              ulDPClock = (double)DP540M*M/N;
+ 312   2              break;
+ 313   2          }
+ 314   1          //printf("M = %ld, N = %ld, DPCLK = %ld\r\n",M,N,ulDPClock);
+ 315   1          return (USHRT)(ulDPClock/1000000);
+ 316   1      #endif
+ 317   1      }
+ 318          
+ 319          #if 0
+              //******************************************************************************
+              // Prototype: 
+              //  void DPSetPowerState()
+              // Parameters:
+              //
+              // Return:
+              //  None
+              // Purpose:
+              //
+              // Notes:
+              //  None
+              //******************************************************************************
+              void DPSetPowerState(void)
+              {
+                  SC_DP_DEBUG = 0x80; //0x1030 enable I2C write DPCD page
+                  ucPowerState = SC_DP_DPCD_00600;
+                  SC_DP_DEBUG = 0x00; //0x1030 disable I2C write DPCD page
+              }
+              
+              //******************************************************************************
+              // Prototype: 
+              //  void DPGetPowerState()
+              // Parameters:
+              //
+              // Return:
+              //  None
+              // Purpose:
+              //
+              // Notes:
+              //  None
+              //******************************************************************************
+              UCHAR DPGetPowerState(void)
+              {
+                  return ucPowerState;
+              }
+              #endif
+ 356          //******************************************************************************
+ 357          // Prototype: 
+ 358          //  void DPConfigAUXDetect()
+ 359          // Parameters:
+ 360          //
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 7   
+
+ 361          // Return:
+ 362          //  None
+ 363          // Purpose:
+ 364          //
+ 365          // Notes:
+ 366          //  None
+ 367          //******************************************************************************
+ 368          void DPConfigAUXDetect(void)
+ 369          {
+ 370   1          BOOL bEnAUXInt=0;
+ 371   1          float fRatio;
+ 372   1          fRatio = (float)MCU_CLK[MCU_CLK_TIMES]/12;
+ 373   1      
+ 374   1          if (IsZpMode()) {
+ 375   2              SC_DP_AUX_PULSEWIDTH_LO_THD = 0x01;
+ 376   2              SC_DP_AUX_PULSEWIDTH_HI_THD = 0x05;
+ 377   2              if ((UserData.bAutoSyncSource == TRUE)
+ 378   2                  ||((UserData.bAutoSyncSource == FALSE) && GetCurrInputInterface()==DISPLAY_PORT_INPUT )
+ 379   2                  ) {
+ 380   3                  SC_DP_AUX_PRECHARGE_NUM = 0x06 | BIT7; // Enable DP AUX detect interrupt
+ 381   3                  bEnAUXInt = 1;
+ 382   3              }
+ 383   2              else {
+ 384   3              SC_DP_AUX_PRECHARGE_NUM = 0x06;
+ 385   3                  bEnAUXInt = 0;
+ 386   3              }
+ 387   2          }
+ 388   1          else {
+ 389   2              SC_DP_AUX_PULSEWIDTH_LO_THD = 0x09 * fRatio;
+ 390   2              SC_DP_AUX_PULSEWIDTH_HI_THD = 0x0F * fRatio;
+ 391   2              SC_DP_AUX_PRECHARGE_NUM = 0x09;
+ 392   2              bEnAUXInt = 0;
+ 393   2          }
+ 394   1          if (IsDPAUXDetect()) {
+ 395   2              ClearDPAUXDetect();
+ 396   2          }
+ 397   1          
+ 398   1          if(bEnAUXInt){
+ 399   2              INTSC_EN |= BIT1;
+ 400   2          }
+ 401   1          else{
+ 402   2              INTSC_EN &= ~BIT1;
+ 403   2          }
+ 404   1          
+ 405   1          SC_DP_AUX_DETECT = 0x01; //DP_AUX_DET_EN & pre_charge_reach
+ 406   1      }
+ 407          
+ 408          //******************************************************************************
+ 409          // Prototype: 
+ 410          //  void DPConfigFIFO()
+ 411          // Parameters:
+ 412          //
+ 413          // Return:
+ 414          //  None
+ 415          // Purpose:
+ 416          //
+ 417          // Notes:
+ 418          //  None
+ 419          //******************************************************************************
+ 420          void DPConfigFIFO(void)
+ 421          {
+ 422   1          USHRT VBlankCNT;
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 8   
+
+ 423   1      
+ 424   1          SC_DP_DE_START_POS = GetDPInputHDEImmediate()/24;
+ 425   1      
+ 426   1          VBlankCNT = GetDigInputVTotalImmediate() - GetDPInputVDEImmediate() + 2;
+ 427   1          SC_DP_VS_BLANK_CNT_LO = VBlankCNT&0xFF;
+ 428   1          SC_DP_AUX_CTRL2 &= 0xF0;
+ 429   1          SC_DP_AUX_CTRL2 |= (VBlankCNT&0xF00) >> 8;
+ 430   1      
+ 431   1          SC_DP_VIDEO_FIFO_INT = 0x03;
+ 432   1      }
+ 433          
+ 434          //******************************************************************************
+ 435          // Prototype: 
+ 436          //  void DPConfigHWHPD()
+ 437          // Parameters:
+ 438          //
+ 439          // Return:
+ 440          //  None
+ 441          // Purpose:
+ 442          //
+ 443          // Notes:
+ 444          //  None
+ 445          //******************************************************************************
+ 446          void DPConfigHWHPD(BOOL enable)
+ 447          {
+ 448   1          if (enable == TRUE) {
+ 449   2              DP_CTRL |= BIT4; // DP HPD_PAD enable
+ 450   2          }
+ 451   1          else {
+ 452   2              DP_CTRL &= ~BIT4; // DP HPD_PAD disable
+ 453   2          }
+ 454   1      }
+ 455          
+ 456          //******************************************************************************
+ 457          // Prototype: 
+ 458          //  BOOL IsDPTrainingDone()
+ 459          // Parameters:
+ 460          //
+ 461          // Return:
+ 462          //  None
+ 463          // Purpose:
+ 464          //
+ 465          // Notes:
+ 466          //  None
+ 467          //******************************************************************************
+ 468          BOOL IsDPTrainingDone(void)
+ 469          {                                 
+ 470   1      
+ 471   1      #if 0
+              
+                  UCHAR Reg0x10A6;
+                  SC_DP_TEST_MODE_EN = 0x55;//enter dp_text_read_mode 
+                  SC_DP_TEST_MODE_EN = 0x88;//enter dp_text_write_mode 
+                  SC_DP_PHY_CTRL1 &= 0x3F;
+                  Reg0x10A6 = SC_DP_PHY_CTRL6;
+                  SC_DP_TEST_MODE_EN = 0xaa;//leave dp_text_write_mode 
+                  SC_DP_TEST_MODE_EN = 0xbb;//leave dp_text_read_mode 
+                  if ((Reg0x10A6 & 0x30) == 0x30) {
+                      return TRUE;
+                  }
+                  else {
+                      return FALSE;
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 9   
+
+                  }
+              #else
+ 487   1      
+ 488   1          UCHAR ucLaneCount;
+ 489   1          BOOL bTrainingStatus = TRUE;
+ 490   1      
+ 491   1          ucLaneCount = (SC_DP_MISC_CTRL&0x1C)>>2;
+ 492   1          if ((ucLaneCount == 0) || (ucLaneCount > 4)) {
+ 493   2              return FALSE;
+ 494   2          }
+ 495   1      
+ 496   1          SC_DP_TEST_MODE_EN = 0x55;//enter dp_text_read_mode 
+ 497   1          SC_DP_TEST_MODE_EN = 0x88;//enter dp_text_write_mode
+ 498   1      
+ 499   1          do {
+ 500   2              SC_DP_PHY_CTRL1 &= 0x3F;
+ 501   2              SC_DP_PHY_CTRL1 |= (--ucLaneCount) << 6;
+ 502   2              if ((SC_DP_PHY_CTRL6 & 0x30) != 0x30) {
+ 503   3                  bTrainingStatus = FALSE;
+ 504   3                  break;
+ 505   3              }
+ 506   2          } while(ucLaneCount != 0);
+ 507   1      
+ 508   1          SC_DP_TEST_MODE_EN = 0xaa;//leave dp_text_write_mode 
+ 509   1          SC_DP_TEST_MODE_EN = 0xbb;//leave dp_text_read_mode
+ 510   1      
+ 511   1          return bTrainingStatus;
+ 512   1      #endif
+ 513   1      }
+ 514          
+ 515          //******************************************************************************
+ 516          // Prototype: 
+ 517          //  BOOL IsDPAUXDetect(void)
+ 518          // Parameters:
+ 519          //
+ 520          // Return:
+ 521          //  None
+ 522          // Purpose:
+ 523          //
+ 524          // Notes:
+ 525          //  None
+ 526          //******************************************************************************
+ 527          BOOL IsDPAUXDetect(void)
+ 528          {
+ 529   1          if ((SC_DP_AUX_DETECT & BIT7) != 0) {
+ 530   2              return TRUE;
+ 531   2          }
+ 532   1      #if EN_AUX_STROBE_FUNC == ON
+                  else if (bDP_AUX_DETECT == 1) {
+                      return TRUE;
+                  }
+              #endif
+ 537   1          else {
+ 538   2              return FALSE;
+ 539   2          }
+ 540   1      }
+ 541          
+ 542          //******************************************************************************
+ 543          // Prototype: 
+ 544          //  void ClearDPAUXDetect()
+ 545          // Parameters:
+ 546          //
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 10  
+
+ 547          // Return:
+ 548          //  None
+ 549          // Purpose:
+ 550          //
+ 551          // Notes:
+ 552          //  None
+ 553          //******************************************************************************
+ 554          void ClearDPAUXDetect(void)
+ 555          {
+ 556   1          SC_DP_AUX_DETECT |= BIT1;
+ 557   1          Sleep(1);
+ 558   1          SC_DP_AUX_DETECT &= ~BIT1; 
+ 559   1      #if EN_AUX_STROBE_FUNC == ON
+                  bDP_AUX_DETECT = 0;
+              #endif
+ 562   1      }
+ 563          
+ 564          //******************************************************************************
+ 565          // Prototype: 
+ 566          //  void DPHandler()
+ 567          // Parameters:
+ 568          //
+ 569          // Return:
+ 570          //  None
+ 571          // Purpose:
+ 572          //
+ 573          // Notes:
+ 574          //  None
+ 575          //******************************************************************************
+ 576          void DPHandler(void)
+ 577          {
+ 578   1          static BOOL bauxactived = FALSE;
+ 579   1      
+ 580   1          if (IsZpMode() == FALSE) {
+ 581   2               if (IsDPTrainingDone()) {
+ 582   3                   if (GetSCID()== SCID_850_C) {
+ 583   4                       if ((SC_DP_INT_GROUP_4&BIT6) == 0x40) { // only for Cut3
+ 584   5                           SC_DP_DEBUG = 0x80;
+ 585   5                           SC_DP_DPCD_00201 |= BIT2;
+ 586   5                           SC_DP_DEBUG = 0x00;
+ 587   5                           SC_DP_1000 &= ~BIT5;
+ 588   5                           SC_DP_DEBUG = 0x40;
+ 589   5                           Sleep(5);
+ 590   5                           SC_DP_1000 |= BIT5;
+ 591   5                           SC_DP_DEBUG = 0x80;
+ 592   5                           SC_DP_DPCD_00201 &= ~BIT2;
+ 593   5                           SC_DP_DEBUG = 0x00;
+ 594   5                           SC_DP_INT_GROUP_4 = 0x40;
+ 595   5                       }
+ 596   4                   }
+ 597   3               }
+ 598   2               else {
+ 599   3                   if (GetCurrInputInterface() != DISPLAY_PORT_INPUT) {
+ 600   4                       if (((SC_POWER_CTRL3&0x07) != 0x00) && (IsDPAUXDetect() == TRUE)) {
+ 601   5                           DP_PowerOn();
+ 602   5                       }
+ 603   4                       else if (((SC_POWER_CTRL3&0x07) != 0x07) && (IsDPAUXDetect() == FALSE)) {
+ 604   5                           if ((GetTimerTick() - usDPTimer) > WAITDPTIME) {
+ 605   6                               DP_PowerOFF();
+ 606   6                           }
+ 607   5                       }
+ 608   4                       if (IsDPAUXDetect()) {
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 11  
+
+ 609   5                           ClearDPAUXDetect();
+ 610   5                           usDPTimer = GetTimerTick();
+ 611   5                       }
+ 612   4                   }
+ 613   3               }
+ 614   2           
+ 615   2               if (GetCurrInputInterface() == DISPLAY_PORT_INPUT && GetModeHandleState() == WAIT_MODE_CHANGE) {
+ 616   3                   DP_AudioMNChecker();
+ 617   3                   if (IsDPAUXDetect()) {
+ 618   4                       bauxactived = TRUE;
+ 619   4                       ClearDPAUXDetect();
+ 620   4                       SetGlobalTimer(GLOBAL_TMR_CHECK_AUX, 2000);
+ 621   4                   }
+ 622   3                   if (GetGlobalTimer(GLOBAL_TMR_CHECK_AUX) == 0) {
+ 623   4                       if (bauxactived == TRUE) {
+ 624   5                           SC_DP_RESET_FUNCTION |= BIT0;
+ 625   5                           SC_DP_RESET_FUNCTION &= ~BIT0; 
+ 626   5                           bauxactived = FALSE;
+ 627   5                       }
+ 628   4                   } 
+ 629   3               }
+ 630   2           }
+ 631   1      }
+ 632          
+ 633          //******************************************************************************
+ 634          // Prototype: 
+ 635          //  void DPConfigCRC()
+ 636          // Parameters:
+ 637          //
+ 638          // Return:
+ 639          //  None
+ 640          // Purpose:
+ 641          //
+ 642          // Notes:
+ 643          //  None
+ 644          //******************************************************************************
+ 645          void DPConfigCRC(void)
+ 646          {
+ 647   1      #ifdef ENABLE_DP_LINKER_LAYER_CTS
+                  if ((((SC_DP_MSA_MISC0&0x06) == 0x02) && ((SC_DP_MSA_MISC0&0xF0) != 0x50))
+                      || ((SC_DP_MSA_MISC0&0xFE) == 0x48)) { // YCbCr 4:2:2 & CEA RGB 10bits disable crc support
+                      SC_DP_DEBUG = 0x80; //0x1030 enable I2C write DPCD page
+                      SC_DP_DPCD_00246 = 0x00;//ReadScaler(0x1100+0x52)&(~BIT5));
+                      SC_DP_DEBUG = 0x00; //0x1030 disable I2C write DPCD page
+                  }
+                  else {
+                      SC_DP_DEBUG = 0x80; //0x1030 enable I2C write DPCD page
+                      SC_DP_DPCD_00246 = 0x20;//ReadScaler(0x1100+0x52)|BIT5);
+                      SC_DP_DEBUG = 0x00; //0x1030 disable I2C write DPCD page
+                  }
+              #endif
+ 660   1      }
+ 661          
+ 662          //******************************************************************************
+ 663          // Prototype: 
+ 664          //  void DP_AudioSetMNValue(UCHAR table_idx)
+ 665          // Parameters:
+ 666          //
+ 667          // Return:
+ 668          //  None
+ 669          // Purpose:
+ 670          //
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 12  
+
+ 671          // Notes:
+ 672          //  None
+ 673          //******************************************************************************
+ 674          void DP_AudioSetMNValue(UCHAR table_idx)
+ 675          {
+ 676   1      code DP_audio_mn DP_Audio_MN_tbl[] = {
+ 677   1          //32K                   44.1K                48K              88.2K               96K            176K 
+             -               196K
+ 678   1          {0x0C, 0xF3}, {0x11, 0xD7}, {0x13, 0x6B}, {0x23, 0xAE}, {0x26, 0xD6}, {0x47, 0x5C}, {0x4D, 0xAB},  //1
+             -.62G
+ 679   1          {0x07, 0xC5}, {0x0A, 0xB5}, {0x0B, 0xA7}, {0x15, 0x68}, {0x17, 0x4E}, {0x2A, 0xD1}, {0x2E, 0x9A},  //2
+             -.7G
+ 680   1      };
+ 681   1      
+ 682   1          //N value is always set to 32768
+ 683   1          SC_DP_MANUAL_NAUD_HI = 0x00;     
+ 684   1          SC_DP_MANUAL_NAUD_MI = 0x80; 
+ 685   1          SC_DP_MANUAL_NAUD_LO = 0x00; 
+ 686   1      
+ 687   1          //M value setting
+ 688   1          SC_DP_MANUAL_MAUD_HI = 0x00;         
+ 689   1          SC_DP_MANUAL_MAUD_MI = DP_Audio_MN_tbl[table_idx].DP_Audio_M_MSB; 
+ 690   1          SC_DP_MANUAL_MAUD_LO = DP_Audio_MN_tbl[table_idx].DP_Audio_M_LSB; 
+ 691   1      }
+ 692          
+ 693          //******************************************************************************
+ 694          // Prototype: 
+ 695          //  void DP_AudioSetDefault(void)
+ 696          // Parameters:
+ 697          //
+ 698          // Return:
+ 699          //  None
+ 700          // Purpose:
+ 701          //
+ 702          // Notes:
+ 703          //  None
+ 704          //******************************************************************************
+ 705          void DP_AudioSetDefault(void)
+ 706          {
+ 707   1          UCHAR ucspeed;
+ 708   1      
+ 709   1          ucspeed = SC_DP_MISC_CTRL & (BIT1|BIT0);
+ 710   1          
+ 711   1          switch (ucspeed) {
+ 712   2              case 0: // 1.62
+ 713   2                  DP_AudioSetMNValue(DPAUD_M_48k_1_62G);
+ 714   2                  break;
+ 715   2              case 1:// 2.7
+ 716   2              default:
+ 717   2                  DP_AudioSetMNValue(DPAUD_M_48k_2_7G);
+ 718   2                  break;
+ 719   2              case 2:// 5.4
+ 720   2                  DP_AudioSetMNValue(DPAUD_M_48k_2_7G);//no use  
+ 721   2                  break;
+ 722   2          }
+ 723   1      }
+ 724          
+ 725          //******************************************************************************
+ 726          // Prototype: 
+ 727          //  void DP_AudioSetAudioPath(UCHAR ucpath)
+ 728          // Parameters:
+ 729          //
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 13  
+
+ 730          // Return:
+ 731          //  None
+ 732          // Purpose:
+ 733          //
+ 734          // Notes:
+ 735          //  None
+ 736          //******************************************************************************
+ 737          void DP_AudioSetAudioPath(UCHAR ucpath)
+ 738          {
+ 739   1          SC_DP_CRPLL = 0x15; //clk path    
+ 740   1      
+ 741   1          if (ucpath == DPAUD_path_auto) {
+ 742   2              SC_DP_PLL_CTRL &= ~BIT6; //auto            
+ 743   2          }
+ 744   1          else {//manual
+ 745   2              SC_DP_PLL_CTRL |= BIT6; //manual    
+ 746   2          }
+ 747   1      }
+ 748          
+ 749          //******************************************************************************
+ 750          // Prototype: 
+ 751          //  void DP_AudioMNCheckerInit(void)
+ 752          // Parameters:
+ 753          //
+ 754          // Return:
+ 755          //  None
+ 756          // Purpose:
+ 757          //
+ 758          // Notes:
+ 759          //  None
+ 760          //******************************************************************************
+ 761          void DP_AudioMNCheckerInit(void)
+ 762          {
+ 763   1          //printf("DP_AudioMNCheckerInit\r\n"); 
+ 764   1          SC_DP_AUDIO_FIFO_CTRL |= BIT6; //audio fifo mute
+ 765   1          SC_DP_INT_GROUP_3 = 0xFF; //Clear interrupt group 2 status
+ 766   1      
+ 767   1          DP_AudioSetAudioPath(DPAUD_path_auto);
+ 768   1      
+ 769   1          bAudioMNChecking = TRUE;   
+ 770   1      }
+ 771          
+ 772          //******************************************************************************
+ 773          // Prototype: 
+ 774          //  UCHAR DP_AudioGetFIFOStatus(BOOL bquickcheck) 
+ 775          // Parameters:
+ 776          //
+ 777          // Return:
+ 778          //  None
+ 779          // Purpose:
+ 780          //
+ 781          // Notes:
+ 782          //  None
+ 783          //******************************************************************************
+ 784          UCHAR DP_AudioGetFIFOStatus(BOOL bquickcheck) 
+ 785          {
+ 786   1          UCHAR ucfifo_readstatus;
+ 787   1      
+ 788   1          if (!bquickcheck) {
+ 789   2              SC_DP_AUDIO_FIFO_CTRL &= ~BIT7; //audio fifo off
+ 790   2              SC_DP_AUDIO_DAC_CTRL &= ~ BIT7; //audio DAC off    
+ 791   2              SC_DP_AUDIO_DAC_CTRL |= BIT7; //audio DAC on
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 14  
+
+ 792   2              SC_DP_AUDIO_FIFO_CTRL |= BIT7; //audio fifo on    
+ 793   2              SC_DP_AUDIO_ERROR_FLAG = 0xFF;
+ 794   2              Sleep(40);
+ 795   2          }
+ 796   1          ucfifo_readstatus = SC_DP_AUDIO_ERROR_FLAG & (BIT6|BIT2);
+ 797   1          //printf("ucfifo_readstatus  = %bx\r\n", ucfifo_readstatus);
+ 798   1      
+ 799   1          if (ucfifo_readstatus == BIT6) {
+ 800   2              return DPAUD_fifo_overflow;
+ 801   2          }
+ 802   1          else if (ucfifo_readstatus == BIT2) {
+ 803   2              return DPAUD_fifo_underflow;
+ 804   2          }
+ 805   1          else if (ucfifo_readstatus == 0x00) {
+ 806   2              return DPAUD_fifo_balance;
+ 807   2          }
+ 808   1          else {
+ 809   2              return DPAUD_fifo_unknown;
+ 810   2          }
+ 811   1      }
+ 812          
+ 813          //******************************************************************************
+ 814          // Prototype: 
+ 815          //  UCHAR DP_AudioMNSearch(void)
+ 816          // Parameters:
+ 817          //
+ 818          // Return:
+ 819          //  None
+ 820          // Purpose:
+ 821          //
+ 822          // Notes:
+ 823          //  None
+ 824          //******************************************************************************
+ 825          UCHAR DP_AudioMNSearch(void)
+ 826          {
+ 827   1      #if 1 //search table method
+ 828   1          UCHAR ucsearch_idx, ucspeed, ucfifo_status, i;
+ 829   1          UCHAR ucsearch_result = FALSE;
+ 830   1          
+ 831   1          ucspeed = SC_DP_MISC_CTRL & (BIT1|BIT0);
+ 832   1      
+ 833   1          if (ucspeed == 0) {//1.62g
+ 834   2              ucsearch_idx = DPAUD_M_32k_1_62G;
+ 835   2          }
+ 836   1          else {//2.7g
+ 837   2              ucsearch_idx = DPAUD_M_32k_2_7G;
+ 838   2          }
+ 839   1      
+ 840   1          SC_VPLL_CTRL &= ~BIT2;    
+ 841   1      
+ 842   1          for (i = ucsearch_idx ; i < ucsearch_idx+DPAUD_M_num ; i++) {
+ 843   2      
+ 844   2              DP_AudioSetMNValue(i);       
+ 845   2              ucfifo_status = DP_AudioGetFIFOStatus(FALSE); 
+ 846   2              //printf("ucfifo_status = %bx %bx\r\n", ucfifo_status, i);
+ 847   2      
+ 848   2              if (ucfifo_status == DPAUD_fifo_balance) {
+ 849   3                  ucsearch_result = TRUE;
+ 850   3                  break;
+ 851   3              }
+ 852   2          }
+ 853   1      
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 15  
+
+ 854   1          SC_VPLL_CTRL |= BIT2;
+ 855   1      
+ 856   1          if (ucsearch_result == FALSE) {
+ 857   2              DP_AudioSetDefault();
+ 858   2          }
+ 859   1      
+ 860   1          //printf("ucsearch_result = %bx\r\n", ucsearch_result);
+ 861   1          return ucsearch_result;
+ 862   1      
+ 863   1      #else //binary search method
+              
+                  UCHAR ucfifo_status;
+                  ULONG ulaudio_n_tune = 0x004000;
+                  ULONG ulaudio_n_tune_upper = 0x008000, ulaudio_n_tune_bottom = 1;
+                  UCHAR ucsearch_result = FALSE;
+                  
+                  SC_DP_MANUAL_MAUD_LO = ulaudio_n_tune; 
+                  SC_DP_MANUAL_MAUD_MI = ulaudio_n_tune>>8; 
+                  SC_DP_MANUAL_MAUD_HI = ulaudio_n_tune>>16;     
+                  ucfifo_status = DP_AudioGetFIFOStatus();
+                      
+                  while (ucfifo_status  != DPAUD_fifo_balance || (ulaudio_n_tune_upper-ulaudio_n_tune_bottom) < 3) {
+                      if (ucfifo_status == DPAUD_fifo_underflow) {
+                          ulaudio_n_tune_upper = ulaudio_n_tune;
+                      }
+                      else if (ucfifo_status == DPAUD_fifo_overflow) {
+                          ulaudio_n_tune_bottom = ulaudio_n_tune;
+                      }
+                      else {
+                          DP_AudioSetDefault();
+                          break;
+                      }
+                      ulaudio_n_tune = (ulaudio_n_tune_upper + ulaudio_n_tune_bottom)/2;
+              
+                      SC_DP_MANUAL_MAUD_LO = ulaudio_n_tune; 
+                      SC_DP_MANUAL_MAUD_MI = ulaudio_n_tune>>8); 
+                      SC_DP_MANUAL_MAUD_HI = ulaudio_n_tune>>16);     
+                      //printf("0x10  = %bx\r\n", ReadScaler(0x1000+0x10));
+                      //printf("0x11  = %bx\r\n", ReadScaler(0x1000+0x11));
+                      ucfifo_status = DP_AudioGetFIFOStatus();
+                      //printf("ucfifo_status  = %bx\r\n", ucfifo_status);
+                  }
+              
+                  if (ucfifo_status == DPAUD_fifo_balance) {
+                      ucsearch_result = TRUE;
+                  }
+              
+                  return ucsearch_result;
+              #endif    
+ 903   1      }
+ 904          
+ 905          //******************************************************************************
+ 906          // Prototype: 
+ 907          //  void DP_AudioMNChecker(void)
+ 908          // Parameters:
+ 909          //
+ 910          // Return:
+ 911          //  None
+ 912          // Purpose:
+ 913          //
+ 914          // Notes:
+ 915          //  None
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 16  
+
+ 916          //******************************************************************************
+ 917          void DP_AudioMNChecker(void)
+ 918          {
+ 919   1          UCHAR mn_search_result = FALSE;
+ 920   1          UCHAR ucfifo_status = DPAUD_fifo_unknown;
+ 921   1          
+ 922   1          if (bAudioMNChecking) {    
+ 923   2              if (SC_DP_INT_GROUP_3 & BIT6) { //packet recieved
+ 924   3                  if (!(SC_DP_INT_GROUP_3 & BIT4)){//without M/N upated but with packet, enter search process
+ 925   4                      DP_AudioSetAudioPath(DPAUD_path_manual);
+ 926   4                   
+ 927   4                      if (!DP_AudioMNSearch()) { //if no found in table, swich back to auto mode
+ 928   5                          DP_AudioSetAudioPath(DPAUD_path_auto);      
+ 929   5                      }
+ 930   4                  }
+ 931   3      
+ 932   3                  SC_DP_RESET_FUNCTION |= BIT3; //audio fifo sw reset
+ 933   3                  SC_DP_RESET_FUNCTION &= ~BIT3; //audio fifo sw reset            
+ 934   3                  SC_DP_AUDIO_FIFO_CTRL &= ~BIT6; //audio fifo mute off        
+ 935   3      
+ 936   3                  bAudioMNChecking = FALSE;
+ 937   3              }
+ 938   2          }
+ 939   1          else {
+ 940   2              if (SC_DP_PLL_CTRL & BIT6) {//manual mode     
+ 941   3                  ucfifo_status = DP_AudioGetFIFOStatus(TRUE);
+ 942   3                  if (ucfifo_status != DPAUD_fifo_balance) {
+ 943   4                      DP_AudioMNCheckerInit();
+ 944   4                  }
+ 945   3              }
+ 946   2          }
+ 947   1      }
+ 948          
+ 949          #if (ENABLE_DP_AUX_MONITOR==ON) 
+              #define DP_MONITOR ON      
+              #define DP_DEBUG_PORT 0   //0~ 4
+              #define DP_STROBE_BUFFER_NUM_2 18000//18432 //6144*24/8
+              #define DP_STROBE_BUFFER_SIZE 4     
+              //UCHAR volatile xdata  *EDID_SRAM_BUFF0=0xF800;//the address 0xF802~0xF803 is used for reading strobe pac
+             -ket len
+              
+              #if (DP_DEBUG_PORT==1)
+                      USHRT volatile xdata *strobe_count=0xF902;
+              #elif (DP_DEBUG_PORT==2)
+                      USHRT volatile xdata *strobe_count=0xFA02;
+              #elif (DP_DEBUG_PORT==3)
+                      USHRT volatile xdata *strobe_count=0xFB02;
+              #elif (DP_DEBUG_PORT==4)
+                      USHRT volatile xdata *strobe_count=0xFC02;
+              #else
+                      USHRT volatile xdata *strobe_count=0xF802;
+              #endif
+                 
+              
+              void Init_DP_Strobe(void)
+              {
+                        USHRT i;  
+                        CORE_FIX=0x0F;   
+                  //DP_CTRL=0x1B; 
+                        for(i=0;i<DP_STROBE_BUFFER_SIZE;i++) 
+              #if (DP_DEBUG_PORT==1)
+                   *(EDID_SRAM_BUFF1+i)=0x00;
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 17  
+
+              #elif (DP_DEBUG_PORT==2)
+                   *(EDID_SRAM_BUFF2+i)=0x00;
+              #elif (DP_DEBUG_PORT==3)
+                   *(EDID_SRAM_BUFF3+i)=0x00;
+              #elif (DP_DEBUG_PORT==4)
+                   *(EDID_SRAM_BUFF4+i)=0x00;
+              #else
+                              *(EDID_SRAM_BUFF0+i)=0x00;
+              #endif          
+                  SC_CR_MUX = DP_DEBUG_PORT;
+                  // enable internal EDID for strobe reading
+              #if (DP_DEBUG_PORT==1)
+                    DDC_CTL1 &= ~BIT7;
+                    McuSetDDC(MCU_DDC_1, 0xA8, 1);  // 0xA8 is special address for Strobe debug reading 
+                    DDC_CTL1 |= BIT7; 
+              #elif (DP_DEBUG_PORT==2)
+                    DDC_CTL2 &= ~BIT7;
+                    McuSetDDC(MCU_DDC_2, 0xA8, 1);  // 0xA8 is special address for Strobe debug reading 
+                    DDC_CTL2 |= BIT7; 
+              #elif (DP_DEBUG_PORT==3)
+                    DDC_CTL3 &= ~BIT7;
+                    McuSetDDC(MCU_DDC_3, 0xA8, 1);  // 0xA8 is special address for Strobe debug reading 
+                    DDC_CTL3 |= BIT7; 
+              #elif (DP_DEBUG_PORT==4)
+                    DDC_CTL4 &= ~BIT7;
+                    McuSetDDC(MCU_DDC_4, 0xA8, 1);  // 0xA8 is special address for Strobe debug reading 
+                    DDC_CTL4 |= BIT7; 
+              #else
+                  DDC_CTL0 &= ~BIT7;
+                  McuSetDDC(MCU_DDC_0, 0xA8, 1);  // 0xA8 is special address for Strobe debug reading 
+                  DDC_CTL0 |= BIT7;    
+              #endif
+                 #if (DP_MONITOR==ON)  
+                  AUX_STROBE_CTL|=BIT0;  // 
+                 #endif
+              }
+              
+              void reset_DP_Strobe(void)
+              {
+                        USHRT i;
+                        //clear buffer 
+                        for(i=0;i<DP_STROBE_BUFFER_SIZE;i++) 
+                                      #if (DP_DEBUG_PORT==1)
+                                           *(EDID_SRAM_BUFF1+i)=0x00;
+                                      #elif (DP_DEBUG_PORT==2)
+                                           *(EDID_SRAM_BUFF2+i)=0x00;
+                                      #elif (DP_DEBUG_PORT==3)
+                                           *(EDID_SRAM_BUFF3+i)=0x00;
+                                      #elif (DP_DEBUG_PORT==4)
+                                           *(EDID_SRAM_BUFF4+i)=0x00;
+                                      #else
+                                                      *(EDID_SRAM_BUFF0+i)=0x00;  
+                                      #endif            
+              
+                      //clear flag         
+                      (*strobe_count)=0;  
+                      SC_INDEX_CTRL = 0x80;
+                      SC_INDEX_ADDR_LO = 0; 
+                  SC_INDEX_ADDR_HI = 0;
+                  AUX_STROBE_CTL |= BIT3;   
+              }
+              
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 18  
+
+              
+              // move AUX packets to OSD RAM
+              void  move_aux_packet(void) using 1
+              { 
+              #if (DP_MONITOR==OFF)           
+                      UCHAR i=0;
+              #endif 
+              
+                      if((*strobe_count)>=DP_STROBE_BUFFER_NUM_2)  //buffer is full,  continue to read Aux packet ,but does not
+             - store them
+                              return;
+              
+              //#if IS_NT68850_SERIES                 
+              //              if(DP_SRC & BIT7)
+              //#else
+              //    if(INT_SRC3 & BIT0) 
+              //#endif        
+                              {  
+              //                      if(AUX_STROBE_CTL & BIT3) //bit3:  AUX Debug path interrupt flag
+                                      {        
+                                                      while(AUX_STROBE_CTL & BIT3)
+                                                      {
+                                                              #if (DP_MONITOR==OFF)                           
+                                                                      SC_INDEX_DATA=(AUX_STROBE_FUN&BIT3)?1:0;  // get data direction(RX or TX)
+                                                              #endif
+                                                              
+                                                                      SC_INDEX_DATA=AUX_STROBE_PORT; //read strobe data
+              
+                                                              #if (DP_MONITOR==OFF)                                                   
+                                                                      i++;
+                                                              #else
+                                                                      (*strobe_count)++;
+                                                              #endif
+              
+                                                                      AUX_STROBE_CTL |= BIT3;  //clear interrupt flag
+                                                        
+                                                      } 
+                                              CLR_WDT = 0x55;                 
+                                      }
+              
+                                      #if (DP_MONITOR==OFF)                         
+                                    (*strobe_count)+=i*2;   
+                                      #endif        
+                         } 
+              }
+              
+              
+              
+              void DP_Strobe_Debug(void)
+              {   
+                      UCHAR i=0;
+                      #if (DP_DEBUG_PORT==1)
+                        if((*EDID_SRAM_BUFF1)&BIT6)  //0xF900[6] is used for reset all flag and buffer
+                      #elif (DP_DEBUG_PORT==2)
+                        if((*EDID_SRAM_BUFF2)&BIT6)  //0xFA00[6] is used for reset all flag and buffer
+                      #elif (DP_DEBUG_PORT==3)
+                        if((*EDID_SRAM_BUFF3)&BIT6)  //0xFB00[6] is used for reset all flag and buffer
+                      #elif (DP_DEBUG_PORT==4)
+                        if((*EDID_SRAM_BUFF4)&BIT6)  //0xFC00[6] is used for reset all flag and buffer
+                      #else
+                              if((*EDID_SRAM_BUFF0)&BIT6)  //0xF800[6] is used for reset all flag and buffer
+                      #endif
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 19  
+
+                              {
+                                      reset_DP_Strobe();
+                              }       
+                              CLR_WDT = 0x55;
+                      #if (DP_DEBUG_PORT==1)
+                              DDC_CTL1=0xB0;
+                      #elif (DP_DEBUG_PORT==2)
+                              DDC_CTL2=0xB0;
+                      #elif (DP_DEBUG_PORT==3)
+                              DDC_CTL3=0xB0;
+                      #elif (DP_DEBUG_PORT==4)
+                              DDC_CTL4=0xB0;
+                      #else
+                              DDC_CTL0=0xB0;     
+                      #endif            
+                                   
+              }
+              
+              
+              
+              void DP_Aux_Channel_Monitor(void)
+              {
+                        UCHAR cpu_speed,ip;        
+                       
+                      if(AUX_STROBE_CTL&BIT0)
+                      {          
+                              #if (DP_MONITOR==ON)         
+                                      SC_DP_AUX_CTRL2&=~BIT4;   //aux strobe listen mode
+                              #endif          
+              
+                                      cpu_speed=CPU_CLK; 
+              
+                              #if IS_NT68850_SERIES                   
+                                      CPU_CLK=0x58;  //64Mhz
+                              #else
+                              CPU_CLK=0x50;
+                              #endif                  
+                              
+                                      //use OSD RAM to store tmp AUX packets
+                                      OSDAPI_OSDPowerOn();
+                                      SC_INDEX_CTRL = 0x80;
+                                      SC_INDEX_ADDR_LO = 0;
+                                      SC_INDEX_ADDR_HI = 0;
+              
+                              #if IS_NT68850_SERIES      
+                              INTSC_EN|=BIT1;//DP interrrupt enable
+                              #else  //TC68370
+                              INTSC_EN3|=BIT0;  
+                              #endif      
+                              
+                                      AUX_STROBE_CTL = 0x07;// DP AUX STROBE    
+                                      AUX_STROBE_CTL = 0x05;
+                              ip=IP;
+              
+                              #if IS_NT68850_SERIES
+                                      IP = 0x01;   // DP interrupt(Ext1) has the highest priority .    
+                              #else
+                                      IP = 0x04; 
+                              #endif            
+                                  
+                                      while(AUX_STROBE_CTL&BIT0)
+                                      {
+C51 COMPILER V8.02   SCALER_DP                                                             08/07/2015 16:22:34 PAGE 20  
+
+                                              DP_Strobe_Debug();  
+                                      }
+                              //backup 
+                            
+                              IP=ip;
+                              OSDAPI_OSDPowerOff();
+              
+                              #if IS_NT68850_SERIES      
+                                    INTSC_EN&=~BIT1;//DP interrrupt enable
+                              #else  //TC68370
+                                    INTSC_EN3&=~BIT0;  
+                              #endif         
+                     
+                     
+                                      CPU_CLK=cpu_speed;
+                              #if (DP_MONITOR==ON)
+                              SC_DP_AUX_CTRL2|=BIT4;
+                              #endif
+                      }
+              }
+              #endif
+1183          
+1184          
+1185          #else 
+              void ForDPCompilerCodePass(void)
+              {
+                      code UCHAR temp[]={0x00};
+                      UCHAR i;
+                      i = temp[0];
+              }
+              #endif
+1193          
+1194          
+1195          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1433    ----
+   CONSTANT SIZE    =    805    ----
+   XDATA SIZE       =      9      21
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2       4
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

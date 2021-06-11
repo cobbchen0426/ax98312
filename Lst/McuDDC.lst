@@ -1,0 +1,246 @@
+C51 COMPILER V8.02   MCUDDC                                                                08/07/2015 16:22:22 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MCUDDC
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\McuDDC.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\McuDDC.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\Us
+                    -er;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT
+                    -\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\McuDDC.lst) OBJ
+                    -ECT(.\Bin\ADS\AXI\104N\McuDDC.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          #define EN_DDC        0x80 /*!< Mask for DDC control register. */
+  18          #define WPT_DDC       0x40 /*!< Mask for DDC control register. */
+  19          #define LEN_256       0x20 /*!< Mask for DDC control register. */
+  20          #define MODE_DDC2     0x10 /*!< Mask for DDC control register. */
+  21          #define EN_BACK       0x08 /*!< Mask for DDC control register. */
+  22          #define INTV_CLK      0x04 /*!< Mask for DDC control register. */
+  23          #define CLR_PTR       0x02 /*!< Mask for DDC control register. */
+  24          #define CLR_UPD       0x01 /*!< Mask for DDC control register. */
+  25          #define UPD_DDC       0x01 /*!< Mask for DDC control register. */
+  26          
+  27          //******************************************************************************
+  28          // G L O B A L   V A R I A B L E S
+  29          //******************************************************************************
+  30          
+  31          //******************************************************************************
+  32          // S T A T I C   V A R I A B L E S
+  33          //******************************************************************************
+  34          
+  35          //******************************************************************************
+  36          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  37          //******************************************************************************
+  38          
+  39          //******************************************************************************
+  40          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  41          //******************************************************************************
+  42          
+  43          //******************************************************************************
+  44          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  45          //******************************************************************************
+  46          
+  47          //******************************************************************************
+  48          // F U N C T I O N   B O D Y S
+  49          //******************************************************************************
+  50          
+  51          /**************************************************************************//**
+  52           * Turn on MCU DDC.
+C51 COMPILER V8.02   MCUDDC                                                                08/07/2015 16:22:22 PAGE 2   
+
+  53           * @param mask Each bit indicates one DDC channel, Bit 0: DDC0, Bit 1: DDC1, ..., Bit 3: DDC3.
+  54           ******************************************************************************/
+  55          void McuEnableDDC(UCHAR mask)
+  56          {
+  57   1          if ((mask & BIT0) && (MCU_UART_OUTPUT != 1)) {
+  58   2              DDC_CTL0 |= BIT7;
+  59   2          }
+  60   1          if ((mask & BIT1) && (MCU_UART_OUTPUT != 2)) {
+  61   2              DDC_CTL1 |= BIT7;
+  62   2          }
+  63   1          if ((mask & BIT2) && (MCU_UART_OUTPUT != 3)) {
+  64   2              DDC_CTL2 |= BIT7;
+  65   2          }
+  66   1          if ((mask & BIT3) && (MCU_UART_OUTPUT != 4)) {
+  67   2              DDC_CTL3 |= BIT7;
+  68   2          }
+  69   1      }
+  70          
+  71          /**************************************************************************//**
+  72           * Turn off MCU DDC.
+  73           * @param mask Each bit indicates one DDC channel, Bit 0: DDC0, Bit 1: DDC1, ..., Bit 3: DDC3.
+  74           ******************************************************************************/
+  75          void McuDisableDDC(UCHAR mask)
+  76          {
+  77   1          if (mask & BIT0) {
+  78   2              DDC_CTL0 &= ~BIT7;
+  79   2          }
+  80   1          if (mask & BIT1) {
+  81   2              DDC_CTL1 &= ~BIT7;
+  82   2          }
+  83   1          if (mask & BIT2) {
+  84   2              DDC_CTL2 &= ~BIT7;
+  85   2          }
+  86   1          if (mask & BIT3) {
+  87   2              DDC_CTL3 &= ~BIT7;
+  88   2          }
+  89   1      }
+  90          
+  91          /**************************************************************************//**
+  92           * Configure MCU DDC channel.
+  93           * @param channel DDC channel ID.
+  94           * @param address DDC address, 0xA0, 0xA2, ..., 0xAE.
+  95           * @param ext_edid  1: EDID is 256 bytes, 0: EDID is 128 bytes
+  96           ******************************************************************************/
+  97          void McuSetDDC(UCHAR channel, UCHAR address, UCHAR ext_edid)
+  98          {
+  99   1          UCHAR i, ctrl_byte;
+ 100   1      
+ 101   1          //Avoid error address
+ 102   1          if (0xA0 != (address & 0xF1)) {
+ 103   2              address = 0xA0;
+ 104   2          }
+ 105   1          i = address & 0x0E;
+ 106   1          address = (i << 4) | i;
+ 107   1          ext_edid &= BIT0;
+ 108   1          ctrl_byte = (ext_edid == 1) ? 0x73 : 0x53;
+ 109   1      
+ 110   1          switch (channel) {
+ 111   2              case MCU_DDC_0:
+ 112   2                  DDC_CTL0 = (DDC_CTL0 & BIT7) | ctrl_byte;
+ 113   2                  DDC_ADDR0 = address;
+ 114   2                  break;
+C51 COMPILER V8.02   MCUDDC                                                                08/07/2015 16:22:22 PAGE 3   
+
+ 115   2      
+ 116   2              case MCU_DDC_1:
+ 117   2                  DDC_CTL1 = (DDC_CTL1 & BIT7) | ctrl_byte;
+ 118   2                  DDC_ADDR1 = address;
+ 119   2                  break;
+ 120   2      
+ 121   2              case MCU_DDC_2:
+ 122   2                  DDC_CTL2 = (DDC_CTL2 & BIT7) | ctrl_byte;
+ 123   2                  DDC_ADDR2 = address;
+ 124   2                  break;
+ 125   2      
+ 126   2              case MCU_DDC_3:
+ 127   2                  DDC_CTL3 = (DDC_CTL3 & BIT7) | ctrl_byte;
+ 128   2                  DDC_ADDR3 = address;
+ 129   2                  break;
+ 130   2          }
+ 131   1      }
+ 132          
+ 133          #if USE_INTERNAL_EDID == 1
+ 134          /**************************************************************************//**
+ 135           * Turn on/off the write protection function of specified DDC channel.
+ 136           * @param channel DDC channel ID.
+ 137           * @param wp TRUE to enable the protection else FALSE.
+ 138           ******************************************************************************/
+ 139          void McuSetDDCWP(UCHAR channel, UCHAR wp)
+ 140          {
+ 141   1          UCHAR ctrl_byte;
+ 142   1      
+ 143   1          ctrl_byte = wp == 1 ? 0x40 : 0x00;
+ 144   1      
+ 145   1          switch (channel) {
+ 146   2              case MCU_DDC_0:
+ 147   2                  DDC_CTL0 = (DDC_CTL0 & 0xBC) | ctrl_byte;
+ 148   2                  break;
+ 149   2      
+ 150   2              case MCU_DDC_1:
+ 151   2                  DDC_CTL1 = (DDC_CTL1 & 0xBC) | ctrl_byte;
+ 152   2                  break;
+ 153   2      
+ 154   2              case MCU_DDC_2:
+ 155   2                  DDC_CTL2 = (DDC_CTL2 & 0xBC) | ctrl_byte;
+ 156   2                  break;
+ 157   2      
+ 158   2              case MCU_DDC_3:
+ 159   2                  DDC_CTL3 = (DDC_CTL3 & 0xBC) | ctrl_byte;
+ 160   2                  break;
+ 161   2          }
+ 162   1      }
+ 163          
+ 164          /**************************************************************************//**
+ 165           * Check EDID is updated or not.
+ 166           * @return TRUE if EDID is updated else FALSE.
+ 167           ******************************************************************************/
+ 168          BOOL McuCheckDDCUpdate(void)
+ 169          {
+ 170   1          UCHAR tmp, backup;
+ 171   1          UCHAR *pddc;
+ 172   1          UCHAR *pstat;
+ 173   1          USHRT timer;
+ 174   1      
+ 175   1          if ((DDC_CTL0 & UPD_DDC) != 0) {
+ 176   2              pddc = &DDC_CTL0;
+C51 COMPILER V8.02   MCUDDC                                                                08/07/2015 16:22:22 PAGE 4   
+
+ 177   2              pstat = &IIC0_STATUS;
+ 178   2          }
+ 179   1          else if ((DDC_CTL1 & UPD_DDC) != 0) {
+ 180   2              pddc = &DDC_CTL1;
+ 181   2              pstat = &IIC1_STATUS;
+ 182   2          }
+ 183   1          else if ((DDC_CTL2 & UPD_DDC) != 0) {
+ 184   2              pddc = &DDC_CTL2;
+ 185   2              pstat = &IIC2_STATUS;
+ 186   2          }
+ 187   1          else if ((DDC_CTL3 & UPD_DDC) != 0) {
+ 188   2              pddc = &DDC_CTL3;
+ 189   2              pstat = &IIC3_STATUS;
+ 190   2          }
+ 191   1          else {
+ 192   2              return FALSE;
+ 193   2          }
+ 194   1      
+ 195   1          backup = *pddc & 0x3C;
+ 196   1          *pddc = (EN_DDC | backup | CLR_UPD);
+ 197   1          tmp = *pstat & 0x03;
+ 198   1      
+ 199   1          timer = GetTimerTick();
+ 200   1          while ((GetTimerTick() - timer) < 500) {
+ 201   2              ResetWDTimer();
+ 202   2              if ((*pstat & 0x03) != tmp) {
+ 203   3                  tmp = *pstat & 0x03;
+ 204   3                  timer = GetTimerTick();
+ 205   3              }
+ 206   2              if ((*pddc & UPD_DDC) != 0) {
+ 207   3                  *pddc = (EN_DDC | backup | CLR_UPD);
+ 208   3                  timer = GetTimerTick();
+ 209   3              }
+ 210   2          }
+ 211   1      
+ 212   1          return TRUE;
+ 213   1      }
+ 214          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    502    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6      10
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

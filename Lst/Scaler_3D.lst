@@ -1,0 +1,1892 @@
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_3D
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_3D.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_3D.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDI
+                    -R(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\
+                    -NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) P
+                    -RINT(.\Lst\Scaler_3D.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_3D.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          #if ENABLE_SCALER_3D == ON
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          #define SetHDMI3DFlag() (ucScaler3DStatus |= BIT0)
+  19          #define IsHDMI3DFlag()  (ucScaler3DStatus & BIT0)
+  20          #define SetAMD3DFlag()  (ucScaler3DStatus |= BIT1)
+  21          #define IsAMD3DFlag()   (ucScaler3DStatus & BIT1)
+  22          #define Set2DTo3DFlag() (ucScaler3DStatus |= BIT2)
+  23          #define Is2DTo3DFlag()  (ucScaler3DStatus & BIT2)
+  24          #define Set2DToFSFlag() (ucScaler3DStatus |= BIT3)
+  25          #define Is2DToFSFlag()  (ucScaler3DStatus & BIT3)
+  26          #define SetSBSFlag()    (ucScaler3DStatus |= BIT4)
+  27          #define IsSBSFlag()     (ucScaler3DStatus & BIT4)
+  28          #define SetTBFlag()     (ucScaler3DStatus |= BIT5)
+  29          #define IsTBFlag()      (ucScaler3DStatus & BIT5)
+  30          
+  31          #define Set3DTo2DFlag() (ucScaler3DStatus |= BIT7)
+  32          #define Clr3DTo2DFlag() (ucScaler3DStatus &= ~BIT7)
+  33          #define Is3DTo2DFlag()  (ucScaler3DStatus & BIT7)
+  34          
+  35          #define ClrAll3DFlag() (ucScaler3DStatus &= 0x80)
+  36          #define Is3DFlag() (ucScaler3DStatus & 0x3F)
+  37          
+  38          //******************************************************************************
+  39          // G L O B A L   V A R I A B L E S
+  40          //******************************************************************************
+  41          
+  42          //******************************************************************************
+  43          // S T A T I C   V A R I A B L E S
+  44          //******************************************************************************
+  45          static xdata UCHAR ucHDMI3DFormat;
+  46          static xdata UCHAR ucScaler3DStatus;
+  47          static xdata UCHAR uc2DTo3DFlag = 0;
+  48          //******************************************************************************
+  49          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  50          //******************************************************************************
+  51          
+  52          //******************************************************************************
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 2   
+
+  53          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  54          //******************************************************************************
+  55          static BOOL SC3DAPI_CheckHDMI3DInfoFrame(void);
+  56          static void SC3DAPI_ConfigFrameDown(UCHAR freq);
+  57          static void SC3DAPI_ConfigScaling(UCHAR hfactor, UCHAR vfactor, UCHAR ratio);
+  58          static void SC3DAPI_ConfigPreFRC(UCHAR hratio, UCHAR vratio);
+  59          static void SC3DAPI_ConfigPostFRC(void);
+  60          static void SC3DAPI_ConfigFIFO(void);
+  61          static void SC3DAPI_ConfigFRCLock(void);
+  62          static void SC3DAPI_AutoFrameDown(void);
+  63          
+  64          //******************************************************************************
+  65          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  66          //******************************************************************************
+  67          //******************************************************************************
+  68          // Prototype: 
+  69          //  void SC3DAPI_Init(void)
+  70          // Parameters:
+  71          //  None
+  72          // Return:
+  73          //  None
+  74          // Purpose:
+  75          //  Initialize 3D register
+  76          // Notes:
+  77          //  None
+  78          //******************************************************************************
+  79          void SC3DAPI_Init(void)
+  80          {
+  81   1          ClrAll3DFlag();
+  82   1      }
+  83          
+  84          #if ENABLE_SHUTTER_3D == ON
+              //******************************************************************************
+              // Prototype: 
+              //  void SC3DAPI_InitSyncSignal(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Initialize IR registers
+              // Notes:
+              //  None
+              //******************************************************************************
+              void SC3DAPI_InitSyncSignal(void)
+              {
+                  UCHAR xdata *ptr;
+                  UCHAR i;
+                  code UCHAR init_table[] = {
+                    //0x26, 0x28, 0x33, 0x20, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x28, 0x38, 0x26, 0x01, 0xFF, 0xFF,
+                      0x00, 0x00, 0x33, 0x20, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4A, 0x65, 0x26, 0x01, 0xFF, 0xFF,
+                      0xFF, 0x0F, 0x0F, 0xFF, 0xFF, 0x0F, 0xF0, 0x7F, 0xFF, 0x0F, 0xFF, 0x80, 0xFF, 0x00, 0x00, 0x00
+                  };
+              
+                  ptr = SC_3D_SHUTTER_GLASS_CTRL;
+                  for (i = 0; i < sizeof(init_table); i++) {
+                      *ptr = init_table[i];
+                      ptr++;
+                  }
+              }
+              
+              //******************************************************************************
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 3   
+
+              // Prototype:
+              //  void SC3DAPI_SelSyncPort(SC3DSyncPort port)
+              // Parameters:
+              //  port : output port
+              // Return:
+              //  None
+              // Purpose:
+              //  Select 3D sync signal output port
+              // Notes:
+              //  None
+              //******************************************************************************
+              void SC3DAPI_SelSyncPort(SC3DSyncPort port)
+              {
+                  switch(port) {
+                      case SC3D_SYNC_VOUT :
+                          SC_3D_SHUTTER_GLASS_CTRL[0] |= BIT1;
+                          SC_MCU_IO_CTRL3 = (SC_MCU_IO_CTRL3 & 0xFC) | 0x01; // For V_OUT
+                          break;
+                      case SC3D_SYNC_LOUT :
+                          SC_3D_SHUTTER_GLASS_CTRL[0] |= BIT1;
+                          SC_MCU_IO_CTRL4 = (SC_MCU_IO_CTRL4 & 0x3F) | 0x40; // For L_OUT
+                          break;
+                      case SC3D_SYNC_ROUT :
+                          SC_3D_SHUTTER_GLASS_CTRL[0] |= BIT1;
+                          SC_MCU_IO_CTRL4 = (SC_MCU_IO_CTRL4 & 0xCF) | 0x10; // For R_OUT
+                          break;
+                      case SC3D_SYNC_IROUT :
+                          SC_3D_SHUTTER_GLASS_CTRL[0] |= BIT0;
+                          SC_MCU_IO_CTRL3 = (SC_MCU_IO_CTRL3 & 0xF3) | 0x04; // For IR_TX
+                          break;
+                      case SC3D_TVIR_OUT :
+                          SC_TVIR_ENABLE |= BIT1;
+                          SC_TVIR_POLARITY |= BIT1;
+                          SC_MCU_IO_CTRL4 = (SC_MCU_IO_CTRL4 & 0x3F) | 0x80; // For TVIR_OUT
+                          break;
+                  };
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_SetSyncDuty(USHRT on, USHRT off)
+              // Parameters:
+              //  on :
+              //  off :
+              // Return:
+              //  None
+              // Purpose:
+              //
+              // Notes:
+              //  None
+              //******************************************************************************
+              void SC3DAPI_SetSyncDuty(USHRT on, USHRT off)
+              {
+                  SC_3D_SHUTTER_GLASS_CTRL[0x0A] = on;
+                  SC_3D_SHUTTER_GLASS_CTRL[0x0B] = off;
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_SetTVIRDelay(USHRT vsync, UCHAR delay)
+              // Parameters:
+              //  vsync : the unit is VSync freq x 10
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 4   
+
+              //  delay : The range is 0~100(0% ~ 100%)
+              // Return:
+              //  None
+              // Purpose:
+              //  Set TVIR delay
+              // Notes:
+              //  None
+              //******************************************************************************
+              void SC3DAPI_SetTVIRDelay(USHRT vsync, UCHAR delay)
+              {
+                  ULONG clk = GetCPUClcok();//REF_CLK * MCU_CLK_TIMES;
+              
+                  clk = (clk * 10 / vsync);
+                  clk = clk * delay / 100;
+              
+                  SC_TVIR_PORT1_DELAY_LO = (clk & 0xFF);
+                  SC_TVIR_PORT1_DELAY_MI = (clk >> 8) & 0xFF;
+                  SC_TVIR_PORT1_DELAY_HI = (clk >> 16) & 0xFF;
+                  SC_TVIR_PORT2_DELAY_LO = (clk & 0xFF);
+                  SC_TVIR_PORT2_DELAY_MI = (clk >> 8) & 0xFF;
+                  SC_TVIR_PORT2_DELAY_HI = (clk >> 16) & 0xFF;
+                  SC_TVIR_PORT3_DELAY_LO = (clk & 0xFF);
+                  SC_TVIR_PORT3_DELAY_MI = (clk >> 8) & 0xFF;
+                  SC_TVIR_PORT3_DELAY_HI = (clk >> 16) & 0xFF;
+              }
+              
+              //******************************************************************************
+              // Prototype: 
+              //  void SC3DAPI_InvSyncLR(UCHAR inv)
+              // Parameters:
+              //  inv : invert or not
+              // Return:
+              //  None
+              // Purpose:
+              //  Invert 3D L/R output sync 
+              // Notes:
+              //  None
+              //******************************************************************************
+              void SC3DAPI_InvSyncLR(UCHAR inv)
+              {
+                  if (inv) {
+                      SC_3D_SHUTTER_GLASS_CTRL[0x08] |= BIT5;
+                  }
+                  else {
+                      SC_3D_SHUTTER_GLASS_CTRL[0x08] &= ~BIT5;
+                  }
+              }
+              #endif
+ 225          
+ 226          //******************************************************************************
+ 227          // Prototype:
+ 228          //  void SC3DAPI_EnableAMDLRSync(UCHAR enable)
+ 229          // Parameters:
+ 230          //  enable : enable or not
+ 231          // Return:
+ 232          //  None
+ 233          // Purpose:
+ 234          //  Enable AMD 3D LR sync
+ 235          // Notes:
+ 236          //  None
+ 237          //******************************************************************************
+ 238          void SC3DAPI_EnableAMDLRSync(UCHAR enable)
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 5   
+
+ 239          {
+ 240   1          if (enable) {
+ 241   2              SC_3D_SHUTTER_GLASS_CTRL[0x1D] |= BIT7;
+ 242   2          }
+ 243   1          else {
+ 244   2              SC_3D_SHUTTER_GLASS_CTRL[0x1D] &= ~BIT7;
+ 245   2          }
+ 246   1      }
+ 247          
+ 248          //******************************************************************************
+ 249          // Prototype:
+ 250          //  UCHAR SC3DAPI_DetectAMD3D(void)
+ 251          // Parameters:
+ 252          //  None
+ 253          // Return:
+ 254          //  True or False
+ 255          // Purpose:
+ 256          //  Detect the current TMDS input is AMD 3D or not.
+ 257          // Notes:
+ 258          //  None
+ 259          //******************************************************************************
+ 260          UCHAR SC3DAPI_DetectAMD3D(void)
+ 261          {
+ 262   1          #define AMD_DET_LOOP 4
+ 263   1      
+ 264   1          UCHAR i;
+ 265   1          
+ 266   1          if (!IsHDMI()) {
+ 267   2              SC3DAPI_EnableAMDLRSync(TRUE);
+ 268   2              SC3DAPI_GetAMD3DCtlStatus();
+ 269   2      
+ 270   2              for (i = 0; i < AMD_DET_LOOP; i++) {
+ 271   3                  DelayVTime(3);
+ 272   3                  if (!SC3DAPI_GetAMD3DCtlStatus()) {
+ 273   4                      break;
+ 274   4                  }
+ 275   3              }
+ 276   2      
+ 277   2              if (i == AMD_DET_LOOP) {
+ 278   3                  return TRUE;
+ 279   3              }
+ 280   2      
+ 281   2              SC3DAPI_EnableAMDLRSync(FALSE);
+ 282   2          }
+ 283   1          return FALSE;
+ 284   1      }
+ 285          
+ 286          //******************************************************************************
+ 287          // Prototype:
+ 288          //  UCHAR SC3DAPI_GetAMD3DCtlStatus(void)
+ 289          // Parameters:
+ 290          //  None
+ 291          // Return:
+ 292          //  True or False
+ 293          // Purpose:
+ 294          //  Get the current control bit status of AMD 3D
+ 295          // Notes:
+ 296          //  None
+ 297          //******************************************************************************
+ 298          UCHAR SC3DAPI_GetAMD3DCtlStatus(void)
+ 299          {
+ 300   1          if ((SC_HDMI_INT_STATE1[2] & BIT6) != 0x00) {
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 6   
+
+ 301   2              SC_HDMI_INT_STATE1[2] = BIT6;
+ 302   2              return TRUE;
+ 303   2          }
+ 304   1          return FALSE;
+ 305   1      }
+ 306          
+ 307          #if 0
+              //******************************************************************************
+              // Prototype: 
+              //  static void SC3DAPI_ConfigFrameDown(UCHAR freq)
+              // Parameters:
+              //  freq : Target vsync frequency
+              // Return:
+              //  None
+              // Purpose:
+              //  Frame rate down convertion
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_ConfigFrameDown(UCHAR freq)
+              {
+                  ULONG clock, tmp1, tmp2;
+                  USHRT lcnt, htotal, vtotal, vlock;
+                  float ratio;
+                  UCHAR i;
+              
+                  lcnt = 1;
+                  for (i = 0; i < SC_HPLL_LINE_CNT; i++) {
+                      lcnt *= 2;
+                  }
+                  
+                  htotal = ReadShortScaler(&SC_HSDDS_DIVIDER_LO);
+                  clock = (ULONG)((float)lcnt * 192 * htotal / Read3ByteScaler(&SC_HS_CNT_RESULT_LO) * 1000000);
+              
+                  tmp1 = (ULONG)4095 * freq;
+                  tmp2 = tmp1 / 2;
+                  
+                  htotal = 4095;
+                  vtotal = (clock + tmp2) / tmp1;
+                  
+                  if (vtotal < GetInputVTotal()) {
+                      vtotal = GetInputVTotal();
+              
+                      tmp1 = (ULONG)vtotal * freq;
+                      tmp2 = tmp1 / 2;
+                      htotal = (clock + tmp2) / tmp1;
+                  }
+              
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_H_TOTAL_LO, htotal);
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_V_TOTAL_LO, vtotal);
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_H_ACTIVE_LO, ReadShortScaler(&SC_GI_CAP_HWID_LO));
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_V_ACTIVE_LO, ReadShortScaler(&SC_GI_CAP_VLEN_LO));
+              
+              #if 0
+                  SC_PREFRC_CONTROL = 0x01;
+              #else
+                  SC_PREFRC_CONTROL = 0x03;
+              
+                  // H/V lower bound
+                  vlock = GetInputVTotal() - 2;
+                  SC_PREFRC_53A = ((vlock & 0x0F00) >> 4);
+                  SC_PREFRC_53B = vlock & 0xFF;
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 7   
+
+                  SC_PREFRC_53C = 0x00;
+              
+                  ratio = (float)freq * 10 / usVSyncFreq;
+                  ratio = (float)1 - ratio;
+              
+                  // H/V upper bound
+                  vlock = (float)InputTiming.usModeVActive * ratio;
+                  SC_PREFRC_53D = ((vlock & 0x0F00) >> 4);
+                  SC_PREFRC_53E = vlock & 0xFF;
+                  SC_PREFRC_53F = 0x00;
+              #endif
+              
+                  clock = Read3ByteScaler(&SC_DDDS_RATIO_LO);
+                  ratio = (float)freq * 11 * GetInputVTotal() / usVSyncFreq / vtotal;
+                  clock = (ULONG)((float)clock * ratio);
+                  Write3ByteScaler(&SC_DDDS_RATIO_LO, clock);
+                  Sleep(100);
+              
+                  // Readback & set display htotal because of clock changed.
+                  htotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO) & 0xFFFF;
+                  WriteShortScaler(&SC_DH_HTOTAL_LO, htotal);
+              
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  static void SC3DAPI_AutoFrameDown(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Set frame down frequency by input v-sync frequency
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_AutoFrameDown(void)
+              {
+                  if (usVSyncFreq > 620) {
+                      SC3DAPI_ConfigFrameDown(60);
+                  }
+                  else if (abs(usVSyncFreq - 560) < 10) {
+                      SC3DAPI_ConfigFrameDown(50);
+                  }
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  static void SC3DAPI_ConfigScaling(UCHAR hfactor, UCHAR vfactor, UCHAR ratio)
+              // Parameters:
+              //  hfactor :
+              //  vfactor :
+              //  ratio :
+              // Return:
+              //  None
+              // Purpose:
+              //  Config scaler clock
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_ConfigScaling(UCHAR hfactor, UCHAR vfactor, UCHAR ratio)
+              {
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 8   
+
+                  ULONG clock, tmpclk;
+                  USHRT i;
+                  USHRT dsthtotal;
+                  UCHAR check_fifo;
+              
+                  check_fifo = FALSE;
+                  clock = Read3ByteScaler(&SC_DDDS_RATIO_LO);
+                  tmpclk = clock;
+                  clock = clock * ratio / 10;
+              
+                  dsthtotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO) & 0xFFFF; //2011-07-22 wasy: To prevent ht
+             -otal * 2 >= 4095, or DDR counter would be fail
+              
+                  // Input HTotal of FRC is limited and must be smaller than 4096.
+                  i = ((ULONG)dsthtotal * hfactor) >> 1;
+                  if (i > 4080) {
+                      clock = (ULONG) ((float) clock * 4080 / i);
+                  }
+              
+                  if (clock != tmpclk) {
+                      check_fifo = TRUE;
+                  }
+              
+                  if (hfactor != 2) { //must be after SetupDisplayTiming
+                      i = ReadShortScaler(&SC_DH_BG_WID_LO);
+                      WriteShortScaler(&SC_DH_BG_WID_LO, (i * hfactor) >> 1);
+                      i = ReadShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_WID_LO);
+                      WriteShortScaler(&SC_GRAPHIC_DISP_HOR_ACT_WID_LO, (i * hfactor) >> 1);
+                      check_fifo = TRUE;
+                  }
+              
+                  if (vfactor != 2) { //must be after SetupDisplayTiming
+                      i = ReadShortScaler(&SC_DV_BG_LEN_LO);
+                      WriteShortScaler(&SC_DV_BG_LEN_LO, (i * vfactor) >> 1);
+                      i = ReadShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO);
+                      WriteShortScaler(&SC_GRAPHIC_DISP_VER_ACT_LEN_LO, (i * vfactor) >> 1);
+                      check_fifo = TRUE;
+                  }
+              
+                  if (check_fifo == TRUE) {
+                      Sleep(80);
+                      // If display clock or display active H/V are changed, we must set the display HTotal to
+                      // avoid the following code referring to the wrong value.
+                      dsthtotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO) & 0xFFFF;
+                      WriteShortScaler(&SC_DH_HTOTAL_LO, dsthtotal);
+                      // If display clock/display active H/V are changed, we must set the scaler FIFO to
+                      // avoid FIFO underflow or overflow.
+                      CheckFIFO();
+                  }
+              
+                  // HotFix for FP issue over Samsung's Master PG
+                  // Jude 2011/08/27
+                  if (((SC_HDMI_3D_FORMAT & 0x0F) == 0x0A) &&
+                      ((SC_HDMI_3D_FORMAT & 0xF0) == FRAME_PACKING) &&
+                      (IsInterlaced() == FALSE)) {
+                      SC_VCR_CTRL = 0x10;
+                      i = ReadShortScaler(&SC_GI_CAP_VBEGO_LO);
+                      SetVP(i+2);
+                      SC_DISPLAY_CTRL &= ~BIT6;
+                      SC_DISPLAY_VLOCK = 2;
+                      WriteShortScaler(&SC_DISPLAY_HLOCK_LO, 0);
+                  }
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 9   
+
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  static void SC3DAPI_ConfigPreFRC(UCHAR hratio, UCHAR vratio)
+              // Parameters:
+              //  hratio :
+              //  vratio :
+              // Return:
+              //  None
+              // Purpose:
+              //  Config pre-frc clock
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_ConfigPreFRC(UCHAR hratio, UCHAR vratio)
+              {
+                  USHRT htotal, vtotal;
+                  USHRT i;
+              
+                  i = ReadShortScaler(&SC_GI_CAP_HWID_LO);
+                  i = i * hratio / 2;
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_H_ACTIVE_LO, i);
+              
+                  i = ReadShortScaler(&SC_GI_CAP_VLEN_LO);
+                  i = i * vratio / 2;
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_V_ACTIVE_LO, i);
+              
+                  SC_3D_FORMAT_CTRL |= BIT7; //pre_3d enable for pre-frc
+                  SC_PREFRC_CONTROL = 0x41;
+              
+                  Sleep(85);//
+                  htotal = ReadShortScaler(&SC_PREFRC_OUTPUT_H_TOTAL_LO);
+              
+                  vtotal = ReadShortScaler(&SC_PREFRC_OUTPUT_V_TOTAL_LO);
+                  vtotal = vtotal / 2;
+                  SC_PREFRC_CONTROL = 0x03; //set fifo manual mode to set correct  H/V Total
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_H_TOTAL_LO, htotal);
+                  WriteShortScaler(&SC_PREFRC_OUTPUT_V_TOTAL_LO, vtotal);
+                  
+                  // Delay Here. Because display htotal will be unstable in a short minutes when turn on pre-FRC
+                  // Jude 2011/08/27
+                  Sleep(100);
+              
+                  // Readback & set display htotal because of clock changed.
+                  htotal = ReadShortScalerHighLowFilter(&SC_DSP_HTOTAL_LO) & 0xFFFF;
+                  WriteShortScaler(&SC_DH_HTOTAL_LO, htotal);
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  static void SC3DAPI_ConfigPostFRC(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Config post-frc clock
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_ConfigPostFRC(void)
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 10  
+
+              {
+              #ifndef FRC_VBI_RATIO
+              #define FRC_VBI_RATIO 10 // This value must higher than 10
+              #endif
+              
+                  UCHAR lock;
+                  USHRT htotal, vtotal, i, lcnt, vsync_x10;
+                  ULONG clock;
+                  float vsync;
+              
+                  // Flag to turn on/off lock mode
+                  lock = TRUE;
+              
+                  if ((SC_PREFRC_CONTROL & BIT0) != 0x00) {
+                      htotal = ReadShortScaler(&SC_HSDDS_DIVIDER_LO);
+                      lcnt = 1;
+                      for (i = 0; i < SC_HPLL_LINE_CNT; i++) {
+                          lcnt *= 2;
+                      }
+                      clock = (ULONG)((float)lcnt * 192 * htotal / Read3ByteScaler(&SC_HS_CNT_RESULT_LO) * 1000000);
+                      
+                      htotal = ReadShortScaler(&SC_PREFRC_OUTPUT_H_TOTAL_LO);
+                      vtotal = ReadShortScaler(&SC_PREFRC_OUTPUT_V_TOTAL_LO);
+                  
+                      vsync = (float)clock / htotal / vtotal;
+                      vsync_x10 = (USHRT)(vsync * 10);
+                  }
+                  else {
+                      vsync_x10 = usVSyncFreq;
+                  }
+              
+              #if ENABLE_SHUTTER_3D == ON
+                  if ((abs(vsync_x10 - 250) < 5) ||
+                      (abs(vsync_x10 - 500) < 12) ||
+                      (abs(vsync_x10 - 1000) < 12)) {
+                      htotal = UserPanelData.usTypHTotal * 6 / 5;
+                      vtotal = UserPanelData.usTypVTotal;
+                  }
+                  else {
+                      htotal = UserPanelData.usTypHTotal;
+                      vtotal = UserPanelData.usTypVTotal;
+                  }
+                  vtotal = vtotal * FRC_VBI_RATIO / 10;
+                  clock = 297000000L;
+                  clock = clock * FRC_VBI_RATIO / 10;
+                  lock = FALSE;
+              #else
+                  htotal = UserPanelData.usTypHTotal; //ReadShortScaler(&SC_DSP_HTOTAL_LO) & 0xFFFE;
+                  vtotal = ReadShortScaler(&SC_DV_TOTAL_LO);
+              
+                  if (vsync_x10 > 855) {
+                      clock = (float) htotal * vtotal * vsync_x10 / 20;
+                  }
+                  else if (vsync_x10 < 320) {
+                      clock = (float) htotal * vtotal * vsync_x10 / 5;
+                  }
+                  else {
+                      clock = (float) htotal * vtotal * vsync_x10 / 10;
+                  }
+              
+                  if ((clock > UserPanelData.ulMaxPClk) ||
+                      (clock < UserPanelData.ulMinPClk)) {
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 11  
+
+                      htotal = UserPanelData.usTypHTotal;
+                      vtotal = UserPanelData.usTypVTotal;
+                      clock = (ULONG)UserPanelData.usTypHTotal * UserPanelData.usTypVTotal * 60;
+                      lock = FALSE;
+                  }
+              #endif
+                  SetDisplayDCLK(clock);
+                  //Setup FRC H/V Total
+                  WriteShortScaler(&SC_FRC_OUTPUT_H_TOTAL_LO, htotal);
+                  WriteShortScaler(&SC_FRC_OUTPUT_V_TOTAL_LO, vtotal);
+                  //Setup FRC H/V Active
+                  i = UserPanelData.usWidth;
+                  WriteShortScaler(&SC_FRC_OUTPUT_H_ACTIVE_LO, i);
+                  i = UserPanelData.usHeight;
+                  WriteShortScaler(&SC_FRC_OUTPUT_V_ACTIVE_LO, i);
+              
+                  //Setup FRC H/V front porch
+                  i = htotal - ReadShortScaler(&SC_FRC_OUTPUT_H_ACTIVE_LO) - ReadShortScaler(&SC_DH_BG_BEG_LO);
+                  SC_FRC_H_FRONT_PORCH_LSB = (UCHAR)i;
+                  SC_FRC_VH_FRONT_PORCH_MSB = (UCHAR)((i >> 8) & 0x000F);
+                  i = vtotal - ReadShortScaler(&SC_FRC_OUTPUT_V_ACTIVE_LO) - ReadShortScaler(&SC_DV_BG_BEG_LO);
+                  SC_FRC_V_FRONT_PORCH_LSB = (UCHAR)i;
+                  SC_FRC_VH_FRONT_PORCH_MSB |= (UCHAR)((i >> 4) & 0x00F0);
+              
+                  Sleep(20);
+              
+                  // We must turn on the FRC lock mode to avoid the "Frame Tier" issue when display is 3D or 2D interlac
+             -e.
+                  if ((Is3DFlag() || IsInterlaced()) && (lock == TRUE)) {
+                      SC_FRC_CTRL = 0x53;
+                  }
+                  else {
+                      SC_FRC_CTRL = 0x13;
+              
+                      vsync = (float)clock / htotal / vtotal;
+                      vsync *= 10;
+                      if (vsync < vsync_x10) {
+                          // Set FRC up/down
+                          SC_FRC_CTRL |= BIT5;
+                      }
+                  }
+              
+                  SC_FRC_RESET = 0x01;
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  static void SC3DAPI_ConfigFIFO(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Config MMU FIFO
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_ConfigFIFO(void)
+              {
+                  // When we turn on Pre-FRC, we must turn off OD to avoid the issue of insufficient DDR BW.
+                  if (((SC_PREFRC_CONTROL & BIT0) != 0x00) && ((SC_FRC_CTRL & BIT0) != 0x00)) {
+                      SC_OD_CONFIGURATION &= ~BIT0;
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 12  
+
+                  }
+                  else {
+                      SC_OD_CONFIGURATION |= BIT0;
+                      SC_OD_BTC_CONFIGURATION = 0x70;
+                  }
+              
+                  if ((SC_OD_CONFIGURATION & BIT0) != 0x00) {
+                      if ((SC_PREFRC_CONTROL & BIT0) != 0x00) {
+                          MMUConfigFIFO(MMU_FIFO_PRE_OD);
+                          MMUConfigFrameBufAddr(MMU_FRAME_ADDR_PRE_OD);
+                      }
+                      else {
+                          MMUConfigFIFO(MMU_FIFO_OD_POST);
+                          MMUConfigFrameBufAddr(MMU_FRAME_ADDR_OD_POST);
+                      }
+                  }
+                  else {
+                      MMUConfigFIFO(MMU_FIFO_PRE_POST);
+                      MMUConfigFrameBufAddr(MMU_FRAME_ADDR_PRE_POST);
+                  }
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  static void SC3DAPI_ConfigFRCLock(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Config FRC lock position
+              // Notes:
+              //  None
+              //******************************************************************************
+              static void SC3DAPI_ConfigFRCLock(void)
+              {
+                  USHRT hlock, vlock;
+                  
+                  if ((SC_FRC_CTRL & BIT6) != 0x00) {
+                      hlock = 0;
+                      vlock = ReadShortScaler(&SC_DV_BG_BEG_LO);
+                      vlock += ReadShortScaler(&SC_DV_BG_LEN_LO);
+              
+                      if (IsTBFlag()) {
+                          vlock /= 2;
+                      }
+                  }
+                  else {
+                      hlock = 0x0FFF;
+                      vlock = 0x0FFF;
+                  }
+              
+                  SC_FRC_H_POINT1_LO = (UCHAR)hlock;
+                  SC_FRC_POINT1_HI &= 0xF0;
+                  SC_FRC_POINT1_HI |= (UCHAR)((hlock >> 8) & 0x000F);
+              
+                  SC_FRC_V_POINT1_LO = (UCHAR) vlock;
+                  SC_FRC_POINT1_HI &= 0x0F;
+                  SC_FRC_POINT1_HI |= (UCHAR)((vlock >> 4) & 0x00F0);
+                  SC_FRC_V_POINT2_LO = (UCHAR) vlock;
+                  SC_FRC_POINT2_HI &= 0x0F;
+                  SC_FRC_POINT2_HI |= (UCHAR)((vlock >> 4) & 0x00F0);
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 13  
+
+              }
+              #endif
+ 735          
+ 736          //******************************************************************************
+ 737          // Prototype: 
+ 738          //  void SC3DAPI_Setup3DMode(void)
+ 739          // Parameters:
+ 740          //  None
+ 741          // Return:
+ 742          //  None
+ 743          // Purpose:
+ 744          //  Setup 3D mode display clk
+ 745          // Notes:
+ 746          //******************************************************************************
+ 747          void SC3DAPI_Setup3DMode(void)
+ 748          {
+ 749   1      //    UCHAR type;
+ 750   1      
+ 751   1          ClrAll3DFlag();
+ 752   1      
+ 753   1          if (SC3DAPI_IsHDMI3DMode() == FALSE) { //If input is not HDMI 3D format, then exit directly
+ 754   2              if (SC3DAPI_DetectAMD3D()) {
+ 755   3      //            type = (FRAME_PACKING>>4)&0x0F;
+ 756   3                  SetAMD3DFlag();
+ 757   3              }
+ 758   2              else {
+ 759   3                  // 2D Mode
+ 760   3      //            type = 0x00;
+ 761   3              } 
+ 762   2          }
+ 763   1          else {
+ 764   2              switch (SC_HDMI_3D_FORMAT & 0xF0) { //Check 3D Format
+ 765   3                  case FRAME_PACKING:
+ 766   3                  case FIELD_ALTERNATIVE:
+ 767   3                  case L_DEPT:
+ 768   3                      break;
+ 769   3                  case LINE_ALTERNATIVE:
+ 770   3                      break;
+ 771   3                  case SIDE_BY_SIDE_FULL:
+ 772   3                  case SIDE_BY_SIDE_HALF:
+ 773   3                      SetSBSFlag();
+ 774   3                      break;
+ 775   3                  case TOP_BOTTOM:
+ 776   3                      SetTBFlag();
+ 777   3                      break;
+ 778   3                  default:
+ 779   3                      break;
+ 780   3              }
+ 781   2      //        type = SC_HDMI_3D_FORMAT>>4;
+ 782   2              SetHDMI3DFlag();
+ 783   2          }
+ 784   1      
+ 785   1      //    SC3DAPI_ConfigScaling(scaling_vector[type][0], scaling_vector[type][1], scaling_vector[type][2]);
+ 786   1      }
+ 787          
+ 788          #if ENABLE_3D_CNV == ON
+              //******************************************************************************
+              // Prototype: 
+              //  void SC3DAPI_Set3DTo2D(UCHAR enable)
+              // Parameters:
+              //  enable : Enable or disable 3D to 2D function
+              // Return:
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 14  
+
+              //  None
+              // Purpose:
+              //  Turn on/off 3D to 2D
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_Set3DTo2D(UCHAR enable)
+              {
+                  if (enable) {
+                      SC_3D_CNV_2D |= BIT1;
+                      Set3DTo2DFlag();
+                  }
+                  else {
+                      SC_3D_CNV_2D &= ~BIT1;
+                      Clr3DTo2DFlag();
+                  }
+              }
+              #endif
+ 812          
+ 813          //******************************************************************************
+ 814          // Prototype:
+ 815          //  void SC3DAPI_TurnOff3DMode(void)
+ 816          // Parameters:
+ 817          //  None
+ 818          // Return:
+ 819          //  None
+ 820          // Purpose:
+ 821          //  off 3D mode display
+ 822          // Notes:
+ 823          //******************************************************************************
+ 824          void SC3DAPI_TurnOff3DMode(void)
+ 825          {
+ 826   1          LoadDefaultPanelData();
+ 827   1      
+ 828   1      #if ENABLE_SHUTTER_3D == ON
+                  SC3DAPI_InvSyncLR(FALSE);
+              #endif
+ 831   1          SC3DAPI_EnableAMDLRSync(FALSE);
+ 832   1      
+ 833   1      #if ENABLE_3D_CNV == ON
+                  SC3DAPI_Enable2DTo3D(FALSE);
+              #endif
+ 836   1      
+ 837   1          ClrAll3DFlag();
+ 838   1      }
+ 839          
+ 840          #if ENABLE_3D_CNV == ON
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_Enable2DTo3D(UCHAR enable)
+              // Parameters:
+              //  enable : TRUE or FALSE to enable/disable 2D to 3D function
+              // Return:
+              //  None
+              // Purpose:
+              //  Enable/disable 2D to 3D function
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_Enable2DTo3D(UCHAR enable)
+              {
+                  code UCHAR uc2Dto3DTable[] = {
+                    //f00h,f01h,f02h,f03h,f04h,f05h,f06h,f07h,f08h,f09h,f0ah,f0bh,f0ch,f0dh,f0eh,f0fh,
+                      0x7f,0x00,0xaa,0x00,0x20,0x38,0xC0,0x34,0x00,0x00,0x00,0x00,0x00,0x00,0x10,0xff,
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 15  
+
+                  
+                    //f10h,f11h,f12h,f13h,f14h,f15h,f16h,f17h,f18h,f19h,f1ah,f1bh,f1ch,f1dh,f1eh,f1fh,
+                      0xff,0xff,0x54,0x14,0x80,0x00,0x80,0xf0,0x10,0x08,0x08,0x00,0x80,0xf8,0x10,0x08,
+              
+                    //f20h,f21h,f22h,f23h,f24h,f25h,f26h,f27h,f28h,f29h,f2ah,f2bh,f2ch,f2dh,f2eh,f2fh,
+                      0x08,0x00,0x80,0xf8,0x10,0x08,0x08,0x00,0x80,0xf0,0x10,0x08,0x00,0x10,0x80,0xf0,
+                   
+                    //f30h,f31h,f32h,f33h,f34h,f35h,f36h,f37h,f38h,f39h,f3ah,f3bh,f3ch,f3dh,f3eh,f3fh,
+                      0x10,0x00,0x08,0x9f,0x00,0x04,0x06,0x00,0x01,0x00,0x00,0x00,0xf0,0x00,0x00,0xf0,
+              
+                    //f40h,f41h,f42h,f43h,f44h,f45h,f46h,f47h,f48h,f49h,f4ah,f4bh,f4ch,f4dh,f4eh,f4fh,
+                      0x66,0x62,0x5a,0x4e,0x41,0x32,0x25,0x1a,0x11,0x00,0x00,0xf0,0x00,0x00,0x00,0xf0,
+              
+                    //f50h,f51h,f52h,f53h,f54h,f55h,f56h,f57h,f58h,f59h,f5ah,f5bh,f5ch,f5dh,f5eh,f5fh,
+                      0x10,0x18,0x00,0x2e,0x45,0x70,0x48,0x3e,0x70,0x00,0x00,0x00,0x00,0xC0,0x01,0x21,
+              
+                    //f60h,f61h,f62h,f63h,f64h,f65h,f66h,f67h,f68h,f69h,f6ah,f6bh,f6ch,f6dh,f6eh,f6fh,
+                      0x03,0x00,0xe6,0x54,0xd6,0xff,0x00,0x11,0xcf,0x00,0x00,0x32,0x18,0x06,0x0C,0x14,
+              
+                    //f70h,f71h,f72h,f73h,f74h,f75h,f76h,f77h,f78h,f79h,f7ah,f7bh,f7ch,f7dh,f7eh,f7fh,
+                      0x38,0x37,0x35,0x33,0x30,0x2d,0x29,0x25,0x20,0x1c,0x18,0x14,0x11,0x0e,0x0b,0x08,
+              
+                    //f80h,f81h,f82h,f83h,f84h,f85h,f86h,f87h,f88h,f89h,f8ah,f8bh,f8ch,f8dh,f8eh,f8fh,
+                      0x59,0x00,0x50,0x4e,0x4a,0x43,0x3b,0x32,0x28,0x20,0x18,0x11,0x0c,0x08,0x03,0x03,
+              
+                    //f90h,f91h,f92h,f93h,f94h,f95h,f96h,f97h,f98h,f99h,f9ah,f9bh,f9ch,f9dh,f9eh,f9fh,
+                      0x02,0x01,0x00,0x00,0x40,0x40,0x20,0x00,0x00,0x40,0x40,0x20,0x34,0x2e,0x20,0x11,
+              
+                    //fa0h,fa1h,fa2h,fa3h,fa4h,fa5h,fa6h,fa7h,fa8h,fa9h,faah,fabh,fach,fadh,faeh,fafh,
+                      0x07,0x44,0x37,0x1c,0x40,0x32,0x96,0x0f,0x10,0x04,0x00,0x40,0x0f,0x30,0x18,0xa0,
+              
+                    //fb0h,fb1h,fb2h,fb3h,fb4h,fb5h,fb6h,fb7h,fb8h,fb9h,fbah,fbbh,fbch,fbdh,fbeh,fbfh,
+                      0x1f,0x80,0x00,0x00,0x00,0x00,0x00,0x00,0xbf,0x00,0x4f,0x00,0x00,0x00,0x00,0x00,
+              
+                    //fc0h,fc1h,fc2h,fc3h,fc4h,fc5h,fc6h,fc7h,fc8h,fc9h,fcah,fcbh,fcch,fcdh,fceh,fcfh,
+                      0xb6,0x7c,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x90,0xb9,0x02,0x30,
+              
+                    //fd0h,fd1h,fd2h,fd3h,fd4h,fd5h,fd6h,fd7h,fd8h,fd9h,fdah,fdbh,fdch,fddh,fdeh,fdfh,
+                      0x9a,0x00,0x69,0x75,0x00,0xcc,0x7a,0x00,0x7c,0x38,0x00,0x08,0x00,0xd4,0x08,0xff,
+              
+                    //fe0h,fe1h,fe2h,fe3h,fe4h,fe5h,fe6h,fe7h,fe8h,fe9h,feah,febh,fech,fedh,feeh,fefh,
+                      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+              
+                    //ff0h,ff1h,ff2h,ff3h,ff4h,ff5h,ff6h,ff7h,ff8h,ff9h,ffah,ffbh,ffch,ffdh,ffeh,fffh,
+                      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04,0x56,0x0f,
+                  };
+              
+                  USHRT i;
+                  UCHAR *p;
+                  
+                  if (enable) {
+                      SC_BIST_CTRL2 = 0x00;
+                      SC_SCALER_DE_EXT_2DTO3D = 0x10;
+                  #if ENABLE_SHUTTER_3D == ON //frame packing panel
+                      SC_MICRO_RETARDED_CTRL = 0x00;
+                  #else //retarder panel
+                      SC_MICRO_RETARDED_CTRL = 0xF4;
+                  #endif
+                  
+                      p = &SC_2Dto3D_ENABLE_CONTROL;
+                      for (i = 0; i < 256; i++) {
+                          *p = uc2Dto3DTable[i];
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 16  
+
+                          p++;
+                          ResetWDTimer();
+                      }
+                  }
+                  else {
+                      SC_BIST_CTRL2 |= 0x02;
+                  }
+              }
+              
+              xdata UCHAR volatile _2DT3D_REG_13 _at_ 0x8F13;
+              xdata UCHAR volatile _2DT3D_REG_14 _at_ 0x8F14;
+              xdata UCHAR volatile _2DT3D_REG_50 _at_ 0x8F50;
+              xdata UCHAR volatile _2DT3D_REG_51 _at_ 0x8F51;
+              xdata UCHAR volatile _2DT3D_REG_52 _at_ 0x8F52;
+              xdata UCHAR volatile _2DT3D_REG_53 _at_ 0x8F53;
+              xdata UCHAR volatile _2DT3D_REG_54 _at_ 0x8F54;
+              xdata UCHAR volatile _2DT3D_REG_55 _at_ 0x8F55;
+              xdata UCHAR volatile _2DT3D_REG_56 _at_ 0x8F56;
+              xdata UCHAR volatile _2DT3D_REG_57 _at_ 0x8F57;
+              xdata UCHAR volatile _2DT3D_REG_58 _at_ 0x8F58;
+              xdata UCHAR volatile _2DT3D_REG_6C _at_ 0x8F6C;
+              xdata UCHAR volatile _2DT3D_REG_6D _at_ 0x8F6D;
+              xdata UCHAR volatile _2DT3D_REG_6E _at_ 0x8F6E;
+              xdata UCHAR volatile _2DT3D_REG_6F _at_ 0x8F6F;
+              xdata UCHAR volatile _2DT3D_REG_C4 _at_ 0x8FC4;
+              xdata UCHAR volatile _2DT3D_REG_C5 _at_ 0x8FC5;
+              xdata UCHAR volatile _2DT3D_REG_C7 _at_ 0x8FC7;
+              xdata UCHAR volatile _2DT3D_REG_C8 _at_ 0x8FC8;
+              xdata UCHAR volatile _2DT3D_REG_CA _at_ 0x8FCA;
+              xdata UCHAR volatile _2DT3D_REG_CB _at_ 0x8FCB;
+              xdata UCHAR volatile _2DT3D_REG_DD _at_ 0x8FDD;
+              xdata UCHAR volatile _2DT3D_REG_DE _at_ 0x8FDE;
+              xdata UCHAR volatile _2DT3D_REG_04 _at_ 0x8F04;
+              
+              xdata ULONG volatile glb_level;
+              xdata ULONG volatile glb_max_0;
+              xdata ULONG volatile glb_max_1;
+              xdata ULONG volatile glb_max;
+              xdata ULONG volatile glb_counter;
+              xdata ULONG volatile glb_reg_50;
+              xdata ULONG volatile glb_reg_51;
+              xdata ULONG volatile glb_reg_52;
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_Set2DTo3DViewPoint(UCHAR vpoint)
+              // Parameters:
+              //  vpoint : value of view point. Range is 0 ~ 11
+              // Return:
+              //  None
+              // Purpose:
+              //  Set view point
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_Set2DTo3DViewPoint(UCHAR vpoint)
+              {
+                  glb_reg_52 = vpoint < 6 ? (5 - vpoint) * 5 + 64 : (vpoint - 5) * 5;
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_Set2DTo3DDepthLvl(UCHAR dlvl)
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 17  
+
+              // Parameters:
+              //  dlvl : value of depth level. Range is 0 ~ 10.
+              // Return:
+              //  None
+              // Purpose:
+              //  Set depth level
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_Set2DTo3DDepthLvl(UCHAR dlvl)
+              {
+                  glb_reg_50 = dlvl * 8/10;
+                  glb_reg_51 = dlvl * 4;
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_Set2DTo3DBorder(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Config left/right border size
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_Set2DTo3DBorder(void)
+              {
+              #define MIN_BORDER 0x14
+              
+                  _2DT3D_REG_53 = MIN_BORDER & 0xFF;
+                  _2DT3D_REG_54 = (UserPanelData.usWidth - MIN_BORDER) & 0xFF;
+                  _2DT3D_REG_55 = (((UserPanelData.usWidth - MIN_BORDER) >> 4) & 0xF0) | (MIN_BORDER >> 8);
+                  _2DT3D_REG_56 = MIN_BORDER & 0xFF;
+                  _2DT3D_REG_57 = (UserPanelData.usWidth - MIN_BORDER) & 0xFF;
+                  _2DT3D_REG_58 = (((UserPanelData.usWidth - MIN_BORDER) >> 4) & 0xF0) | (MIN_BORDER >> 8);
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_Update2DTo3DGlobalCounter(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  None
+              // Purpose:
+              //  Update luma histogram
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_Update2DTo3DGlobalCounter(void)
+              {
+                  ULONG reg_DD, reg_DE, max, max_0, max_1;
+                  ULONG histogram;
+              
+                  histogram = 0;
+              
+                  for (glb_counter = 0; glb_counter < 16;glb_counter++) {
+                      _2DT3D_REG_04 = (_2DT3D_REG_04 & 0xF0) | (glb_counter >> 0); //change the luma bin
+                      reg_DD = _2DT3D_REG_DD;
+                      reg_DE = _2DT3D_REG_DE;
+                      max = (reg_DD >> 4) | (reg_DE << 4);
+                      histogram += max;
+                      if (max > max_0) {
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 18  
+
+                          max_1 = max_0;
+                          max_0 = max;
+                      }
+                      else {
+                          if (max > max_1) {
+                              max_1 = max;
+                          }
+                      }
+                  }
+              
+                  if ((max_0 * 100 / histogram) > 80) {
+                      uc2DTo3DFlag = 1;
+                  }
+                  else {
+                      uc2DTo3DFlag = 0;
+                  }
+              
+                  glb_counter = 0;
+                  glb_max = max_0 + max_1;
+                  max_0 = 0;
+                  max_1 = 0;
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_SetDym2Dto3DDepthLvl(UCHAR on)
+              // Parameters:
+              //  on : TRUE/FALSE to set/fix depth level
+              // Return:
+              //  None
+              // Purpose:
+              //  Set depth level dynamically
+              // Notes:
+              //******************************************************************************
+              void SC3DAPI_SetDym2Dto3DDepthLvl(UCHAR on)
+              {
+              #define MAX_TH        0x890
+              #define MIN_TH        0x690
+              #define TOTAL_TH      (MAX_TH - MIN_TH)
+              #define MIN_OFFSET_50 ((TOTAL_TH)/2)
+              #define MIN_OFFSET_51 ((TOTAL_TH)/2)
+              
+                  ULONG ClassLevel, max;
+                  ULONG reg_C4, reg_C5, reg_C7, reg_C8, reg_CA, reg_CB, reg1, reg2, reg3;
+                  UCHAR Current_Reg_50,Current_Reg_51;
+                  UCHAR Target_Reg_50,Target_Reg_51;
+              
+                  reg_C4 = _2DT3D_REG_C4;
+                  reg_C5 = _2DT3D_REG_C5;
+                  reg_C7 = _2DT3D_REG_C7;
+                  reg_C8 = _2DT3D_REG_C8;
+                  reg_CA = _2DT3D_REG_CA;
+                  reg_CB = _2DT3D_REG_CB;
+              
+                  reg1 = (reg_C4 >> 4) + (reg_C5 << 4);
+                  reg2 = (reg_C7 >> 4) + (reg_C8 << 4);
+                  reg3 = (reg_CA >> 4) + (reg_CB << 4);
+                  Current_Reg_50 = _2DT3D_REG_50;
+                  Current_Reg_51 = _2DT3D_REG_51;
+                  ClassLevel = glb_level;
+                  max = glb_max;
+              
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 19  
+
+                  if ((max > MAX_TH)&&(uc2DTo3DFlag)) {
+                      ClassLevel = 2;
+                  }
+                  else if (((max < MAX_TH)&&(max > MIN_TH))||((!uc2DTo3DFlag)&&(max > MAX_TH))) {
+                      ClassLevel = 1;
+                  }
+                  else {
+                      ClassLevel = 0;
+                  }
+              
+                  if ((0 < ClassLevel)) {
+                      if ((reg1 < 15) && (reg1 + 20 < reg3) && (reg2 + 20 < reg3)) {
+                          ClassLevel = 0;
+                      }
+                      if((abs(reg1 + reg3) < reg2)) {
+                          ClassLevel = 0;
+                      }
+                  }
+              
+                  if (on == FALSE) {
+                      ClassLevel = 0;
+                  }
+              
+                  if (0 == ClassLevel) {
+                      Target_Reg_50 = glb_reg_50;
+                      Target_Reg_51 = glb_reg_51;
+                  }
+                  else if (1 == ClassLevel) {
+                      if (max > MAX_TH) {
+                          Target_Reg_50 = glb_reg_50;
+                          Target_Reg_51 = glb_reg_51/2;
+                      }
+                      else {
+                          Target_Reg_50 = (glb_reg_50*((MAX_TH - glb_max)+MIN_OFFSET_50))/TOTAL_TH;
+                          Target_Reg_51 = (glb_reg_51*((MAX_TH - glb_max)+MIN_OFFSET_51))/TOTAL_TH;
+                      }
+                  }
+                  else if (2 == ClassLevel) {
+                      Target_Reg_50 = glb_reg_50/2;
+                      Target_Reg_51 = glb_reg_51/3;
+                  }
+              
+                  //for depth smooth adjust
+                  if (Current_Reg_50 > Target_Reg_50) {
+                      Current_Reg_50--;
+                  }
+                  else if(Current_Reg_50 < Target_Reg_50) {
+                      Current_Reg_50++;
+                  }
+                  if(Current_Reg_51 > Target_Reg_51) {
+                      Current_Reg_51--;
+                  }
+                  else if(Current_Reg_51 < Target_Reg_51) {
+                      Current_Reg_51++;
+                  }
+              
+                  _2DT3D_REG_50 = Current_Reg_50;
+                  _2DT3D_REG_51 = Current_Reg_51;
+                  _2DT3D_REG_52 = glb_reg_52;
+              
+                  glb_level = ClassLevel;
+              
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 20  
+
+              }
+              
+              //******************************************************************************
+              // Prototype:
+              //  void SC3DAPI_SwapLR(UCHAR swap)
+              // Parameters:
+              //  swap : swap or not
+              // Return:
+              //  None
+              // Purpose:
+              //  Swap L/R frame
+              // Notes:
+              //  None
+              //******************************************************************************
+              void SC3DAPI_SwapLR(UCHAR swap)
+              {
+              #if ENABLE_SHUTTER_3D == ON
+                  if (swap) {
+                  }
+                  else {
+                  }
+              #else
+                  if (swap) {
+                      SC_MICRO_RETARDED_CTRL &= ~BIT6;
+                  }
+                  else {
+                      SC_MICRO_RETARDED_CTRL |= BIT6;
+                  }
+              #endif
+              }
+              #endif
+1198          
+1199          //******************************************************************************
+1200          // Prototype:
+1201          //  static BOOL SC3DAPI_CheckHDMI3DInfoFrame(void)
+1202          // Parameters:
+1203          //  None
+1204          // Return:
+1205          //  TRUE: HDMI 3D mode, FALSE: not HDMI 3D mode.
+1206          // Purpose:
+1207          //  Check HDMI 3D mode by info-frame
+1208          // Notes:
+1209          //******************************************************************************
+1210          static BOOL SC3DAPI_CheckHDMI3DInfoFrame(void)
+1211          {
+1212   1          UCHAR tmpreg;
+1213   1      
+1214   1          tmpreg = SC_CP_PACKET_TYPE;
+1215   1      
+1216   1          if (SC_CP_PACKET_TYPE != 0x81) {
+1217   2              SC_CP_PACKET_TYPE = 0x81;
+1218   2              Sleep(50); // For 24Hz input, the VSync period is 41ms.
+1219   2                         // We choose 50ms to make sure the delay meet all kinds of video timing.
+1220   2          }
+1221   1          if (SC_CTRL_PACKET[0] != 0x81) {
+1222   2              SC_CP_PACKET_TYPE = tmpreg;
+1223   2              return FALSE;
+1224   2          }
+1225   1      
+1226   1          if ((SC_CTRL_PACKET[7] & 0xE0) != 0x40) {
+1227   2              SC_CP_PACKET_TYPE = tmpreg;
+1228   2              return FALSE;
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 21  
+
+1229   2          }
+1230   1      
+1231   1          SC_CP_PACKET_TYPE = tmpreg;
+1232   1          return TRUE;
+1233   1      }
+1234          
+1235          //******************************************************************************
+1236          // Prototype:
+1237          //  BOOL SC3DAPI_Check3DVSI(void)
+1238          // Parameters:
+1239          //  None
+1240          // Return:
+1241          //  TRUE: HDMI 3D mode, FALSE: not HDMI 3D mode.
+1242          // Purpose:
+1243          //  Check HDMI 3D mode by scaler VSI register
+1244          // Notes:
+1245          //******************************************************************************
+1246          BOOL SC3DAPI_CheckVSI3DStatus(void)
+1247          {
+1248   1          // Check VSI header
+1249   1          if (SC_VSI_PACKET[0] != 0x81) {
+1250   2              return FALSE;
+1251   2          }
+1252   1      
+1253   1          // Check 3D present or not
+1254   1          if ((SC_VSI_PACKET[7] & 0xE0) != 0x40) {
+1255   2              return FALSE;
+1256   2          }
+1257   1      
+1258   1          // Check 3D format valid or not
+1259   1          switch (SC_VSI_PACKET[8] & 0xF0) {
+1260   2              case FRAME_PACKING:
+1261   2              case FIELD_ALTERNATIVE:
+1262   2      #if ENABLE_3D_CNV_120Hz == OFF
+1263   2              case LINE_ALTERNATIVE:
+1264   2      #endif
+1265   2              case SIDE_BY_SIDE_FULL:
+1266   2              case L_DEPT:
+1267   2              case TOP_BOTTOM:
+1268   2              case SIDE_BY_SIDE_HALF:
+1269   2                  return TRUE;
+1270   2          }
+1271   1      
+1272   1          return FALSE;
+1273   1      }
+1274          
+1275          //******************************************************************************
+1276          // Prototype: 
+1277          //  BOOL SC3DAPI_IsHDMI3DMode(void)
+1278          // Parameters:
+1279          //  None
+1280          // Return:
+1281          //  TRUE: HDMI 3D mode, FALSE: not HDMI 3D mode.
+1282          // Purpose:
+1283          //  Check HDMI 3D mode
+1284          // Notes:
+1285          //******************************************************************************
+1286          BOOL SC3DAPI_IsHDMI3DMode(void)
+1287          {
+1288   1          if ((SC_HDMI_3D_FORMAT & 0x0F) != 0x0A) {
+1289   2              return FALSE;
+1290   2          }
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 22  
+
+1291   1          else {
+1292   2              switch (SC_HDMI_3D_FORMAT & 0xF0) {
+1293   3                  case FRAME_PACKING:
+1294   3                  case FIELD_ALTERNATIVE:
+1295   3      #if ENABLE_3D_CNV_120Hz == OFF
+1296   3                  // When we support 120Hz 3D conversion, e.x. 2D to 3D/SBS/TB, the MMU setting is not proper fo
+             -r 3D line alternative timing.
+1297   3                  // Therefore, we do not support it while ENABLE_3D_CNV_120Hz is ON.
+1298   3                  case LINE_ALTERNATIVE:
+1299   3      #endif
+1300   3                  case SIDE_BY_SIDE_FULL:
+1301   3                  case L_DEPT:
+1302   3                  case TOP_BOTTOM:
+1303   3                  case SIDE_BY_SIDE_HALF:
+1304   3                      return TRUE;
+1305   3              }
+1306   2          }
+1307   1      
+1308   1          return FALSE;
+1309   1      }
+1310          
+1311          //******************************************************************************
+1312          // Prototype: 
+1313          //  BOOL SC3DAPI_IsHDMI3DFmtChanged(void)
+1314          // Parameters:
+1315          //  None
+1316          // Return:
+1317          //  TRUE: 3D format changed, FALSE: No change.
+1318          // Purpose:
+1319          //  Check HDMI 3D format changed or not.
+1320          // Notes:
+1321          //******************************************************************************
+1322          BOOL SC3DAPI_IsHDMI3DFmtChanged(void)
+1323          {
+1324   1          if ((SC_VSI_PACKET[8] & 0xF0) != ucHDMI3DFormat) {
+1325   2              return TRUE;
+1326   2          }
+1327   1      
+1328   1          return FALSE;
+1329   1      }
+1330          #if 0
+              //******************************************************************************
+              // Prototype:
+              //  UCHAR SC3DAPI_GetHDMI3DFormat(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  HDMI 3D format
+              // Purpose:
+              //  Get HDMI 3D format
+              // Notes:
+              //******************************************************************************
+              UCHAR SC3DAPI_GetHDMI3DFormat(void)
+              {
+                  if ((SC_HDMI_3D_FORMAT & 0x0F) != 0x0A) {
+                      return 0xFF;
+                  }
+              
+                  return (SC_HDMI_3D_FORMAT & 0xF0);
+              }
+              #endif
+1351          //******************************************************************************
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 23  
+
+1352          // Prototype:
+1353          //  void Hdmi3DSetup(void)
+1354          // Parameters:
+1355          //  None
+1356          // Return:
+1357          //  None
+1358          // Purpose:
+1359          //  Setup HDMI 3D mode
+1360          // Notes:
+1361          //******************************************************************************
+1362          void SC3DAPI_SetupHDMI3DMode(void)
+1363          {
+1364   1          USHRT i, j, v_active, v_act_space;
+1365   1      #if 0
+                  USHRT tmp_vt, tmp_vde;
+              #endif
+1368   1          UCHAR k;
+1369   1      
+1370   1          k = GetCurrInputInterface();
+1371   1          ucHDMI3DFormat = 0xFF;
+1372   1      
+1373   1          if ((k != DIGITAL_INPUT0) && (k != DIGITAL_INPUT1)) {
+1374   2              return;
+1375   2          }
+1376   1      
+1377   1          // If input is HDMI 3D timing, we force scaler as pure DE mode
+1378   1      #if DVI_MODE == DVI_HVDE_MODE
+1379   1          SC_GI_SYNC_CTRL |= BIT7;
+1380   1      #endif
+1381   1          SC_GI_SYNC_CTRL &= ~(BIT3 | BIT2); //VSYNC: 00 = 11-bit. Overflow freq = 27.32Hz
+1382   1          SC_HDMI_AUTO_CTRL |= BIT6;
+1383   1          if (SC3DAPI_IsHDMI3DMode() == FALSE) {
+1384   2              if (SC3DAPI_Is3DFormat() == FALSE) {
+1385   3                  return;
+1386   3              }
+1387   2          }
+1388   1          else if (SC3DAPI_CheckHDMI3DInfoFrame() == FALSE) { // Double confirm the VSP info-frame to make sure 
+             -the input is 3D or not.
+1389   2              SC_HDMI_AUTO_CTRL &= ~BIT6;
+1390   2              SC_HDMI_3D_FORMAT = 0x00;   // Clear manual 3D mode
+1391   2              // Delay here to make sure the sync changed interrupt has been risen after
+1392   2              // we disable scaler auto 3D mode.
+1393   2              Sleep(50);
+1394   2              return;
+1395   2          }
+1396   1          SC_GI_SYNC_CTRL |= BIT2; //VSYNC: 01 = 12-bit. Overflow freq = 13.66Hz
+1397   1          ucHDMI3DFormat = SC_HDMI_3D_FORMAT & 0xF0;
+1398   1          switch (ucHDMI3DFormat) { //Check 3D Format
+1399   2              case FRAME_PACKING:
+1400   2              case L_DEPT:
+1401   2              #if DVI_MODE == DVI_HVDE_MODE
+1402   2                  // If input is HDMI 3D timing, we force scaler as pure DE mode
+1403   2                  SC_GI_SYNC_CTRL &= ~BIT7;
+1404   2              #endif
+1405   2      #if 1
+1406   2                  i = GetDigInputVTotalImmediate();
+1407   2                  j = GetDigInputVActiveImmediate();
+1408   2      
+1409   2                  v_act_space = i - j;
+1410   2                  if (((j - v_act_space) % 2) != 0) {
+1411   3                      v_act_space--;
+1412   3                  }
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 24  
+
+1413   2      
+1414   2                  //Setup FP progressive mode
+1415   2                  WriteShortScaler(&SC_HDMI_3D_DE_LENGTH_LO, (j - v_act_space) / 2);
+1416   2                  SC_HDMI_3D_ACTIVE_SPACE = v_act_space;
+1417   2      
+1418   2                  //Setup FP interlaced mode
+1419   2                  SC_HDMI_3D_ACTIVE_SPACE2 = v_act_space;
+1420   2                  v_active = (j - (i - j) * 3) / 4;
+1421   2                  v_act_space = (j - v_active * 4 - v_act_space) / 2;
+1422   2                  SC_HDMI_3D_ACTIVE_SPACE1 = v_act_space;
+1423   2                  WriteShortScaler(&SC_HDMI_3D_RODD_ST_LSB, v_active);
+1424   2                  WriteShortScaler(&SC_HDMI_3D_LEVEN_ST_LSB, v_active * 2 + SC_HDMI_3D_ACTIVE_SPACE1);
+1425   2                  WriteShortScaler(&SC_HDMI_3D_REVEN_ST_LSB, v_active * 3 + SC_HDMI_3D_ACTIVE_SPACE1 + SC_HDMI_3
+             -D_ACTIVE_SPACE2);
+1426   2      
+1427   2                  // Because VDE is changed, we need delay for more than one frame time to make sure
+1428   2                  // the sync processor already  update vsync frequency to avoid interrupt again.
+1429   2                  // Jude 2011/09/01
+1430   2                  Sleep(50); // 24Hz is 41ms around.
+1431   2      #else
+                          //Setup frame packing progressive mode
+                          k = 50;
+                          tmp_vt = GetDigInputVTotalImmediate();
+                          tmp_vde = GetDigInputVActiveImmediate();
+                          do {
+                              i = GetDigInputVTotalImmediate();
+                              j = GetDigInputVActiveImmediate();
+              
+                              if ((tmp_vt != i) || (tmp_vde != j)) {
+                                  tmp_vt = i;
+                                  tmp_vde = j;
+                                  Sleep(5);
+                              }
+                              else if (j > i) {
+                                  Sleep(5);
+                              }
+                              else {
+                                  Sleep(1);
+                              }
+                              k--;
+                          } while (k != 0);
+                          
+                          k = 2;
+                          do {
+                              WriteShortScaler(&SC_HDMI_3D_DE_LENGTH_LO, j - i / 2);
+                              v_act_space = i - j;
+                              SC_HDMI_3D_ACTIVE_SPACE = v_act_space;
+                              //Setup frame packing interlaced mode
+                              SC_HDMI_3D_ACTIVE_SPACE2 = v_act_space;
+                              v_active = (j - (i - j) * 3) / 4;
+                              v_act_space = (j - v_active * 4 - v_act_space) / 2;
+                              SC_HDMI_3D_ACTIVE_SPACE1 = v_act_space;
+                              WriteShortScaler(&SC_HDMI_3D_RODD_ST_LSB, v_active);
+                              WriteShortScaler(&SC_HDMI_3D_LEVEN_ST_LSB, v_active * 2 + SC_HDMI_3D_ACTIVE_SPACE1);
+                              WriteShortScaler(&SC_HDMI_3D_REVEN_ST_LSB, v_active * 3 + SC_HDMI_3D_ACTIVE_SPACE1 + SC_HD
+             -MI_3D_ACTIVE_SPACE2);
+                              
+                              // Because VDE is changed, we need delay for more than one frame time to make sure 
+                              // the sync processor already  update vsync frequency to avoid interrupt again.
+                              // Jude 2011/09/01        
+                              Sleep(20);
+              
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 25  
+
+                              if ((i == GetDigInputVTotalImmediate()) &&
+                                  (j == GetDigInputVActiveImmediate())) {
+                                      break;
+                              }
+                              
+                              i = GetDigInputVTotalImmediate();
+                              j = GetDigInputVActiveImmediate();
+                              
+                              k--;
+                          } while (k != 0);
+              #endif
+1484   2      
+1485   2                  break;
+1486   2      
+1487   2              case FIELD_ALTERNATIVE:
+1488   2      #if 1
+1489   2                  i = GetDigInputVTotalImmediate();
+1490   2                  j = GetDigInputVActiveImmediate();
+1491   2                  v_act_space = i - j;
+1492   2                  if (((j - v_act_space) % 2) != 0) {
+1493   3                      v_act_space--;
+1494   3                  }
+1495   2      
+1496   2                  // Setup FA mode
+1497   2                  WriteShortScaler(&SC_HDMI_3D_DE_LENGTH_LO, (j - v_act_space) / 2);
+1498   2                  SC_HDMI_3D_ACTIVE_SPACE = v_act_space;
+1499   2      
+1500   2                  // Because VDE is changed, we need delay for more than one frame time to make sure
+1501   2                  // the sync processor already  update vsync frequency to avoid interrupt again.
+1502   2                  // Jude 2011/09/01
+1503   2                  Sleep(50); // 24Hz is 41ms around.
+1504   2      #else
+                          k = 50;
+                          tmp_vt = GetDigInputVTotalImmediate();
+                          tmp_vde = GetDigInputVActiveImmediate();
+                          do {
+                              i = GetDigInputVTotalImmediate();
+                              j = GetDigInputVActiveImmediate();
+              
+                              if ((tmp_vt != i) || (tmp_vde != j)) {
+                                  tmp_vt = i;
+                                  tmp_vde = j;
+                                  Sleep(5);
+                              }
+                              else if (j > i) {
+                                  Sleep(5);
+                              }
+                              else {
+                                  Sleep(1);
+                              }
+                              k--;
+                          } while (k != 0);
+                          
+                          k = 2;
+                          do {
+                              // 3d_vde = (vt - ((vt - vde) * 2 - 1)) / 2
+                              // 3d_vde = vde - (vt - 1) / 2
+                              WriteShortScaler(&SC_HDMI_3D_DE_LENGTH_LO, j - (i - 1) / 2);
+                              v_act_space = i - j - 1;
+                              SC_HDMI_3D_ACTIVE_SPACE = v_act_space;
+                              
+                              // Because VDE is changed, we need delay for more than one frame time to make sure 
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 26  
+
+                              // the sync processor already  update vsync frequency to avoid interrupt again.
+                              // Jude 2011/09/01        
+                              Sleep(20);
+              
+                              if ((i == GetDigInputVTotalImmediate()) &&
+                                  (j == GetDigInputVActiveImmediate())) {
+                                      break;
+                              }
+                              
+                              i = GetDigInputVTotalImmediate();
+                              j = GetDigInputVActiveImmediate();
+                              
+                              k--;
+                          } while (k != 0);            
+              #endif
+1550   2      
+1551   2                  break;
+1552   2      
+1553   2              case LINE_ALTERNATIVE:
+1554   2                  break;
+1555   2      
+1556   2              case SIDE_BY_SIDE_FULL:
+1557   2                  break;
+1558   2      
+1559   2              case TOP_BOTTOM:
+1560   2                  break;
+1561   2      
+1562   2              case SIDE_BY_SIDE_HALF:
+1563   2                  break;
+1564   2      
+1565   2              default:
+1566   2                  break;
+1567   2          }
+1568   1      }
+1569          
+1570          //******************************************************************************
+1571          // Prototype: 
+1572          //  BOOL SC3DAPI_IsActiveSpaceChanged(void)
+1573          // Parameters:
+1574          //  None
+1575          // Return:
+1576          //  TRUE if active space is changed. Otherwise, FALSE.
+1577          // Purpose:
+1578          //  Check active space changed or not
+1579          // Notes:
+1580          //  None
+1581          //******************************************************************************
+1582          BOOL SC3DAPI_IsActiveSpaceChanged(void)
+1583          {
+1584   1          USHRT i, j, v_act_space;
+1585   1      
+1586   1          if ( !SC3DAPI_IsHDMI3D()) { //2012.05.17 Jerry+ DP_input will modechange because 0x650 error, maybe FP
+             -GA issue?
+1587   2              return FALSE;
+1588   2          }
+1589   1      
+1590   1          i = GetDigInputVTotalImmediate();
+1591   1          j = GetDigInputVActiveImmediate();
+1592   1          v_act_space = i - j;
+1593   1      
+1594   1          switch (ucHDMI3DFormat) { //Check 3D Format
+1595   2              case FRAME_PACKING:
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 27  
+
+1596   2              case L_DEPT:
+1597   2              case FIELD_ALTERNATIVE:
+1598   2                  if (abs(SC_HDMI_3D_ACTIVE_SPACE - v_act_space) > 1) {
+1599   3                      return TRUE;
+1600   3                  }
+1601   2                  break;
+1602   2          }
+1603   1      
+1604   1          return FALSE;
+1605   1      }
+1606          
+1607          //******************************************************************************
+1608          // Prototype: 
+1609          //  BOOL SC3DAPI_IsHDMI3D(void)
+1610          // Parameters:
+1611          //  None
+1612          // Return:
+1613          //  True or False to indicate HDMI 3D present or not.
+1614          // Purpose:
+1615          //  Check HDMI 3D present or not.
+1616          // Notes:
+1617          //  None
+1618          //******************************************************************************
+1619          BOOL SC3DAPI_IsHDMI3D(void)
+1620          {
+1621   1          return IsHDMI3DFlag() ? TRUE : FALSE;
+1622   1      }
+1623          
+1624          #if ENABLE_3D_CNV == ON
+              //******************************************************************************
+              // Prototype: 
+              //  BOOL SC3DAPI_IsAMD3D(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  True or False to indicate AMD 3D present or not.
+              // Purpose:
+              //  Check AMD 3D present or not.
+              // Notes:
+              //  None
+              //******************************************************************************
+              BOOL SC3DAPI_IsAMD3D(void)
+              {
+                  return IsAMD3DFlag() ? TRUE : FALSE;
+              }
+              
+              //******************************************************************************
+              // Prototype: 
+              //  BOOL SC3DAPI_Is2DTo3D(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  True or False to indicate 2D to 3D is on or not.
+              // Purpose:
+              //  Check 2D to 3D is on or not.
+              // Notes:
+              //  None
+              //******************************************************************************
+              BOOL SC3DAPI_Is2DTo3D(void)
+              {
+                  return Is2DTo3DFlag() ? TRUE : FALSE;
+              }
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 28  
+
+              
+              //******************************************************************************
+              // Prototype: 
+              //  BOOL SC3DAPI_Is2DToFS(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  True or False to indicate 2D to FS is on or not.
+              // Purpose:
+              //  Check 2D to FS is on or not.
+              // Notes:
+              //  None
+              //******************************************************************************
+              //BOOL SC3DAPI_Is2DToFS(void)
+              //{
+              //    return Is2DToFSFlag() ? TRUE : FALSE;
+              //}
+              
+              //******************************************************************************
+              // Prototype: 
+              //  BOOL SC3DAPI_IsSBS(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  True or False to indidate SBS is on or not.
+              // Purpose:
+              //  Check SBS is on or not.
+              // Notes:
+              //  None
+              //******************************************************************************
+              //BOOL SC3DAPI_IsSBS(void)
+              //{
+              //    return IsSBSFlag() ? TRUE : FALSE;
+              //}
+              
+              //******************************************************************************
+              // Prototype: 
+              //  BOOL SC3DAPI_IsTB(void)
+              // Parameters:
+              //  None
+              // Return:
+              //  True or False to indicate TB is on or not.
+              // Purpose:
+              //  Check TB is on or not.
+              // Notes:
+              //  None
+              //******************************************************************************
+              //BOOL SC3DAPI_IsTB(void)
+              //{
+              //    return IsTBFlag() ? TRUE : FALSE;
+              //}
+              #endif //ENABLE_3D_CNV
+1710          
+1711          //******************************************************************************
+1712          // Prototype: 
+1713          //  BOOL SC3DAPI_IsDisplay3D(void)
+1714          // Parameters:
+1715          //  None
+1716          // Return:
+1717          //  True or False to indicate the scaler is under 3D mode or not.
+1718          // Purpose:
+1719          //  Check the scaler is under 3D mode or not.
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 29  
+
+1720          // Notes:
+1721          //  None
+1722          //******************************************************************************
+1723          BOOL SC3DAPI_IsDisplay3D(void)
+1724          {
+1725   1          return Is3DFlag() ? TRUE : FALSE;
+1726   1      }
+1727          
+1728          //******************************************************************************
+1729          // Prototype: 
+1730          //  BOOL SC3DAPI_Is3DTo2D(void)
+1731          // Parameters:
+1732          //  None
+1733          // Return:
+1734          //  True or False to indicate 3D to 2 on or off
+1735          // Purpose:
+1736          //  Check 3D to 2D is on or off
+1737          // Notes:
+1738          //  None
+1739          //******************************************************************************
+1740          //BOOL SC3DAPI_Is3DTo2D(void)
+1741          //{
+1742          //    return Is3DTo2DFlag() ? TRUE : FALSE;
+1743          //}
+1744          
+1745          //******************************************************************************
+1746          // Prototype: 
+1747          //  BOOL SC3DAPI_Is3DFormat(void)
+1748          // Parameters:
+1749          //  None
+1750          // Return:
+1751          //  True or False to indicate 3D timing format present or not
+1752          // Purpose:
+1753          //  Check the current input is 3D timing format or not
+1754          // Notes:
+1755          //  None
+1756          //******************************************************************************
+1757          BOOL SC3DAPI_Is3DFormat(void)
+1758          {
+1759   1          USHRT vde;
+1760   1          vde = GetDigInputVActiveImmediate();
+1761   1      
+1762   1          if ((abs(vde - 1470) < 2) ||
+1763   1              (abs(vde - 2205) < 2)) {
+1764   2      #if ENABLE_DVI_DUAL_LINK == ON
+                      if (TMDS_IsDualLink()) {
+                          SC_INPUT_SELECT = (SC_INPUT_SELECT & 0xF3) | 0x04;
+                          SC_TMDS_LINK_CLK_SEL |= BIT0;
+                          SC_DVI_PLL_M = 0x20;
+                      }
+              #endif
+1771   2              // 3D Manual Mode
+1772   2              //SC_GI_SYNC_CTRL &= ~BIT7;
+1773   2              SC_HDMI_AUTO_CTRL &= ~BIT6;
+1774   2              SC_HDMI_3D_FORMAT = 0x0A;
+1775   2      
+1776   2              return TRUE;
+1777   2          }
+1778   1      
+1779   1          return FALSE;
+1780   1      }
+1781          
+C51 COMPILER V8.02   SCALER_3D                                                             08/07/2015 16:22:24 PAGE 30  
+
+1782          //******************************************************************************
+1783          // Prototype:
+1784          //  BOOL SC3DAPI_IsManualHDMI3D(void)
+1785          // Parameters:
+1786          //  None
+1787          // Return:
+1788          //  True or False to indicate manual HDMI 3D format present or not
+1789          // Purpose:
+1790          //  Check the current input is manual HDMI 3D timing or not
+1791          // Notes:
+1792          //  None
+1793          //******************************************************************************
+1794          BOOL SC3DAPI_IsManualHDMI3D(void)
+1795          {
+1796   1          if (((SC_HDMI_AUTO_CTRL & BIT6) == 0x00) && SC3DAPI_IsHDMI3DMode()) {
+1797   2              return TRUE;
+1798   2          }
+1799   1          return FALSE;
+1800   1      }
+1801          #endif //ENABLE_SCALER_3D == ON
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1046    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      9      14
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

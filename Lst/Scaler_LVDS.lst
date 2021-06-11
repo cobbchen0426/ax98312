@@ -1,0 +1,193 @@
+C51 COMPILER V8.02   SCALER_LVDS                                                           08/07/2015 16:22:25 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_LVDS
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_LVDS.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_LVDS.c LARGE OPTIMIZE(9,SPEED) BROWSE INC
+                    -DIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\S
+                    -I\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215)
+                    - PRINT(.\Lst\Scaler_LVDS.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_LVDS.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          
+  23          //******************************************************************************
+  24          // S T A T I C   V A R I A B L E S
+  25          //******************************************************************************
+  26          
+  27          //******************************************************************************
+  28          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  29          //******************************************************************************
+  30          
+  31          //******************************************************************************
+  32          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  33          //******************************************************************************
+  34          
+  35          //******************************************************************************
+  36          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  37          //******************************************************************************
+  38          
+  39          //******************************************************************************
+  40          // F U N C T I O N   B O D Y S
+  41          //******************************************************************************
+  42          
+  43          /**************************************************************************//**
+  44           * Initialize LVDS-related registers.
+  45           ******************************************************************************/
+  46          void LVDSInit(void)
+  47          {
+  48   1          SC_LVDS_MISC_CTRL1 = SCREG_1F5;
+  49   1          SC_LVDS_CHARGE_PUMP_CURRENT = SCREG_1F4;
+  50   1          SC_LVDS_MISC_CTRL2 = (SC_LVDS_MISC_CTRL2 & 0x38) | 0x47;
+  51   1          SC_LVDS_MISC_CTRL4 = SCREG_1F8;
+  52   1          SC_LVDS_MISC_CTRL5 = SCREG_1F9;
+C51 COMPILER V8.02   SCALER_LVDS                                                           08/07/2015 16:22:25 PAGE 2   
+
+  53   1          SC_LVDS_MISC_CTRL6 = SCREG_1FA;
+  54   1          SC_LVDS_PLL_CTRL = SCREG_1FD;
+  55   1          SC_LVDS_RSDS_SWITCH = SCREG_1EF;
+  56   1      #if IS_NT68850_SERIES || IS_NT68790_SERIES
+  57   1          SC_LVDS_DIV = 0x00;//APN 1.0
+  58   1      #endif
+  59   1          SetLvdsClkDelay(LVDS_DELAY_OFF);
+  60   1          SetLvdsDataDelay(LVDS_DELAY_OFF);
+  61   1          SetLvdsSwing(UserPanelData.ucLVDS_Swing);
+  62   1          SetLvdsChPolSwap();
+  63   1      }
+  64          
+  65          /**************************************************************************//**
+  66           * Turn off LVDS output.
+  67           ******************************************************************************/
+  68          void LvdsOff(void)
+  69          {
+  70   1          SC_LVDS_MISC_CTRL1 = SCREG_1F5;  //LVDS output port: pull low
+  71   1          SC_LVDS_MISC_CTRL3 = 0x00;  //LVDS output port: power down
+  72   1          SC_POWER_CTRL1 &= ~BIT6;        //LVDS main power off
+  73   1      }
+  74          
+  75          /**************************************************************************//**
+  76           * Turn on LVDS output.
+  77           ******************************************************************************/
+  78          void LvdsOn(void)
+  79          {
+  80   1          SC_POWER_CTRL1 |= BIT6;     //LVDS main power on
+  81   1          SC_LVDS_MISC_CTRL3 |= 0xE0;  //LVDS output port: power on
+  82   1      #if IS_NT68652_SERIES || IS_NT68169_SERIES || IS_NT68661_SERIES
+                  SC_LVDS_MISC_CTRL2 |= 0x07;
+              #endif
+  85   1          SC_LVDS_MISC_CTRL1 = (SCREG_1F5 & ~BIT4);  //LVDS output port: Tri-state output
+  86   1          SetLvdsSwing(UserPanelData.ucLVDS_Swing);
+  87   1      }
+  88          
+  89          /**************************************************************************//**
+  90           * Set LVDS swing value.
+  91           * @param swing LVDS swing.
+  92           ******************************************************************************/
+  93          void SetLvdsSwing(LVDSSwing swing)
+  94          {
+  95   1          code UCHAR ucLVDS_Swing_Table[NUM_LVDS_SWING][3] = {
+  96   1            // 0x1F6[5:3], 0x1F7[2:0], 0x1B8[5:3]
+  97   1              {4, 1, 1}, //LVDS_SWING_220
+  98   1              {5, 1, 1}, //LVDS_SWING_250
+  99   1              {4, 2, 2}, //LVDS_SWING_300
+ 100   1              {5, 2, 2}, //LVDS_SWING_350
+ 101   1              {0, 3, 3}, //LVDS_SWING_400
+ 102   1              {4, 3, 3}, //LVDS_SWING_450
+ 103   1              {5, 3, 3}, //LVDS_SWING_500
+ 104   1              {6, 3, 3}, //LVDS_SWING_550
+ 105   1              {7, 3, 3}, //LVDS_SWING_600
+ 106   1              {0, 4, 4}, //LVDS_SWING_650
+ 107   1              {4, 4, 4}, //LVDS_SWING_700
+ 108   1              {5, 4, 4}, //LVDS_SWING_750
+ 109   1              {0, 6, 6}, //LVDS_SWING_800
+ 110   1          };
+ 111   1      
+ 112   1          SC_LVDS_MISC_CTRL2 &= 0xC7;
+ 113   1          SC_LVDS_MISC_CTRL3 &= 0xF8;
+ 114   1          SC_LVDS_CTRL &= 0xC7;
+C51 COMPILER V8.02   SCALER_LVDS                                                           08/07/2015 16:22:25 PAGE 3   
+
+ 115   1      
+ 116   1          SC_LVDS_MISC_CTRL2 |= (ucLVDS_Swing_Table[swing][0] << 3);
+ 117   1          SC_LVDS_MISC_CTRL3 |= ucLVDS_Swing_Table[swing][1];
+ 118   1          SC_LVDS_CTRL |= (ucLVDS_Swing_Table[swing][2] << 3);
+ 119   1      }
+ 120          
+ 121          /**************************************************************************//**
+ 122           * Set the stage of LVDS clock delay.
+ 123           * @param delay Clock delay.
+ 124           ******************************************************************************/
+ 125          void SetLvdsClkDelay(LVDSDelay delay)
+ 126          {
+ 127   1          if (delay > LVDS_DELAY_7_STAGE)
+ 128   1              delay = LVDS_DELAY_OFF;
+ 129   1          SC_LVDS_CLOCK_DELAY &= 0x88;
+ 130   1          SC_LVDS_CLOCK_DELAY |= (delay | (delay << 4));
+ 131   1      }
+ 132          
+ 133          /**************************************************************************//**
+ 134           * Set the stage of LVDS data delay.
+ 135           * @param delay Data delay.
+ 136           ******************************************************************************/
+ 137          void SetLvdsDataDelay(LVDSDelay delay)
+ 138          {
+ 139   1          if (delay > LVDS_DELAY_7_STAGE)
+ 140   1              delay = LVDS_DELAY_OFF;
+ 141   1          SC_LVDS_DATA_DELAY &= 0x88;
+ 142   1          SC_LVDS_DATA_DELAY |= (delay | (delay << 4));
+ 143   1          SC_LVDS_PAD_POWER &= 0xF8;
+ 144   1          SC_LVDS_PAD_POWER |= delay;
+ 145   1      }
+ 146          
+ 147          /**************************************************************************//**
+ 148           * Set LVDS P2S-related registers.
+ 149           ******************************************************************************/
+ 150          void SetLvdsP2SByDCLK(void)
+ 151          {
+ 152   1      
+ 153   1      }
+ 154          
+ 155          /**************************************************************************//**
+ 156           * Set LVDS LVDS Channel Polarity Swap (Positive/Negative)
+ 157           ******************************************************************************/
+ 158          void SetLvdsChPolSwap(void)
+ 159          {
+ 160   1      #if ENABLE_LVDS_POL_SWAP
+                  SC_LVDS_CTRL |= 0x80;
+              #endif
+ 163   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    291    ----
+   CONSTANT SIZE    =     39    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

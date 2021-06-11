@@ -1,0 +1,612 @@
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE MODECONFIG
+OBJECT MODULE PLACED IN .\Bin\ModeConfig.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\ModeConfig.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\Ap
+                    -p\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI
+                    -\NVT\Keypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD) DEFINE(SCALER_TYPE=NT68857,NT68857_MODULE,NVT_
+                    -1920X1080,FLASH_BANK=4) PRINT(.\Lst\ModeConfig.lst) OBJECT(.\Bin\ModeConfig.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+*** WARNING C318 IN LINE 254 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\ModelConfig.h'
+*** WARNING C318 IN LINE 255 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\GlobalTimerDef.h'
+*** WARNING C318 IN LINE 256 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\NonSupportTimingList.h'
+*** WARNING C318 IN LINE 257 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\OSDConfig.h'
+*** WARNING C318 IN LINE 258 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\SRConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 15 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 26 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 40 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 54 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 61 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 68 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 75 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 82 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 89 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 96 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 110 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 2   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 117 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 124 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 131 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 140 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 147 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 154 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 161 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 175 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 187 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 194 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 201 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 208 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 215 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 222 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 229 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 236 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 243 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 250 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 259 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 266 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 273 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 280 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 287 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 294 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 301 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 308 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 315 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 322 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 329 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 336 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 3   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 343 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 350 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 360 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 367 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 374 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 381 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 388 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 395 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 402 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 409 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 419 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 426 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 438 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 442 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 452 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 460 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 17 OF .\PHY\SI\NVT\BOARD\BOARD.H: unknown identifier
+*** WARNING C318 IN LINE 18 OF .\PHY\SI\NVT\BOARD\BOARD.H: can't open file 'NT68168_DEMO_BOARD\BoardConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** ERROR C202 IN LINE 74 OF .\LIB\INT.H: 'UART_TX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 74 OF .\LIB\INT.H: invalid dimension size: [0]
+*** ERROR C202 IN LINE 75 OF .\LIB\INT.H: 'UART_RX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 75 OF .\LIB\INT.H: invalid dimension size: [0]
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF .\LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 16 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: unknown identifier
+*** WARNING C318 IN LINE 17 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: can't open file 'NT68168_DEMO_KEYPAD\KeyPadConfig.h'
+*** WARNING C322 IN LINE 42 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_POWER.H: unknown identifier
+*** WARNING C322 IN LINE 36 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_PWM.H: unknown identifier
+*** WARNING C322 IN LINE 227 OF SYS\NVRAM.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 505 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 97 OF .\APP\OSD\OSDINDEX.H: unknown identifier
+*** WARNING C322 IN LINE 66 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 148 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 4   
+
+*** WARNING C322 IN LINE 320 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 389 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 475 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** ERROR C320 IN LINE 170 OF .\PHY\PANEL\PANEL.H: "Please choose one panel at least!"
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** ERROR C320 IN LINE 173 OF .\PHY\PANEL\PANEL.H: "Wrong PanelVTotal setting! Please review it!"
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 56 OF SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF SYS\SYSAPI.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 111 OF .\APP\INCLUDE.H: unknown identifier
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          //============== CHIU   (from \App\OSD\FOSDView.c  ->  STATIC   VARIABLES) =======
+  30          //static code UCHAR ucVersionText[]={16,'V',VERSION+'0','.',(REVERSION>>4)+'0',(REVERSION&0x0F)+'0',' ',DA
+             -TE};        
+  31          //static code UCHAR ucScalerText[]={7,SCALER_TEXT};
+  32          
+  33          #ifdef USE_X18_BOARD
+                      code UCHAR ucModelText[]={4,"X18 "};
+              #else
+  36                  code UCHAR ucModelText[]={4,"X12N"};    //"X215"};      //"X215"};      //"X15N"};      //"X07W"};      //"X29W"};      //"XXW"};               //
+             -"X10N"};        // (at \App\OSD\FOSDView.c -> OSDShowFactory() )
+  37          #endif
+  38          
+  39                  code UCHAR ucDateText[]={sizeof(__DATE__)-1 ,__DATE__};                 // (at \App\OSD\FOSDView.c -> OSDShowFactory()
+             - ),  another (at \Sys\Nvram.c -> GetFirmwareVer() )
+  40                  code UCHAR ucPanelText[]={sizeof(PANEL_NAME)-1,PANEL_NAME};             // (at \App\OSD\FOSDView.c -> OSDShowFactory
+             -() )
+*** ERROR C202 IN LINE 40 OF SYS\MODECONFIG.C: 'PANEL_NAME': undefined identifier
+*** ERROR C202 IN LINE 40 OF SYS\MODECONFIG.C: 'PANEL_NAME': undefined identifier
+  41          
+  42          
+  43          #if OSD_SHOW_VERSION == ENABLE   // show at osd-user-mode
+  44          //      static code UCHAR ucVersionText[]={16,'V',VERSION+'0','.',(REVERSION>>4)+'0',(REVERSION&0x0F)+'0',' ',D
+             -ATE};        
+  45                  code UCHAR ucVersionText[]={20,"F/W Ver: P6121-V1.00"}; //V2.00  "};                            // (at \App\OSD\OSDView.c) -> OSD
+             -ShowMainMenu() ->     OSDAPI_ShowIndentString(...)
+  46          #endif
+  47                          
+  48          //============== CHIU
+  49          //******************************************************************************
+  50          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  51          //******************************************************************************
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 5   
+
+  52          static void CheckInvalidParameter(void);
+  53          
+  54          //******************************************************************************
+  55          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  56          //******************************************************************************
+  57          
+  58          //******************************************************************************
+  59          // F U N C T I O N   B O D Y S
+  60          //******************************************************************************
+  61          
+  62          /**************************************************************************//**
+  63           * Setup capture window and post display.
+  64           * @return TRUE if system can show image normally. FASLE if OOR happens.
+  65           ******************************************************************************/
+  66          BOOL ModeConfig(void)
+  67          {
+  68   1          BOOL result;
+  69   1      
+  70   1          if (GetInputSyncMode() == DIG_SYNC) { //Digital input
+  71   2              PowerDownAnalogInput();
+  72   2              SetDVIPLL();
+  73   2          #if (DVI_MODE==DVI_HV_MODE) || (DVI_MODE==DVI_HVDE_MODE)
+*** WARNING C322 IN LINE 73 OF Sys\ModeConfig.c: unknown identifier
+*** WARNING C322 IN LINE 73 OF Sys\ModeConfig.c: unknown identifier
+                      DVIAutoPosition();
+                  #endif
+  76   2          #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 76 OF Sys\ModeConfig.c: unknown identifier
+                      // power off DP or Digital sync?
+                  // Sequence : Run DPConfigFIFO() after DVIAutoPosition() 
+                      if (GetCurrInputInterface() == DISPLAY_PORT_INPUT) {
+                          PowerDownDigitalInput();
+                          DP_AudioMNCheckerInit();
+                      }
+                      //DPConfigFIFO();
+                      DPConfigCRC(); // CTS for Cut2/3 Use Only
+                  #endif
+  86   2          #if ENABLE_HDMI == ON
+                      ClearHDMIStatus();
+                  #endif
+  89   2      #if ENABLE_NR_BYTIMING == ON    
+                      SetNRByDigitalTiming();
+              #endif
+  92   2          }
+  93   1          else { //Analog Input
+  94   2              PowerDownDigitalInput();
+  95   2              CheckInvalidParameter();
+  96   2              SetADCPLL(InputTiming.usHTotal);
+  97   2              SetADCPhase(InputTiming.ucPhase);
+  98   2              SetNRByAnalogTiming();
+  99   2              SetMinMax();
+ 100   2              SetHP(InputTiming.usHStart);
+ 101   2              SetVP(InputTiming.usVStart);
+ 102   2          }
+ 103   1      
+ 104   1      #if ENABLE_OVERSCAN == ON
+                  CheckOverScan();
+              #else
+ 107   1          SetCaptureSize(InputTiming.usCapHActive, InputTiming.usCapVActive);
+ 108   1      #endif
+ 109   1          SetHmask();
+ 110   1      
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 6   
+
+ 111   1      #if 0//ENABLE_SR == ON
+                  UserSetSR();
+              #endif
+ 114   1      
+ 115   1      #if !IS_NT68770_SERIES && !IS_NT68850_SERIES && !IS_NT68655_SERIES && !IS_NT68790_SERIES
+                  SetColorSpace();
+              #endif
+ 118   1      
+ 119   1          result = SetupDisplayTiming(InputTiming.usHTotal50);
+ 120   1      
+ 121   1      #if ENABLE_SR == ON
+                  UserSetSR();
+              #endif
+ 124   1      
+ 125   1      #if ENABLE_SCALER_3D == ON
+                  SC3DAPI_Setup3DMode();
+              #endif
+ 128   1      #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 128 OF Sys\ModeConfig.c: unknown identifier
+                  // 0x1046 = 0x17, DPConfigFIFO() after SetupDisplayTiming()???
+                  if (GetCurrInputInterface() == DISPLAY_PORT_INPUT) {
+                      DPConfigFIFO();
+                  }
+              #endif
+ 134   1      
+ 135   1          return result;
+ 136   1      }
+ 137          
+ 138          /**************************************************************************//**
+ 139           * Determine current input timing is video timing or not.
+ 140           * @return TRUE if input timing is video timing else FALSE.
+ 141           ******************************************************************************/
+ 142          BOOL IsVideoTiming(void)
+ 143          {
+ 144   1      
+ 145   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+*** WARNING C322 IN LINE 145 OF Sys\ModeConfig.c: unknown identifier
+*** WARNING C322 IN LINE 145 OF Sys\ModeConfig.c: unknown identifier
+                   if ( (GetInputSyncMode() == DIG_SYNC) && MHL_IsMHLInput() ) {
+                         return TRUE;
+                  }
+              #endif   
+ 150   1         
+ 151   1          if ((InputTiming.usModeIndex == _720x480I_60HZ)   ||
+ 152   1              (InputTiming.usModeIndex == _1440x480I_60HZ)  ||
+ 153   1              (InputTiming.usModeIndex == _2880x480I_60HZ)  ||
+ 154   1              (InputTiming.usModeIndex == _720x480P_60HZ)   ||
+ 155   1              (InputTiming.usModeIndex == _720x576I_50HZ)   ||
+ 156   1              (InputTiming.usModeIndex == _1440x576I_50HZ)  ||
+ 157   1              (InputTiming.usModeIndex == _2880x576I_50HZ)  ||
+ 158   1              (InputTiming.usModeIndex == _720x576P_50HZ)   ||
+ 159   1              (InputTiming.usModeIndex == _1280x720P_50HZ)  ||
+ 160   1              (InputTiming.usModeIndex == _1280x720_60HZ)   ||
+ 161   1              (InputTiming.usModeIndex == _1920x1080P_60HZ) ||
+ 162   1              (InputTiming.usModeIndex == _1920x1080P_50HZ) ||
+ 163   1              (InputTiming.usModeIndex == _1920x1080I_50HZ) ||
+ 164   1              (InputTiming.usModeIndex == _1920x1080I_50HZ_RB)) {
+ 165   2              return TRUE;
+ 166   2          }
+ 167   1      
+ 168   1          return FALSE;
+ 169   1      }
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 7   
+
+ 170          
+ 171          /**************************************************************************//**
+ 172           * Determine current input timing is "Out Of Range" or not.
+ 173           * @return TRUE if input timing is OOR else FALSE.
+ 174           ******************************************************************************/
+ 175          BOOL IsOutOfRange(void)
+ 176          {
+ 177   1      
+ 178   1      #if ENABLE_SCALER_3D == ON
+                  if (SC3DAPI_IsHDMI3DMode()) {
+                      return FALSE;
+                  }
+              #endif
+ 183   1      #if ENABLE_DVI_DUAL_LINK == ON
+*** WARNING C322 IN LINE 183 OF Sys\ModeConfig.c: unknown identifier
+                  if (TMDS_IsDualLink()) {
+                      return FALSE;
+                  }
+              #endif
+ 188   1      
+ 189   1          if (IsVideoTiming()) {
+ 190   2              return FALSE;
+ 191   2          }
+ 192   1      
+ 193   1          //Check HSync Frequency
+ 194   1          if (InputTiming.usHSyncFreq < MIN_H_FREQ) {
+*** ERROR C202 IN LINE 194 OF SYS\MODECONFIG.C: 'MIN_H_FREQ': undefined identifier
+ 195   2              return TRUE;
+ 196   2          }
+ 197   1          if (InputTiming.usHSyncFreq > MAX_H_FREQ) {
+*** ERROR C202 IN LINE 197 OF SYS\MODECONFIG.C: 'MAX_H_FREQ': undefined identifier
+ 198   2              return TRUE;
+ 199   2          }
+ 200   1          //Check VSync Frequency
+ 201   1          if (InputTiming.usVSyncFreq < MIN_V_FREQ) {
+*** ERROR C202 IN LINE 201 OF SYS\MODECONFIG.C: 'MIN_V_FREQ': undefined identifier
+ 202   2              return TRUE;
+ 203   2          }
+ 204   1          if (InputTiming.usVSyncFreq > MAX_V_FREQ) {
+*** ERROR C202 IN LINE 204 OF SYS\MODECONFIG.C: 'MAX_V_FREQ': undefined identifier
+ 205   2              return TRUE;
+ 206   2          }
+ 207   1          //Check ADC clock frequency
+ 208   1          if (GetInputSyncMode() != DIG_SYNC) {
+ 209   2              if (CheckADCPLLOutOfRange(InputTiming.usHTotal) == TRUE) {
+ 210   3                  return TRUE;
+ 211   3              }
+ 212   2          }
+ 213   1      
+ 214   1              return FALSE;
+ 215   1      }
+ 216          
+ 217          /**************************************************************************//**
+ 218           * Define the minimum and maximum value of HTotal, HStart and VStart
+ 219           ******************************************************************************/
+ 220          void SetMinMax(void)
+ 221          {
+ 222   1          USHRT temp;
+ 223   1      
+ 224   1          temp = InputTiming.usHTotal50 > 50 ? 50 : InputTiming.usHTotal50;
+ 225   1          InputTiming.usHTotalMin = InputTiming.usHTotal50 - temp;
+ 226   1          InputTiming.usHTotalMax = InputTiming.usHTotal50 + temp;
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 8   
+
+ 227   1      
+ 228   1          temp = InputTiming.usHStart50 > 50 ? 50 : InputTiming.usHStart50;
+ 229   1          InputTiming.usHStartMin = InputTiming.usHStart50 - temp;
+ 230   1          InputTiming.usHStartMax = InputTiming.usHStart50 + temp;
+ 231   1      
+ 232   1          temp = InputTiming.usVStart50 > 20 ? 20 : InputTiming.usVStart50-1;
+ 233   1          InputTiming.usVStartMin = InputTiming.usVStart50 - temp;
+ 234   1          InputTiming.usVStartMax = InputTiming.usVStart50 + temp;
+ 235   1      }
+ 236          
+ 237          /**************************************************************************//**
+ 238           * Verify the present HTotal, HStart and VStart.
+ 239           * The criteria is
+ 240           *   If HTotal > 2*HActive, HTotal is invalid and HTotal = HActive * 3 / 2.
+ 241           *   If HStart > 0.5*HTotal, HStart is invalid and HStart = (HTotal - HActive) / 2.
+ 242           *   If VStart > 0.5*VTotal, VStart is invalid and VStart = (VTotal - VActive) / 2.
+ 243           ******************************************************************************/
+ 244          void CheckInvalidParameter(void)
+ 245          {
+ 246   1          USHRT temp;
+ 247   1          temp = InputTiming.usCapHActive << 1;
+ 248   1          if (InputTiming.usHTotal > temp) {
+ 249   2              temp = InputTiming.usCapHActive >> 1;
+ 250   2              InputTiming.usHTotal = InputTiming.usCapHActive + temp;
+ 251   2          }
+ 252   1          temp = InputTiming.usHTotal >> 1;
+ 253   1          if (InputTiming.usHStart > temp) {
+ 254   2              InputTiming.usHStart = (InputTiming.usHTotal - InputTiming.usCapHActive) / 2;
+ 255   2          }
+ 256   1          temp = InputTiming.usVTotal >> 1;
+ 257   1          if (InputTiming.usVStart > temp) {
+ 258   2              InputTiming.usVStart = (InputTiming.usVTotal - InputTiming.usCapVActive) / 2;
+ 259   2          }
+ 260   1      }
+ 261          
+ 262          #if ENABLE_OVERSCAN == ON
+              /**************************************************************************//**
+               * Perform over-scan with some conditions.
+               ******************************************************************************/
+              void CheckOverScan(void)
+              {
+              #if ((ENABLE_HDMI == ON) && !(INPUT_INTERFACE&INPUT_DP))
+                  if ((GetInputSyncMode() == DIG_SYNC) && IsHDMIVideo() && IsOverScan())
+              #else
+                  if ((GetInputSyncMode() == DIG_SYNC) && IsOverScan())
+              #endif
+                  {
+                      SetOverScanRatio(OVER_SCAN_RATIO);
+                  }
+                  else{
+                      SetOverScanRatio(0);
+                  }
+              }
+              
+              /**************************************************************************//**
+               * Update capture-related parameters.
+               ******************************************************************************/
+              static void UpdateCaptureInfo(void)
+              {
+                  USHRT vactive = GetDigInputVActive();
+                  if (IsInterlaced()) {
+                      vactive = vactive * 2;
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 9   
+
+                  }
+              
+                  InputTiming.usModeHActive = GetDigInputHActive();
+                  InputTiming.usModeVActive = vactive;
+                  InputTiming.usCapHActive = InputTiming.usModeHActive;
+                  InputTiming.usCapVActive = InputTiming.usModeVActive;
+                  InputTiming.usHStart = GetInputHStart();
+                  InputTiming.usVStart = GetInputVStart();
+                  InputTiming.usHStart50 = InputTiming.usHStart;
+                  InputTiming.usVStart50 = InputTiming.usVStart;
+              }
+              
+              /**************************************************************************//**
+               * Perform over-scan.
+               * Over-scan procedures must follow the following steps.
+               *   1. Disable over-scan.
+               *   2. Set capture window.
+               *   3. Wait for a VSync duty (20ms).
+               *   4. Enable over-scan.
+               * @param ratio Over-scan ratio.
+               ******************************************************************************/
+              void SetOverScanRatio(UCHAR ratio)
+              {
+                  USHRT hstart, vstart;
+              
+                  if (ratio != 0) { //On
+                      DisableOverSample();
+                      DVIAutoPosition();
+                      UpdateCaptureInfo();
+                      hstart = InputTiming.usCapHActive * ratio / 100 / 2;
+                      vstart = InputTiming.usCapVActive * ratio / 100 / 2;
+                      InputTiming.usHStart = hstart;
+                      InputTiming.usVStart = GetInputVStart();
+                      InputTiming.usVStart += vstart;
+                      InputTiming.usCapHActive = InputTiming.usCapHActive - hstart * 2;
+                      InputTiming.usCapHActive &= 0xFFFE;
+                      if (IsInterlaced() == TRUE) {
+                          InputTiming.usCapVActive = InputTiming.usCapVActive - vstart * 4;
+                      }
+                      else {
+                          InputTiming.usCapVActive = InputTiming.usCapVActive - vstart * 2;
+                      }
+                      SetHP(InputTiming.usHStart);
+                      SetVP(InputTiming.usVStart);
+                      SetCaptureSize(InputTiming.usCapHActive, InputTiming.usCapVActive);
+                      DelayVTime(2);
+                      EnableOverSample();
+                  }
+                  else { //Off
+                      if (IsOverSample() == TRUE) {
+                          DisableOverSample();
+                          DVIAutoPosition();
+                          UpdateCaptureInfo();
+                      }
+                      SetCaptureSize(InputTiming.usCapHActive, InputTiming.usCapVActive);
+                  }
+              }
+              #endif
+ 347          //******************************************************************************
+ 348          // Prototype:
+ 349          //  BOOL CheckVSyncWidthChange(void)
+ 350          // Parameters:
+C51 COMPILER V7.50   MODECONFIG                                                            11/16/2016 14:31:25 PAGE 10  
+
+ 351          //  None
+ 352          // Return:
+ 353          //  TRUE/FALSE
+ 354          // Purpose:
+ 355          //  Check Vsync width change
+ 356          // Notes:
+ 357          //  v31_1106221_2200_SYS#2
+ 358          //******************************************************************************
+ 359          /*
+ 360          BOOL CheckVSyncWidthChange(void)
+ 361          {
+ 362          #define VS_WID_DIFF_CNT 4
+ 363          
+ 364              UCHAR uctemp_Vs_wid;
+ 365              if (GetModeHandleState() == WAIT_MODE_CHANGE) {
+ 366                  if (((InputTiming.usModeHActive == 1360) ||(InputTiming.usModeHActive == 1366)) && (InputTiming.us
+             -ModeVActive == 768)) { //v31_110627_2225_SYS#7
+ 367                      uctemp_Vs_wid = GetInputVSyncWidth();
+ 368                      if (uctemp_Vs_wid != Custom_System.ucVs_wid) {
+ 369                          Custom_System.ucVs_wid_diff_cnt ++;
+ 370                      }
+ 371                      else {
+ 372                          Custom_System.ucVs_wid_diff_cnt = 0;
+ 373                      }
+ 374                      if ( Custom_System.ucVs_wid_diff_cnt > VS_WID_DIFF_CNT) {
+ 375                          return TRUE;
+ 376                      }
+ 377                  }
+ 378              }
+ 379              return FALSE;
+ 380          }
+ 381          */
+
+C51 COMPILATION COMPLETE.  111 WARNING(S),  12 ERROR(S)

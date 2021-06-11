@@ -1,0 +1,6086 @@
+### uVision2 Project, (C) Keil Software
+### Do not modify !
+
+Target (NT68857_MODULE_1080), 0x0000 // Tools: 'MCS-51'
+Target (NT68857_DEMO_1080), 0x0000 // Tools: 'MCS-51'
+Target (NT68857_FPGA_1080), 0x0000 // Tools: 'MCS-51'
+Target (NT68857_MODULE_1050), 0x0000 // Tools: 'MCS-51'
+Target (NT68857_SRP_640x480), 0x0000 // Tools: 'MCS-51'
+Target (NT856_TRULY_TFT1280120-1-E), 0x0000 // Tools: 'MCS-51'
+Target (ADS-AD07_GDS_AUO_P460HVN03.0), 0x0000 // Tools: 'MCS-51'
+Target (ADS-AD908_15"_XGA), 0x0000 // Tools: 'MCS-51'
+Target (IBER-LWO_NT856_INL_S290AJ1-LE1), 0x0000 // Tools: 'MCS-51'
+Target (AD908_46"_JEIDA(10-8bit)), 0x0000 // Tools: 'MCS-51'
+Target (AXI_AX98310_G104X1-L04), 0x0000 // Tools: 'MCS-51'
+Target (AD908_SGD_GVTW70SNAD1E0), 0x0000 // Tools: 'MCS-51'
+Target (AD908_IBER-LWO_T215HVN01.1), 0x0000 // Tools: 'MCS-51'
+Target (AD908_GDS_P550HVN01_V2), 0x0000 // Tools: 'MCS-51'
+Target (AD908_Nextech_21.5_AutoDim+Remote), 0x0000 // Tools: 'MCS-51'
+Target (AD908_LWO_19W_RS232), 0x0000 // Tools: 'MCS-51'
+Target (AD907_X15N_Test), 0x0000 // Tools: 'MCS-51'
+Target (LWO-AD908_AXI_X10W), 0x0000 // Tools: 'MCS-51'
+Target (NT856_AD908-LWO_21.5), 0x0000 // Tools: 'MCS-51'
+Target (NT856_IVO_1024x768), 0x0000 // Tools: 'MCS-51'
+
+Group (Common)
+Group (Bank0)
+Group (Bank1)
+Group (Bank2)
+Group (Bank3)
+
+File 1,1,<.\Lib\Int.c><Int.c> 0x0 
+File 1,1,<.\Sys\Main.c><Main.c> 0x0 
+File 1,2,<.\Lib\NT68F631_4bank.a51><NT68F631_4bank.a51> 0x0 
+File 1,1,<.\Lib\ScalerAccess.c><ScalerAccess.c> 0x0 
+File 1,1,<.\Lib\OSDAPI_Common.c><OSDAPI_Common.c> 0x0 
+File 1,2,<.\Lib\STARTUP_A000.A51><STARTUP_A000.A51> 0x0 
+File 1,1,<.\Sys\EmbedCheckSum.c><EmbedCheckSum.c> 0x0 
+File 1,4,<.\Lib\fe2p_large_3.13.LIB><fe2p_large_3.13.LIB> 0x51A4214C 
+File 1,1,<.\Lib\NT68655_770_850 Series\Scaler_DP_Common.c><Scaler_DP_Common.c> 0x0 
+File 1,5,<.\App\ChiuDef.h><ChiuDef.h> 0x0 
+File 1,5,<.\ReadMe.txt><ReadMe.txt> 0x0 
+File 2,1,<.\Lib\AutoAdj.c><AutoAdj.c> 0x0 
+File 2,1,<.\Sys\AutoAdjConfig.c><AutoAdjConfig.c> 0x0 
+File 2,1,<.\Sys\SyncHandler.c><SyncHandler.c> 0x0 
+File 2,1,<.\Sys\ModeHandler.c><ModeHandler.c> 0x0 
+File 2,1,<.\Sys\ModeTable.c><ModeTable.c> 0x0 
+File 2,1,<.\Sys\ModeSearch.c><ModeSearch.c> 0x0 
+File 2,1,<.\Sys\ModeConfig.c><ModeConfig.c> 0x0 
+File 2,1,<.\Sys\NR.c><NR.c> 0x0 
+File 2,1,<.\Sys\Nvram.c><Nvram.c> 0x0 
+File 2,1,<.\Sys\NvramIIC.c><NvramIIC.c> 0x0 
+File 2,1,<.\Sys\SysAPI.c><SysAPI.c> 0x0 
+File 2,1,<.\Lib\Mcu.c><Mcu.c> 0x0 
+File 2,1,<.\Lib\McuADC.c><McuADC.c> 0x0 
+File 2,1,<.\Lib\McuDDC.c><McuDDC.c> 0x0 
+File 2,1,<.\Lib\McuIO.c><McuIO.c> 0x0 
+File 2,1,<.\Lib\McuPWM.c><McuPWM.c> 0x0 
+File 2,1,<.\Lib\McuHwIIC.c><McuHwIIC.c> 0x0 
+File 2,1,<.\Phy\SI\NVT\Board\Board.c><Board.c> 0x0 
+File 2,1,<.\Sys\Misc.c><Misc.c> 0x0 
+File 2,1,<.\Sys\Ram.c><Ram.c> 0x0 
+File 2,1,<.\App\HDCP.c><HDCP.c> 0x0 
+File 2,1,<.\Phy\Panel\Panel.c><Panel.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_CSC.c><Scaler_CSC.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\ScalerReg.c><ScalerReg.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_3D.c><Scaler_3D.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_ADC.c><Scaler_ADC.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_Capture.c><Scaler_Capture.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_Common.c><Scaler_Common.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_Display.c><Scaler_Display.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_Dithering.c><Scaler_Dithering.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_HDMI.c><Scaler_HDMI.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_LedDriver.c><Scaler_LedDriver.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_LVDS.c><Scaler_LVDS.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_MMU.c><Scaler_MMU.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_NR.c><Scaler_NR.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_Power.c><Scaler_Power.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_PWM.c><Scaler_PWM.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_Sync.c><Scaler_Sync.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_TMDS.c><Scaler_TMDS.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Fe2p_API.c><Fe2p_API.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\HDCPAPI.c><HDCPAPI.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\McuReg.c><McuReg.c> 0x0 
+File 2,1,<.\Lib\NT68655_770_850 Series\Scaler_MHL.c><Scaler_MHL.c> 0x0 
+File 3,1,<.\App\OSD\OSDAPI_Indent.c><OSDAPI_Indent.c> 0x0 
+File 3,1,<.\App\OSD\OSDFont.c><OSDFont.c> 0x0 
+File 3,1,<.\App\OSD\OSDFunc.c><OSDFunc.c> 0x0 
+File 3,1,<.\App\OSD\OSDIndex.c><OSDIndex.c> 0x0 
+File 3,1,<.\App\OSD\OSDView.c><OSDView.c> 0x0 
+File 3,1,<.\App\OSD\FOSDView.c><FOSDView.c> 0x0 
+File 3,1,<.\Lib\NT68655_770_850 Series\OSDAPI.c><OSDAPI.c> 0x0 
+File 3,1,<.\App\OSD\OSDCtrl.c><OSDCtrl.c> 0x0 
+File 4,1,<.\App\APPCtrl.c><APPCtrl.c> 0x0 
+File 4,1,<.\App\EventHandle.c><EventHandle.c> 0x0 
+File 4,1,<.\App\KeyCtrl.c><KeyCtrl.c> 0x0 
+File 4,1,<.\App\User\UserSetting.c><UserSetting.c> 0x0 
+File 4,1,<.\App\ColorConfig.c><ColorConfig.c> 0x0 
+File 4,4,<.\Lib\ColorEngine_Large.LIB><ColorEngine_Large.LIB> 0x51A4214C 
+File 4,1,<.\App\Gamma.c><Gamma.c> 0x0 
+File 4,1,<.\Lib\GammaAPI.c><GammaAPI.c> 0x0 
+File 4,1,<.\App\OSD\Logo.c><Logo.c> 0x0 
+File 4,1,<.\App\OD.c><OD.c> 0x0 
+File 4,4,<.\Lib\ODTransform_Large.LIB><ODTransform_Large.LIB> 0x51A4214C 
+File 4,1,<.\Lib\ODAPI.c><ODAPI.c> 0x0 
+File 4,1,<.\App\DBC.c><DBC.c> 0x0 
+File 4,1,<.\Lib\NT68655_770_850 Series\DBCAPI.c><DBCAPI.c> 0x0 
+File 4,1,<.\App\OSD\DemoOSDView.c><DemoOSDView.c> 0x0 
+File 4,1,<.\App\3D.c><3D.c> 0x0 
+File 4,1,<.\Phy\SI\NVT\Keypad\KeyPad.c><KeyPad.c> 0x0 
+File 4,1,<.\Phy\SI\NVT\Keypad\IR.c><IR.c> 0x0 
+File 4,1,<.\App\CM3218_ALSMode.c><CM3218_ALSMode.c> 0x0 
+File 4,1,<.\App\CM3218_ALSOffset.c><CM3218_ALSOffset.c> 0x0 
+File 4,1,<.\App\LS3101_ADS.c><LS3101_ADS.c> 0x0 
+File 4,1,<.\App\XRS232_APP.c><XRS232_APP.c> 0x0 
+File 4,1,<.\App\XRS232_LWO_APP.c><XRS232_LWO_APP.c> 0x0 
+File 5,1,<.\Lib\CEC.c><CEC.c> 0x0 
+File 5,1,<.\App\Ddcci.c><Ddcci.c> 0x0 
+File 5,1,<.\App\DdcciCtrl.c><DdcciCtrl.c> 0x0 
+File 5,1,<.\App\LD.c><LD.c> 0x0 
+File 5,1,<.\App\SR.c><SR.c> 0x0 
+File 5,1,<.\App\MHL.c><MHL.c> 0x0 
+File 5,1,<.\Lib\NT68655_770_850 Series\SRAPI.c><SRAPI.c> 0x0 
+File 5,1,<.\Lib\NT68655_770_850 Series\LDAPI.c><LDAPI.c> 0x0 
+File 5,1,<.\Lib\NT68655_770_850 Series\Scaler_DP.c><Scaler_DP.c> 0x0 
+
+
+Options 1,0,0  // Target 'NT68857_MODULE_1080'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\)
+ OutName (NT68857_MODULE_1080)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Lst\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 1 <bank_chk.exe NVT_NT68857_4B_MISC.lin NVT_NT68857_4B.UV2>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_MODULE,NVT_1920X1080,FLASH_BANK=4)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 0,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ()
+EndOpt
+
+Options 2,0,0  // Target 'NT68857_DEMO_1080'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\ADS\17W\George_X17\)
+ OutName (NT856_AU_12280x1024_150817)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X17N)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 3,0,0  // Target 'NT68857_FPGA_1080'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\)
+ OutName (NT68857_FPGA_1080)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Lst\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 1 <bank_chk.exe NVT_NT68857_4B_MISC.lin NVT_NT68857_4B.UV2>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_MODULE,NVT_1920X1080,ENABLE_FPGA_MODE,FLASH_BANK=4)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 0,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ()
+EndOpt
+
+Options 4,0,0  // Target 'NT68857_MODULE_1050'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\)
+ OutName (NT68857_MODULE_1050)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Lst\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 1 <bank_chk.exe NVT_NT68857_4B_MISC.lin NVT_NT68857_4B.UV2>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_MODULE,NVT_1680X1050,FLASH_BANK=4)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 0,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ()
+EndOpt
+
+Options 5,0,0  // Target 'NT68857_SRP_640x480'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\ADS\6N\)
+ OutName (NT856_SRP_6400x480_150907T)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X06N)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 6,0,0  // Target 'NT856_TRULY_TFT1280120-1-E'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\ADS\TRULY_TFT1280120-1-E\)
+ OutName (NT856_AD908_ONation_TRULY_TFT1280120-1-E_151013)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,SPECIAL_TRULY_TFT1280120)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 7,0,0  // Target 'ADS-AD07_GDS_AUO_P460HVN03.0'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\ADS\X46W\)
+ OutName (ADS-AD907_GDS_AUO_P460HVN03.0_1920x1080_150930)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X46W)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 8,0,0  // Target 'ADS-AD908_15"_XGA'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\15N\)
+ OutName (NT856_SYSCON_IVO_1024x768_160114)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X15N)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 9,0,0  // Target 'IBER-LWO_NT856_INL_S290AJ1-LE1'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\ADS\X29CutW\)
+ OutName (IBER-LWO_NT856_INL_S290AJ1-LE1_1920x540_151126)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X29CutW)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 10,0,0  // Target 'AD908_46"_JEIDA(10-8bit)'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\ADS\X46W\)
+ OutName (NT856_Nextech_X46W_1920x1080_151210)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X46W)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 11,0,0  // Target 'AXI_AX98310_G104X1-L04'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\AXI\X10N\)
+ OutName (NT856_CMO_AXI_G104X1-L04_1024X768_151222)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X10N)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 12,0,0  // Target 'AD908_SGD_GVTW70SNAD1E0'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\X07W\)
+ OutName (NT856_SGD_GVTW70SNAD1E0_800X480_160106)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X07W)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 13,0,0  // Target 'AD908_IBER-LWO_T215HVN01.1'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\X215\)
+ OutName (NT856_IBHM-LWO_AUO_T215HVN01.1_1920x1080_160119)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X215)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 14,0,0  // Target 'AD908_GDS_P550HVN01_V2'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\X46W\)
+ OutName (AD908_GDS_AUO_P550HVN01.2_1920x1080_160120)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X46W)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 15,0,0  // Target 'AD908_Nextech_21.5_AutoDim+Remote'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\X215\)
+ OutName (NT856_AD908_Nextech_215_1080p_ALS+IR-Remte_160222)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X215)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 16,0,0  // Target 'AD908_LWO_19W_RS232'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\LWO\19W\)
+ OutName (NT856_AD908_X17N_160304T)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X17N)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 17,0,0  // Target 'AD907_X15N_Test'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\X15N\)
+ OutName (NT856_AD908_X15N_160308T)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X10W)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 18,0,0  // Target 'LWO-AD908_AXI_X10W'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\AXI\X10W\)
+ OutName (AXI_LWOAD908_X10W_160309)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X10W)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 19,0,0  // Target 'NT856_AD908-LWO_21.5'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\Bin\ADS\X215\)
+ OutName (NT856_AD908-LWO_X215_160318)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X215)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 20,0,0  // Target 'NT856_IVO_1024x768'
+ Device (8032AH)
+ Vendor (Intel)
+ Cpu (IRAM(0-0xFF) CLOCK(12000000))
+ FlashUt ()
+ StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
+ FlashDR ()
+ Rgf (REG52.H)
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=0
+ OutDir (.\Bin\AXI\X15N\)
+ OutName (AXI_AX98312_X15N__SAAB_1024x768_181126)
+ GenApp=1
+ GenLib=0
+ GenHex=1
+ Debug=0
+ Browse=1
+ LstDir (.\Bin\ADS\)
+ HexSel=0
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 0 <>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ SVCSID <>
+ MODEL5=2
+ RTOS5=0
+ ROMSZ5=2
+ DHOLD5=0
+ XHOLD5=0
+ T51FL=8208
+ CBANKS5=1
+ XBANKS5=0
+ RCB51 { 0,0,0,0,0,255,255,0,0 }
+ RXB51 { 0,0,0,0,0,0,0,0,0 }
+ OCM51 { 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,160,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IRO51 { 0,0,0,0,0,0,0,0,0 }
+ IRA51 { 0,0,0,0,0,0,1,0,0 }
+ XRA51 { 0,0,0,0,0,0,0,0,0 }
+ XRA512 { 0,0,0,0,0,0,0,0,0 }
+ C51FL=21646608
+ C51VA=0
+ C51MSC ()
+ C51DEF (SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X15N)
+ C51UDF ()
+ INCC5 (.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT)
+ AX51FL=4
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ LX51FL=293
+ LX51OVL ()
+ LX51MSC (B0(?CO?MODETABLE,?CO?SCALER_COMMON,?CO?HDCPAPI)\~B1(?CO?OSDFONT,?CO?OSDINDEX,?CO?OSDFUNC,?CO?FOSDVIEW)\~B2(?CO?GAMMA,?CO?COLORCONFIG,?CO?LOGO, ?CO?OD,?CO?DBC)\~B3(?CO?DDCCI, ?CO?LD, ?CO?MHL,?CO?SCALER_DP))
+ LX51DWN ()
+ LX51LFI (.\NVT_NT68857_4B_MISC.lin)
+ LX51ASN ()
+ LX51RES ()
+ LX51CCL ()
+ LX51UCL ()
+ LX51CSC ()
+ LX51UCS ()
+ LX51COB (0X0000-0XFFFF)
+ LX51XDB (0XA000-0XA7FF)
+ LX51PDB ()
+ LX51BIB ()
+ LX51DAB ()
+ LX51IDB ()
+ LX51PRC ()
+ LX51STK ()
+ LX51COS ()
+ LX51XDS ()
+ LX51BIS ()
+ LX51DAS ()
+ LX51IDS ()
+  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDBG 48125,0,()()()()()()()()()() (BIN\MON51.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+EndOpt
+
+Options 1,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 1,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 1,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 1,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 1,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,1,0  // Group 'Common'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=0
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,2,0  // Group 'Bank0'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=1
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,3,0  // Group 'Bank1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=2
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,4,0  // Group 'Bank2'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=3
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,5,0  // Group 'Bank3'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=4
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 1,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 1,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 1,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 1,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 2,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 2,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 2,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 3,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 3,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 3,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 4,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 4,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 4,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 5,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 5,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 5,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 6,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 6,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 6,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 7,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 7,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 7,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 8,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 8,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 8,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 9,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 9,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 9,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 10,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 10,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 10,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 11,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 11,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 11,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 12,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 12,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 12,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 13,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 13,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 13,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 14,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 14,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 14,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 15,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 15,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 15,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 16,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 16,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 16,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 17,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 17,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 17,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 18,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 18,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 18,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 19,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 19,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 19,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,1,1  // File 'Int.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177087146
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 20,1,2  // File 'Main.c'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 ()
+EndOpt
+
+Options 20,1,3  // File 'NT68F631_4bank.a51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+
+Options 20,1,6  // File 'STARTUP_A000.A51'
+ PropFld { 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=1
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
+EndOpt
+

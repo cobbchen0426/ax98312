@@ -1,0 +1,206 @@
+C51 COMPILER V8.02   DDCCICTRL                                                             08/07/2015 16:22:32 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE DDCCICTRL
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\DdcciCtrl.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\DdcciCtrl.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App
+                    -\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\
+                    -NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\DdcciCtrl.ls
+                    -t) OBJECT(.\Bin\ADS\AXI\104N\DdcciCtrl.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          enum _DDCCIOSDEVENT_ {
+  18              DDCCIEVT_OSD_UPD_USR,
+  19              DDCCIEVT_OSD_UPD_SYS,
+  20              DDCCIEVT_OSD_UPD_TMG,
+  21              DDCCIEVT_OSD_UPD_CAL,
+  22              DDCCIEVT_NONOSD,
+  23              NUM_DDCCI_OSD_EVENTS
+  24          } ;
+  25          
+  26          enum _DDCCI_ACTION_ {
+  27              DDCCIATN_UPD_USR,
+  28              DDCCIATN_UPD_SYS,
+  29              DDCCIATN_UPD_TMG,
+  30              DDCCIATN_UPD_CAL,
+  31              DDCCI_NON_ACTION,
+  32              NUM_DDCCI_ACTION
+  33          } ;
+  34          
+  35          //******************************************************************************
+  36          // G L O B A L   V A R I A B L E S
+  37          //******************************************************************************
+  38          
+  39          //******************************************************************************
+  40          // S T A T I C   V A R I A B L E S
+  41          //******************************************************************************
+  42          static code UCHAR ucOSD2DDCCiEventTable[NUM_OSD_EVENTS] = {
+  43              DDCCIEVT_OSD_UPD_USR, //OSDEVT_UPD_USR,
+  44              DDCCIEVT_OSD_UPD_SYS, //OSDEVT_UPD_SYS,
+  45              DDCCIEVT_OSD_UPD_TMG, //OSDEVT_UPD_TMG,
+  46              DDCCIEVT_OSD_UPD_CAL, //OSDEVT_UPD_CAL,
+  47              DDCCIEVT_NONOSD,      //OSD_NON_EVENT,
+  48          };
+  49          
+  50          static code UCHAR ucDDCCiOSDActionTable[NUM_DDCCI_OSD_EVENTS] = {
+  51              DDCCIATN_UPD_USR,   //DDCCIEVT_OSD_UPD_USR,
+  52              DDCCIATN_UPD_SYS,   //DDCCIEVT_OSD_UPD_SYS,
+C51 COMPILER V8.02   DDCCICTRL                                                             08/07/2015 16:22:32 PAGE 2   
+
+  53              DDCCIATN_UPD_TMG,   //DDCCIEVT_OSD_UPD_TMG,
+  54              DDCCIATN_UPD_CAL,   //DDCCIEVT_OSD_UPD_CAL,
+  55              DDCCI_NON_ACTION    //DDCCIEVT_NONOSD,
+  56          };
+  57          
+  58          //******************************************************************************
+  59          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  60          //******************************************************************************
+  61          
+  62          //******************************************************************************
+  63          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  64          //******************************************************************************
+  65          static void DDCCiTimerRoutine(void);
+  66          
+  67          //******************************************************************************
+  68          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  69          //******************************************************************************
+  70          
+  71          
+  72          //******************************************************************************
+  73          // Prototype: 
+  74          //  void DDCCiActionDispatcher(UCHAR event)
+  75          // Parameters:
+  76          //  event   : event from system
+  77          // Return:
+  78          //  None
+  79          // Purpose:
+  80          //  DDDCCi action dispatcher
+  81          // Notes:
+  82          //  None
+  83          //******************************************************************************
+  84          void DDCCiActionDispatcher(UCHAR event)
+  85          {
+  86   1          UCHAR act = DDCCI_NON_ACTION;
+  87   1          
+  88   1          if (GetGlobalEvent(event) == KEY_RELATED_EVENT) {
+  89   2          }
+  90   1      
+  91   1          else if (GetGlobalEvent(event) == OSD_RELATED_EVENT) {
+  92   2              event = GetLocalEvent(event);
+  93   2              event = ucOSD2DDCCiEventTable[event];
+  94   2              if (event != DDCCIEVT_NONOSD) {
+  95   3                  act = ucDDCCiOSDActionTable[event];
+  96   3                  //printf("DDCCiActionDispatcher->OSDEvent(%bx) Action(%bx)\n\r", event, act);
+  97   3              }
+  98   2          }
+  99   1      
+ 100   1          else {
+ 101   2          }
+ 102   1          
+ 103   1          switch(act) {
+ 104   2              case DDCCIATN_UPD_USR:
+ 105   2              case DDCCIATN_UPD_SYS:
+ 106   2              case DDCCIATN_UPD_TMG:
+ 107   2              case DDCCIATN_UPD_CAL:
+ 108   2                  DDCCiUpdateNotice();
+ 109   2                  break;
+ 110   2              case DDCCI_NON_ACTION:
+ 111   2              default :
+ 112   2                  break;
+ 113   2          }
+ 114   1      }
+C51 COMPILER V8.02   DDCCICTRL                                                             08/07/2015 16:22:32 PAGE 3   
+
+ 115          
+ 116          //******************************************************************************
+ 117          // Prototype: 
+ 118          //  UCHAR DDCCiActionDemander(void)
+ 119          // Parameters:
+ 120          //  None
+ 121          // Return:
+ 122          //  None
+ 123          // Purpose:
+ 124          //  Return gloabl event to system
+ 125          // Notes:
+ 126          //  None
+ 127          //******************************************************************************
+ 128          UCHAR DDCCiActionDemander(void)
+ 129          {
+ 130   1          UCHAR evt = DDCCIEVT_NONE;
+ 131   1          
+ 132   1          DDCCiTimerRoutine();
+ 133   1          
+ 134   1          if (DDCCIUserUpdate()) {
+ 135   2              evt = DDCCIEVT_UPD_USR;
+ 136   2          } 
+ 137   1          else if (DDCCITmgUpdate()) {
+ 138   2              evt = DDCCIEVT_UPD_TMG;
+ 139   2          }
+ 140   1          else if (DDCCISysUpdate()) {
+ 141   2              evt = DDCCIEVT_UPD_SYS;
+ 142   2          }
+ 143   1          else if (DDCCICalUpdate()) {
+ 144   2              evt = DDCCIEVT_UPD_CAL;
+ 145   2          }
+ 146   1          else if (DDCCIPwrOn()) {
+ 147   2              evt = DDCCIEVT_PWR_ON;
+ 148   2          }
+ 149   1          else if (DDCCIPwrOff()) {
+ 150   2              evt = DDCCIEVT_PWR_OFF;
+ 151   2          }
+ 152   1          else if (DDCCIPwrSaving()) {
+ 153   2              evt = DDCCIEVT_PWR_SAVING;
+ 154   2          }
+ 155   1          
+ 156   1          return evt;
+ 157   1      }
+ 158          
+ 159          //******************************************************************************
+ 160          // Prototype: 
+ 161          //  void DDCCiTimerRoutine(void)
+ 162          // Parameters:
+ 163          //  None
+ 164          // Return:
+ 165          //  None
+ 166          // Purpose:
+ 167          //  Periodic DDCCi actions
+ 168          // Notes:
+ 169          //  None
+ 170          //******************************************************************************
+ 171          void DDCCiTimerRoutine(void)
+ 172          {
+ 173   1          CheckDDC2Bi();
+ 174   1      }
+
+
+C51 COMPILER V8.02   DDCCICTRL                                                             08/07/2015 16:22:32 PAGE 4   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    151    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =      6       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

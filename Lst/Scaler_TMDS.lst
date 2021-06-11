@@ -1,0 +1,628 @@
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_TMDS
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_TMDS.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_TMDS.c LARGE OPTIMIZE(9,SPEED) BROWSE INC
+                    -DIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\S
+                    -I\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215)
+                    - PRINT(.\Lst\Scaler_TMDS.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_TMDS.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          
+  23          //******************************************************************************
+  24          // S T A T I C   V A R I A B L E S
+  25          //******************************************************************************
+  26          
+  27          //******************************************************************************
+  28          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  29          //******************************************************************************
+  30          extern xdata ULONG ulHFreqCounter;
+  31          
+  32          //******************************************************************************
+  33          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  34          //******************************************************************************
+  35          
+  36          //******************************************************************************
+  37          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  38          //******************************************************************************
+  39          
+  40          //******************************************************************************
+  41          // F U N C T I O N   B O D Y S
+  42          //******************************************************************************
+  43          
+  44          /**************************************************************************//**
+  45           * Initialize TMDS-related registers.
+  46           ******************************************************************************/
+  47          void TMDSInit(void)
+  48          {
+  49   1          SC_DVI_CTRL_303 |= BIT0;
+  50   1          SC_DVI_CTRL_301 |= BIT0;
+  51   1          SC_DVI_CTRL_303 |= BIT7;
+  52   1          //SC_DVI_RB_SWAP = 0x00;
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 2   
+
+  53   1          SC_DVI_CTRL_32C = 0x04;
+  54   1          SC_DVI_CTRL_330 = DEFAULT_CLKIMP1;
+  55   1          SC_DVI_CTRL_339 = DEFAULT_DATAIMP1;
+  56   1          SC_DVI_CTRL_332 = DEFAULT_EQBIAS1;
+  57   1          SC_DVI_CTRL_331 = SCREG_331;
+  58   1          SC_DVI_CTRL_334 = SCREG_334_PU;
+  59   1          SC_DVI_CTRL_337 = DEFAULT_EQRF1;
+  60   1          SC_DVI_CTRL_338 = 0xFC;
+  61   1          SC_DVI_CTRL_33E = DEFAULT_EQBIAS1;
+  62   1          SC_DVI_CTRL_33F = DEFAULT_EQRF1;
+  63   1      
+  64   1          DVI_PowerOn();
+  65   1          SC_HDCP_CTRL = SCREG_643;
+  66   1          SC_DVI_PLL_M = 0x20;
+  67   1      }
+  68          
+  69          /**************************************************************************//**
+  70           * Detect current input signal quality and set proper impedance.
+  71           ******************************************************************************/
+  72          void TMDSImpedanceDetection(void)
+  73          {
+  74   1      #define GOOD_EYE_THRESHOLD 1 // 2 //every channel needs number of  '0x00' good eye.
+  75   1      #define BREAK_LOOP 0xEE
+  76   1      
+  77   1          code UCHAR ucClkIMPTable[] = {
+  78   1              //0x330
+  79   1              DEFAULT_CLKIMP1,
+  80   1              DEFAULT_CLKIMP2,
+  81   1              DEFAULT_CLKIMP3
+  82   1          };
+  83   1          code UCHAR ucDataIMPTable[][2] = {
+  84   1              //0x339            0x33A
+  85   1              {DEFAULT_DATAIMP1, 0xA0},
+  86   1              {DEFAULT_DATAIMP1, 0x60},
+  87   1              {DEFAULT_DATAIMP2, 0x60},
+  88   1              {DEFAULT_DATAIMP3, 0x60}
+  89   1          };
+  90   1          code UCHAR ucEQBiasTable[][2] = {
+  91   1              //0x332           0x337
+  92   1              {DEFAULT_EQBIAS1, DEFAULT_EQRF1},
+  93   1              {DEFAULT_EQBIAS2, DEFAULT_EQRF2},
+  94   1              {DEFAULT_EQBIAS3, DEFAULT_EQRF3},
+  95   1              {DEFAULT_EQBIAS4, DEFAULT_EQRF4},
+  96   1              {DEFAULT_EQBIAS5, DEFAULT_EQRF5}
+  97   1          };
+  98   1      
+  99   1          UCHAR i, j, k, l, ch, Reg0x306, Reg0x310, Reg0x311, Reg0x336;
+ 100   1          UCHAR *ptr;
+ 101   1          USHRT localtimer;
+ 102   1          EyeData tmp_eye;
+ 103   1          EyeData eye = {
+ 104   1              DEFAULT_CLKIMP1,
+ 105   1              DEFAULT_DATAIMP1,
+ 106   1              0xA0,
+ 107   1              DEFAULT_EQBIAS1,
+ 108   1              DEFAULT_EQRF1,
+ 109   1              0,
+ 110   1              0xffff,
+ 111   1              {0, 0, 0}
+ 112   1          };
+ 113   1          
+ 114   1          McuScalerIntDisable();//make sure sync processor interrupt disable.
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 3   
+
+ 115   1          Reg0x306 = SC_DVI_CTRL_306;
+ 116   1          Reg0x310 = SC_DVI_CTRL_310;
+ 117   1          Reg0x311 = SC_DVI_CTRL_311;
+ 118   1          Reg0x336 = SC_DVI_CTRL_336;
+ 119   1          SC_DVI_CTRL_336 &= ~BIT5; //disable CKDT to control channels impedance power down
+ 120   1      
+ 121   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)  
+ 122   1          if ( MHL_IsMHLInput() ) {
+ 123   2              Sleep(1);
+ 124   2              SC_DVI_CTRL_339 = 0x16;//DEFAULT_DATAIMP1;
+ 125   2              if (((SC_DVI_STATUS & BIT0) != 0)) {
+ 126   3                  SC_DVI_CTRL_33A = 0xA0;//0x20; why 0x20??
+ 127   3          }
+ 128   2          else {
+ 129   3                  SC_DVI_CTRL_33A = 0x60;//0x20; why 0x20??
+ 130   3          }
+ 131   2              SC_DVI_CTRL_33E = ucEQBiasTable[0][0];//EQ bias for MHL
+ 132   2              SC_DVI_CTRL_33F = ucEQBiasTable[0][1];//EQ resistor for MHL
+ 133   2              Sleep(1);
+ 134   2      #if 0 // MHL PP Mode Compability, Reseverd
+                      SC_DVI_CTRL_306 = 0x00;
+                      SC_DVI_CTRL_309 |= BIT0;//clear error
+                      SC_DVI_CTRL_311 = 0x22;//eye detection with Vs
+                      Sleep(20);
+                      for ( i=0,j=0,k=0; i<7; i++ ) {
+                          if ((SC_DVI_CTRL_308 & 0x01) == 0x00) {
+                              j++;
+                          }
+                          else {
+                              j = 0;
+                              k++;
+                          }
+                          if ( j==3 ) {
+                              break;
+                          }
+                          SC_DVI_CTRL_306 = 0x00;
+                          SC_DVI_CTRL_309 |= BIT0;//clear error
+                          SC_DVI_CTRL_311 = 0x22;//eye detection with Vs
+                          Sleep(20);
+                      }
+                      SC_DVI_CTRL_331 = 5+k;
+              #endif
+ 157   2              SC_DVI_CTRL_306 = Reg0x306;
+ 158   2              SC_DVI_CTRL_310 = Reg0x310;
+ 159   2              SC_DVI_CTRL_311 = Reg0x311;
+ 160   2              SC_DVI_CTRL_336 = Reg0x336; 
+ 161   2              return;
+ 162   2          }
+ 163   1          else
+ 164   1      #endif        
+ 165   1          {
+ 166   2              SC_DVI_CTRL_330 = DEFAULT_CLKIMP3; //for SCDT first
+ 167   2              SC_DVI_CTRL_339 = DEFAULT_DATAIMP3;
+ 168   2              SC_DVI_CTRL_33A = 0x60;
+ 169   2          }    
+ 170   1          
+ 171   1          Sleep(1);
+ 172   1          if (((SC_DVI_STATUS & BIT0) != 0) && ((SC_GI_SYNC_STATUS & 0xF8) == 0x18)) {
+ 173   2              SC_DVI_CTRL_311 = 0x22;//eye detection with Vs
+ 174   2              SC_DVI_CTRL_310 = 0x13;//detection start
+ 175   2              for (i = 0; i < sizeof(ucClkIMPTable); i++) {
+ 176   3                  tmp_eye.ClkIMP = ucClkIMPTable[i];
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 4   
+
+ 177   3                  SC_DVI_CTRL_330 = tmp_eye.ClkIMP;//clock impedance       
+ 178   3                  for (j = 0; j < sizeof(ucDataIMPTable) / 2; j++) {
+ 179   4                      tmp_eye.DataIMP = ucDataIMPTable[j][0];
+ 180   4                      tmp_eye.IMPMode = ucDataIMPTable[j][1];
+ 181   4                      SC_DVI_CTRL_339 = tmp_eye.DataIMP;//data impedance
+ 182   4                      SC_DVI_CTRL_33A = tmp_eye.IMPMode;
+ 183   4                      for (k = 0; k < sizeof(ucEQBiasTable) / 2; k++) {
+ 184   5                          tmp_eye.EQBias = ucEQBiasTable[k][0];
+ 185   5                          tmp_eye.EQRF = ucEQBiasTable[k][1];
+ 186   5                          SC_DVI_CTRL_33E = tmp_eye.EQBias;//EQ bias   //data ch0
+ 187   5                          SC_DVI_CTRL_33F = tmp_eye.EQRF;//EQ resistor //data ch0   
+ 188   5                          SC_DVI_CTRL_332 = tmp_eye.EQBias;//EQ bias   //data ch1,ch2
+ 189   5                          SC_DVI_CTRL_337 = tmp_eye.EQRF;//EQ resistor //data ch1,ch2
+ 190   5                          tmp_eye.MaxGoodEye = 0;
+ 191   5                          tmp_eye.SumOfEye = 0xffff;
+ 192   5                          for (ch = 0; ch < 3; ch++) {
+ 193   6                              tmp_eye.RGBGoodEye[ch] = 0;
+ 194   6                              SC_DVI_CTRL_306 = ch;
+ 195   6                              SC_DVI_CTRL_309 |= BIT0;//clear error
+ 196   6                              SC_DVI_CTRL_310 = 0x13;//detection start
+ 197   6                              localtimer = GetTimerTick();
+ 198   6                              do {
+ 199   7                                  Sleep(1);//detection period for 0x308 data error statistics 
+ 200   7                              } while (((SC_DVI_CTRL_310 & BIT3) != BIT3) && ((GetTimerTick() - localtimer) < 30
+             -));
+ 201   6                              if ((SC_DVI_STATUS & BIT0) == 0) {
+ 202   7                                  //force change to next clock impedance
+ 203   7                                  tmp_eye.SumOfEye = 0xffff;
+ 204   7                                  tmp_eye.RGBGoodEye[ch] = 0;
+ 205   7                                  tmp_eye.MaxGoodEye = 0;
+ 206   7                                  j = k = ch = BREAK_LOOP;
+ 207   7                              }
+ 208   6                              else if ((SC_DVI_CTRL_308 & 0x07) == 0x00) {
+ 209   7                                  ptr = &SC_DVI_CTRL_317;
+ 210   7                                  for (l = 0; l < 5; l++) { //search 0x317~0x31B equals to 0x00
+ 211   8                                      tmp_eye.SumOfEye += *ptr;
+ 212   8                                      if (*ptr++ == 0x00) {
+ 213   9                                          tmp_eye.RGBGoodEye[ch]++;
+ 214   9                                          tmp_eye.MaxGoodEye++;
+ 215   9                                      }
+ 216   8                                  }
+ 217   7                              }
+ 218   6                              else {
+ 219   7                                  //data error force break
+ 220   7                                  tmp_eye.SumOfEye = 0xffff;
+ 221   7                                  tmp_eye.RGBGoodEye[ch] = 0;
+ 222   7                                  tmp_eye.MaxGoodEye = 0;
+ 223   7                                  ch = BREAK_LOOP;
+ 224   7                              }
+ 225   6                          }
+ 226   5                          if (((tmp_eye.MaxGoodEye > eye.MaxGoodEye)
+ 227   5                                  && (tmp_eye.RGBGoodEye[0] > 0
+ 228   5                                          && tmp_eye.RGBGoodEye[1] > 0
+ 229   5                                          && tmp_eye.RGBGoodEye[2] > 0))
+ 230   5                                  || ((tmp_eye.SumOfEye < eye.SumOfEye)
+ 231   5                                          && (eye.RGBGoodEye[0] == 0
+ 232   5                                                  || eye.RGBGoodEye[1] == 0
+ 233   5                                                  || eye.RGBGoodEye[2] == 0))) {
+ 234   6                              //Maximum good-eye is prior to minimum sum of eye
+ 235   6                              eye = tmp_eye;
+ 236   6      
+ 237   6                          }
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 5   
+
+ 238   5                          if ((tmp_eye.RGBGoodEye[0] >= GOOD_EYE_THRESHOLD)
+ 239   5                                  && (tmp_eye.RGBGoodEye[1] >= GOOD_EYE_THRESHOLD)
+ 240   5                                  && (tmp_eye.RGBGoodEye[2] >= GOOD_EYE_THRESHOLD)) {
+ 241   6                              eye = tmp_eye;
+ 242   6                              i = j = k = BREAK_LOOP;//for force to break
+ 243   6                          }
+ 244   5                      }
+ 245   4                  }
+ 246   3              }
+ 247   2          }
+ 248   1      
+ 249   1          SC_DVI_CTRL_339 = eye.DataIMP;
+ 250   1          SC_DVI_CTRL_33A = eye.IMPMode;
+ 251   1          SC_DVI_CTRL_330 = eye.ClkIMP;
+ 252   1          SC_DVI_CTRL_33E = eye.EQBias;//data ch0
+ 253   1          SC_DVI_CTRL_33F = eye.EQRF;  //data ch0     
+ 254   1          SC_DVI_CTRL_332 = eye.EQBias;//data ch1,ch2
+ 255   1          SC_DVI_CTRL_337 = eye.EQRF;  //data ch1,ch2
+ 256   1          Sleep(1);
+ 257   1          SC_DVI_CTRL_306 = Reg0x306;
+ 258   1          SC_DVI_CTRL_310 = Reg0x310;
+ 259   1          SC_DVI_CTRL_311 = Reg0x311;
+ 260   1          SC_DVI_CTRL_336 = Reg0x336;
+ 261   1      
+ 262   1      #undef GOOD_EYE_THRESHOLD
+ 263   1      #undef BREAK_LOOP
+ 264   1      }
+ 265          
+ 266          /**************************************************************************//**
+ 267           * Detect the TMDS clock is stable or not.
+ 268           * @return TRUE if clock is stable else FALSE.
+ 269           ******************************************************************************/
+ 270          BOOL TMDSClockStable(void)
+ 271          {
+ 272   1          USHRT pre_clock, stable_timer, unstable_timer;
+ 273   1      
+ 274   1          pre_clock = TMDS_GetClock();
+ 275   1          stable_timer = GetTimerTick();
+ 276   1          unstable_timer = stable_timer;
+ 277   1      
+ 278   1          //Wait the TMDS clock to be stable for 150 ms or unstable for 300 ms
+ 279   1          while ((GetTimerTick()-unstable_timer) < 300) {
+ 280   2              if (abs(pre_clock - TMDS_GetClock()) > 2) {
+ 281   3                  pre_clock = TMDS_GetClock();
+ 282   3                  stable_timer = GetTimerTick();
+ 283   3              }
+ 284   2              if ((GetTimerTick() - stable_timer) > 150) {
+ 285   3                  return TRUE;
+ 286   3              }
+ 287   2              ResetWDTimer();
+ 288   2          }
+ 289   1      
+ 290   1          return FALSE;
+ 291   1      }
+ 292          
+ 293          /**************************************************************************//**
+ 294           * According to the TMDS clock, we set some specific registers to get more signal qualities.
+ 295           * We reset TMDS phase detection only when clock is stable.
+ 296           * @param reset TRUE to reset TMDS phase detection else FALSE.
+ 297           ******************************************************************************/
+ 298          void TMDSBandwidthDetection(UCHAR reset)
+ 299          {
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 6   
+
+ 300   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+ 301   1          if ( !MHL_IsMHLInput() ) { // not mhl
+ 302   2              if (TMDS_GetClock() < (TMDS_BANDWIDTH_SEGMENT - 1)) {
+ 303   3                  SC_DVI_CTRL_334 = SCREG_334_LF;
+ 304   3                  SET_SCREG_335_LF;
+ 305   3                  SC_DVI_CTRL_303 = SCREG_303_LF;
+ 306   3              }
+ 307   2              else if (TMDS_GetClock() > (TMDS_BANDWIDTH_SEGMENT + 1)) {
+ 308   3                  SC_DVI_CTRL_334 = SCREG_334_HF;
+ 309   3                  SET_SCREG_335_HF;
+ 310   3                  SC_DVI_CTRL_303 = SCREG_303_HF;
+ 311   3              }
+ 312   2      
+ 313   2              if (reset) {
+ 314   3                  //Toogle 0x303 for digital input
+ 315   3                  SC_DVI_CTRL_303 &= ~BIT0;
+ 316   3                  SC_DVI_CTRL_303 |= BIT0;
+ 317   3              }
+ 318   2          }
+ 319   1          else { //mhl
+ 320   2              if ( (SC_HDMI_MHL_MODE_DETECT&BIT6) == 0 ) {
+ 321   3                  SC_DVI_CTRL_303 = SCREG_303_LF;
+ 322   3              }
+ 323   2              else {
+ 324   3                  SC_DVI_CTRL_303 = SCREG_303_HF; //pp mode
+ 325   3              }
+ 326   2              SC_DVI_CTRL_334 = 0xF1;
+ 327   2              SC_DVI_CTRL_335 = 0x00;
+ 328   2          }
+ 329   1      #else    
+                  if (TMDS_GetClock() < (TMDS_BANDWIDTH_SEGMENT - 1)) {
+                      SC_DVI_CTRL_334 = SCREG_334_LF;
+                      SET_SCREG_335_LF;
+                      SC_DVI_CTRL_303 = SCREG_303_LF;
+                  }
+                  else if (TMDS_GetClock() > (TMDS_BANDWIDTH_SEGMENT + 1)) {
+                      SC_DVI_CTRL_334 = SCREG_334_HF;
+                      SET_SCREG_335_HF;
+                      SC_DVI_CTRL_303 = SCREG_303_HF;
+                  }
+              
+                  if (reset) {
+                      //Toogle 0x303 for digital input
+                      SC_DVI_CTRL_303 &= ~BIT0;
+                      SC_DVI_CTRL_303 |= BIT0;
+                  }
+              #endif
+ 347   1      }
+ 348          
+ 349          /**************************************************************************//**
+ 350           * Get digital input HDE pixel count.
+ 351           * Before system invoke this function, the input VSync frequency must be determined.
+ 352           * This value is determined by the capture block not TMDS block.
+ 353           * @return Digital input HDE.
+ 354           ******************************************************************************/
+ 355          USHRT GetDigInputHActive(void)
+ 356          {
+ 357   1      #if 0
+                  return ReadShortScaler(&SC_DVI_CAP_HWID_LO);
+              #else
+ 360   1          UCHAR i;
+ 361   1          USHRT hactive, htemp;
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 7   
+
+ 362   1      
+ 363   1          htemp = 0;
+ 364   1          for (i=0; i<5; i++) { //Reg0x03C/Reg0x03D can not be read immediately after 0x6B5[2] was changed
+ 365   2              hactive = ReadShortScaler(&SC_DVI_CAP_HWID_LO);
+ 366   2              if (htemp != hactive) {
+ 367   3                  htemp = hactive;
+ 368   3                  DelayVTime(1);
+ 369   3              }
+ 370   2              else {
+ 371   3                  break;
+ 372   3              }
+ 373   2          }
+ 374   1      
+ 375   1          return hactive;
+ 376   1      #endif
+ 377   1      }
+ 378          
+ 379          /**************************************************************************//**
+ 380           * Get digital input VDE line count.
+ 381           * Before system invoke this function, the input VSync frequency must be determined.
+ 382           * This value is determined by the capture block not TMDS block.
+ 383           * @return Digital input VDE.
+ 384           ******************************************************************************/
+ 385          USHRT GetDigInputVActive(void)
+ 386          {
+ 387   1      #if 0
+                  if (IsInterlaced()) {
+                      return ReadShortScaler(&SC_DVI_CAP_VLEN_LO) * 2;
+                  }
+                  else {
+                      return ReadShortScaler(&SC_DVI_CAP_VLEN_LO);
+                  }
+              #else
+ 395   1          UCHAR i;
+ 396   1          USHRT vactive, vtemp;
+ 397   1      
+ 398   1          vtemp = 0;
+ 399   1          for (i=0; i<5; i++) {
+ 400   2              vactive = ReadShortScaler(&SC_DVI_CAP_VLEN_LO);
+ 401   2              if (vtemp != vactive) {
+ 402   3                  vtemp = vactive;
+ 403   3                  DelayVTime(4);
+ 404   3              }
+ 405   2              else {
+ 406   3                  break;
+ 407   3              }
+ 408   2          }
+ 409   1      
+ 410   1              return vactive;
+ 411   1      #endif
+ 412   1      }
+ 413          
+ 414          /**************************************************************************//**
+ 415           * Get digital input HDE without any delay.
+ 416           * This value is determined by the capture block not TMDS block.
+ 417           * @return Digital input HDE.
+ 418           ******************************************************************************/
+ 419          USHRT GetDigInputHActiveImmediate(void)
+ 420          {
+ 421   1      #if ENABLE_HDMI == ON
+ 422   1      // Because of inconsistent update issue of high/low bytes, we should read hde/vde with filter.
+ 423   1          return ReadShortScalerHighLowFilter(&SC_VIDEO_DE_WIDTH_LO);
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 8   
+
+ 424   1      #else
+                  return ReadShortScalerHighLowFilter(&SC_DVI_CAP_HWID_LO);
+              #endif
+ 427   1      }
+ 428          
+ 429          /**************************************************************************//**
+ 430           * Get digital input VDE without any delay.
+ 431           * This value is determined by the capture block not TMDS block.
+ 432           * @return Digital input VDE.
+ 433           ******************************************************************************/
+ 434          USHRT GetDigInputVActiveImmediate(void)
+ 435          {
+ 436   1      #if ENABLE_HDMI == ON
+ 437   1          // Because of inconsistent update issue of high/low bytes, we should read hde/vde with filter.
+ 438   1          return ReadShortScalerHighLowFilter(&SC_VIDEO_DE_LINE_LO);
+ 439   1      #else
+                  return ReadShortScalerHighLowFilter(&SC_DVI_CAP_VLEN_LO);
+              #endif
+ 442   1      }
+ 443          
+ 444          #if ENABLE_HDMI == ON
+ 445          /**************************************************************************//**
+ 446           * Get digital input HTotal without any delay.
+ 447           * This value is determined by the TMDS block not capture block.
+ 448           * @return Digital input HTotal.
+ 449           ******************************************************************************/
+ 450          USHRT GetDigInputHTotalImmediate(void)
+ 451          {
+ 452   1          // Because of inconsistent update issue of high/low bytes, we should read h/vtotal with filter.
+ 453   1      #if (INPUT_INTERFACE&INPUT_DP)  
+ 454   1          if (GetCurrInputInterface() == DISPLAY_PORT_INPUT) {
+ 455   2              return ReadShortScalerHighLowFilter(&SC_DP_HTOTAL_LO);
+ 456   2          }
+ 457   1      #endif
+ 458   1          return ReadShortScalerHighLowFilter(&SC_VIDEO_HTOTAL_LO);
+ 459   1      }
+ 460          
+ 461          /**************************************************************************//**
+ 462           * Get digital input VTotal without any delay.
+ 463           * This value is determined by the TMDS block not capture block.
+ 464           * @return Digital input VTotal.
+ 465           ******************************************************************************/
+ 466          USHRT GetDigInputVTotalImmediate(void)
+ 467          {
+ 468   1          // Because of inconsistent update issue of high/low bytes, we should read h/vtotal with filter.
+ 469   1      #if (INPUT_INTERFACE&INPUT_DP)  
+ 470   1          if (GetCurrInputInterface() == DISPLAY_PORT_INPUT) {
+ 471   2              return ReadShortScalerHighLowFilter(&SC_DP_VTOTAL_LO);
+ 472   2          }
+ 473   1      #endif
+ 474   1          return ReadShortScalerHighLowFilter(&SC_VIDEO_VTOTAL_LO);
+ 475   1      }
+ 476          #endif
+ 477          
+ 478          /**************************************************************************//**
+ 479           * Get the count of HSync frequency (from sync processor) of digital timing.
+ 480           ******************************************************************************/
+ 481          void SetDVIPLL(void)
+ 482          {
+ 483   1          USHRT pixel_rate;
+ 484   1      
+ 485   1          SC_HPLL_FREQ_CTRL &= ~BIT6;
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 9   
+
+ 486   1      
+ 487   1      #if ENABLE_HDMI == ON
+ 488   1          TMDSDeepColorDetection();
+ 489   1      #endif
+ 490   1      
+ 491   1          SC_HPLL_LINE_CNT = 0x0B;//0x0C; //4096 line
+ 492   1      
+ 493   1          pixel_rate = ReadShortScaler(&SC_GI_HCNT_LO) & 0x1FFF;
+ 494   1          if ((pixel_rate==0x1FFF) || (pixel_rate==0)) {
+ 495   2              ulHFreqCounter = 0xFFFFFFFF;
+ 496   2          }
+ 497   1          else {
+ 498   2              ulHFreqCounter = (ULONG)pixel_rate * 8192;
+ 499   2          }
+ 500   1      }
+ 501          
+ 502          /**************************************************************************//**
+ 503           * Turn off TMDS power.
+ 504           ******************************************************************************/
+ 505          void DVI_PowerOff(void)
+ 506          {
+ 507   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+ 508   1          if ( IsMHL0Connect() ||IsMHL1Connect() ) {
+ 509   2              return;
+ 510   2          }
+ 511   1      #endif
+ 512   1          SC_DVI_CTRL_333 = SCREG_333_PD;
+ 513   1          SC_DVI_CTRL_334 = SCREG_334_PD;
+ 514   1          SC_DVI_CTRL_335 = SCREG_335_PD;
+ 515   1          SC_DVI_CTRL_336 = SCREG_336_PD;
+ 516   1          SC_POWER_CTRL2 &= ~BIT1;
+ 517   1      }
+ 518          
+ 519          /**************************************************************************//**
+ 520           * Turn on TMDS power.
+ 521           ******************************************************************************/
+ 522          void DVI_PowerOn(void)
+ 523          {
+ 524   1          SC_POWER_CTRL2 |= (BIT5 | BIT1);
+ 525   1          SC_DVI_CTRL_333 = SCREG_333_PU;
+ 526   1          SC_DVI_CTRL_334 = SCREG_334_PU;
+ 527   1          SET_SCREG_335_HF;
+ 528   1          SC_DVI_CTRL_336 = SCREG_336_PU;
+ 529   1      }
+ 530          
+ 531          /**************************************************************************//**
+ 532           * Turn on the termination power of TMDS clock pair for TMDS clock detection.
+ 533           ******************************************************************************/
+ 534          void TMDS_EnableSCDT(void)
+ 535          {
+ 536   1          SC_DVI_CTRL_336 = SCREG_336_PU;
+ 537   1      }
+ 538          
+ 539          /**************************************************************************//**
+ 540           * Get current TMDS clock.
+ 541           * @return TMDS clock frequency.
+ 542           ******************************************************************************/
+ 543          USHRT TMDS_GetClock(void)
+ 544          {
+ 545   1      USHRT clk_tmp;
+ 546   1      #if REF_CLK==12000000
+ 547   1          if ((SC_DVI_STATUS & BIT0) != 0) {
+C51 COMPILER V8.02   SCALER_TMDS                                                           08/07/2015 16:22:26 PAGE 10  
+
+ 548   2          #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+ 549   2              if ( MHL_IsPackedPixelMode() ) { //get correct PHY clock 0x016 after set 0x159.6=0
+ 550   3                  return SC_TMDS_CLOCK_DET;
+ 551   3              }
+ 552   2          #endif
+ 553   2      #if IS_NT68770_SERIES
+                      SC_DVI_CTRL_32C |= BIT7;
+              #endif
+ 556   2              clk_tmp = ReadShortScaler(&SC_DVI_PIXELCLK_LO) & 0x0FFF;
+ 557   2      #if IS_NT68770_SERIES
+                      SC_DVI_CTRL_32C &= ~BIT7;
+              #endif
+ 560   2              return clk_tmp;
+ 561   2          }
+ 562   1      #else
+              #define OSC_FREQ_RATIO ((float)REF_CLK/12000000)
+                  if ((SC_DVI_STATUS & BIT0) != 0) {
+                  #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+                      if ( MHL_IsPackedPixelMode() ) { //get correct PHY clock 0x016 after set 0x159.6=0
+                          clk_tmp = (USHRT)SC_TMDS_CLOCK_DET * OSC_FREQ_RATIO;
+                          return clk_tmp;
+                      }
+                  #endif
+              #if IS_NT68770_SERIES
+                      SC_DVI_CTRL_32C |= BIT7;
+              #endif
+                      clk_tmp = (USHRT)((ReadShortScaler(&SC_DVI_PIXELCLK_LO) & 0x0FFF) * OSC_FREQ_RATIO);
+              #if IS_NT68770_SERIES
+                      SC_DVI_CTRL_32C &= ~BIT7;
+              #endif
+                      return clk_tmp;
+                  }
+              #undef OSC_FREQ_RATIO
+              #endif
+ 582   1          return 0;
+ 583   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1617    ----
+   CONSTANT SIZE    =     32    ----
+   XDATA SIZE       =      6      52
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

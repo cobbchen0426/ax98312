@@ -1,0 +1,978 @@
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE NVRAM
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Nvram.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Sys\Nvram.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\Use
+                    -r;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\
+                    -Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\Nvram.lst) OBJEC
+                    -T(.\Bin\ADS\AXI\104N\Nvram.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "string.h"
+  13          #include "Include.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          /*!
+  23           * Default value of user data.
+  24           */
+  25          code NvramUserData UserDataDefault = {          // sizeof(don't over 31 bytes): 29 uchar        + Add(bALSOnOff, ucALSBas
+             -eVal, bTouchOnOff)
+  26              0x00, //UCHAR bPowerStatus : 1;
+  27              0x00, //UCHAR bOSDLock : 1;
+  28              0x00, //UCHAR bDDCCI : 1;
+  29              0x00, //UCHAR bAudioMute : 1;
+  30              0x00, //UCHAR bGammaOnOff : 1;                               
+  31              0x00, //UCHAR bLDOnOff : 1;
+  32          #if ENABLE_HDMI_PRETEST == ON
+                  0x00, //UCHAR bAutoSyncSource : 1;
+              #else
+  35              0x01, //UCHAR bAutoSyncSource : 1;
+  36          #endif
+  37              0x00, //UCHAR bOSDRotation : 1;
+  38              0x00, //UCHAR bOverScan : 1;                        // 9 bits
+  39          
+  40          #if ALS_EnDis == ALSMODE        
+              #elif ALS_EnDis == ALSOffSET    
+                      0x01, //UCHAR bALSOnOff   : 1;                  // george: F_ALSOnOff_01
+              #elif ALS_EnDis == ALSRange     //for ADS
+                      0x00, //UCHAR bALSOnOff   : 1;                  
+              #else
+  46          #endif  //#if ALS_EnDis == ENABLE
+  47          
+  48          #if TOUCH_EnDis == ENABLE
+                  0x01, //UCHAR bTouchOnOff : 1;                      // george: F_Touch_01
+              #endif //#if TOUCH_EnDis == ENABLE
+  51          
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 2   
+
+  52              0x00, //UCHAR ucDCRMode;
+  53              0x00, //UCHAR ucLanguage;
+  54              0x5A, //0x5A, //UCHAR ucBrightness;                         
+  55              0x5A, //UCHAR ucContrast;                                   
+  56              0x1E, //UCHAR ucOSDTimer;  0x1E=30sec
+  57           #if defined (SET_OSD_LEFT_TOP)                          
+                  00, //UCHAR ucOSDX;
+                  100, //UCHAR ucOSDY;
+              #else
+  61              0x32, //UCHAR ucOSDX;
+  62              0x32, //UCHAR ucOSDY;
+  63          #endif                                                                                  
+  64              0x00, //UCHAR ucOSDTransparent;
+  65              0x32, //UCHAR ucVolume;
+  66              CLRTMP_6500K, //UCHAR ucColorTemp;
+  67              0x5A, //0x46, //UCHAR ucUserRGain;
+  68              0x5A, //0x46, //UCHAR ucUserGGain;
+  69              0x5A, //0x46, //UCHAR ucUserBGain;
+  70              0x32, //UCHAR ucUserROffset;                                //----------------------- george 16 seats.
+  71              0x32, //UCHAR ucUserGOffset;
+  72              0x32, //UCHAR ucUserBOffset;
+  73              0x00, //UCHAR ucAspectRatio;
+  74              0x00, //UCHAR ucODMode;
+  75              0x00, //UCHAR ucBFMode;
+  76          #if ENABLE_HDMI_PRETEST == ON
+                  MODEL_INPUT_DIG0, //UCHAR ucInputSource;
+              #else
+  79              MODEL_INPUT_VGA0, //UCHAR ucInputSource;
+  80          #endif
+  81              0x00, //uc2DTo3DMode;
+  82              0x06, //uc2Dto3DDepth;
+  83              0x06, //uc2Dto3DView;                                               
+  84              0x00, //uc3DCfg;
+  85              0x00, //ucSRMode;                                                   //----------------------- george 25byts + 2byts(11bit)= 27 seats.
+  86          
+  87          
+  88          #if ALS_EnDis == ALSMODE
+                      0x00, //ucALSMode (0:Off, 1:InDoor, 2:OutDoor)  // george: F_ALSBV_01
+              #elif ALS_EnDis == ALSOffSET    
+                      0x00, //0x32 //UCHAR ucALSBaseVal                               // george: F_ALSBV_01
+              #elif ALS_EnDis == ALSRange     //for ADS
+                      70, //ALS_Brig-MAX
+                      30, //ALS_Brig-MIN
+              #else   //Normal
+  96          #endif  //#if ALS_EnDis == ENABLE
+  97          
+  98          //      0x06, //AA_for test
+  99          
+ 100              NVRAM_FIELD_END_FLAG //USHRT usUsrEnd;              //----------------------- be used 2 seats.
+ 101          };
+ 102          
+ 103          /*!
+ 104           * Default value of calibration data.
+ 105           */
+ 106          code NvramCalibData CalibDataDefault = {                // sizeof: 31 uchar
+ 107              0x80, //UCHAR ucADCRGain;
+ 108              0x80, //UCHAR ucADCGGain;
+ 109              0x80, //UCHAR ucADCBGain;
+ 110              0x80, //UCHAR ucADCROffset;
+ 111              0x80, //UCHAR ucADCGOffset;
+ 112              0x80, //UCHAR ucADCBOffset;
+ 113              0xFF, //UCHAR uc5000KRGain;
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 3   
+
+ 114              0xFF, //UCHAR uc5000KGGain;
+ 115              0xF0, //UCHAR uc5000KBGain;
+ 116              FACTORY_6500K_R, //UCHAR uc6500KRGain;
+ 117              FACTORY_6500K_G, //UCHAR uc6500KGGain;
+ 118              FACTORY_6500K_B, //UCHAR uc6500KBGain;
+ 119              FACTORY_7500K_R, //UCHAR uc7500KRGain;
+ 120              FACTORY_7500K_G, //UCHAR uc7500KGGain;
+ 121              FACTORY_7500K_B, //UCHAR uc7500KBGain;
+ 122              0xF8, //UCHAR uc8200KRGain;
+ 123              0xF8, //UCHAR uc8200KGGain;
+ 124              0xFF, //UCHAR uc8200KBGain;
+ 125              FACTORY_9300K_R, //UCHAR uc9300KRGain;
+ 126              FACTORY_9300K_G, //UCHAR uc9300KGGain;
+ 127              FACTORY_9300K_B, //UCHAR uc9300KBGain;
+ 128              0xF0, //UCHAR uc11500KRGain;
+ 129              0xF0, //UCHAR uc11500KGGain;
+ 130              0xFF, //UCHAR uc11500KBGain;
+ 131              255, //UCHAR ucsRGBRGain;
+ 132              255, //UCHAR ucsRGBGGain;
+ 133              255, //UCHAR ucsRGBBGain;
+ 134              
+ 135              //ADD BY CHIU
+ 136              DEFAULT_GAMMA_INDEX,                //UCHAR ucGammaVal; 
+ 137              DEFAULT_INVERTER_VAL,               //UCHAR ucBacklite;
+ 138              
+ 139              
+ 140              NVRAM_FIELD_END_FLAG //USHRT usCalEnd;
+ 141          };
+ 142          
+ 143          /*!
+ 144           * Default value of system data.
+ 145           */
+ 146          code NvramSystemData SystemDataDefault = {              // sizeof: 22 uchar
+ 147              0x00,   //UCHAR bFactory : 1;
+ 148              0x00,  //UCHAR bDemo : 1;
+ 149              0x00,  //UCHAR bDFR: 1;
+ 150              0x00,  //UCHAR bSR: 1;
+ 151              0x00,   //UCHAR bBurnIn : 1;
+ 152              0x00,   //UCHAR bShowLogo : 1;
+ 153              0x00,   //UCHAR ucPowerOnTimerM;
+ 154              0x0000, //USHRT usPowerOnTimerH;
+ 155              0x00,   //UCHAR ucPOTimerM_FE2P;
+ 156              0x0000, //USHRT usPOTimerH_FE2P;
+ 157              0x00,   //UCHAR ucTimingWriteIdx;
+ 158              FIRMWARE_VER, //USHRT usFirmwareVer;
+ 159              0x55AA, //USHRT usNvramID;
+ 160              0xFFFF, //USHRT usChkSum;
+ 161              NVRAM_USER_ADDR+sizeof(NvramUserData),              //addr: 0x270 george
+ 162              NVRAM_CALIB_ADDR+sizeof(NvramCalibData),    //addr: 0x290 george
+ 163              NVRAM_SYSTEM_ADDR+sizeof(NvramSystemData),  //addr: 0x2B0 george
+ 164              NVRAM_FIELD_END_FLAG  //USHRT usSysEnd;
+ 165          };
+ 166          
+ 167          //******************************************************************************
+ 168          // S T A T I C   V A R I A B L E S
+ 169          //******************************************************************************
+ 170          //CHIU 
+ 171          #define DefaultEDID             ON
+ 172          
+ 173          
+ 174          //--FEFANJACKY for 1850x1036 -------------------------------------------------
+ 175          //Tatung1850x1036-NO_1920X1080
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 4   
+
+ 176          #if SPECIALAPP == ON
+              static code UCHAR _Default_VGA_EDID[128]={      
+                 0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x3A,0xD4,0x5A,0x66,0x01,0x00,0x00,0x00,
+                 0x0F,0x17,0x01,0x03,0x0E,0x3A,0x20,0x78,0xEA,0x36,0xD5,0xA2,0x56,0x53,0x99,0x27,
+                 0x0D,0x50,0x54,0xA3,0x08,0x00,0x81,0x80,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+                 0x01,0x01,0x01,0x01,0x01,0x01,0x09,0x3B,0x3A,0x5E,0x71,0x0C,0x6D,0x40,0x6E,0x37,
+                 0x85,0x04,0x40,0x44,0x21,0x00,0x00,0x18,0x66,0x21,0x50,0xB0,0x51,0x00,0x1B,0x30,
+                 0x40,0x70,0x36,0x00,0x40,0x44,0x21,0x00,0x00,0x1E,0x00,0x00,0x00,0xFD,0x00,0x32,
+                 0x41,0x1E,0x64,0x16,0x00,0x0A,0x20,0x20,0x20,0x20,0x20,0x20,0x00,0x00,0x00,0xFC,
+                 0x00,0x54,0x55,0x53,0x20,0x4C,0x32,0x36,0x58,0x58,0x58,0x0A,0x0A,0x0A,0x00,0x41,
+              };
+              
+              static code UCHAR _Default_DVI_EDID[128]={
+                 0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x3A,0xD4,0x5A,0x66,0x01,0x00,0x00,0x00,
+                 0x0F,0x17,0x01,0x03,0x80,0x3A,0x20,0x78,0xEA,0x36,0xD5,0xA2,0x56,0x53,0x99,0x27,
+                 0x0D,0x50,0x54,0xA3,0x08,0x00,0x81,0x80,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+                 0x01,0x01,0x01,0x01,0x01,0x01,0x09,0x3B,0x3A,0x5E,0x71,0x0C,0x6D,0x40,0x6E,0x37,
+                 0x85,0x04,0x40,0x44,0x21,0x00,0x00,0x18,0x66,0x21,0x50,0xB0,0x51,0x00,0x1B,0x30,
+                 0x40,0x70,0x36,0x00,0x40,0x44,0x21,0x00,0x00,0x1E,0x00,0x00,0x00,0xFD,0x00,0x32,
+                 0x41,0x1E,0x64,0x16,0x00,0x0A,0x20,0x20,0x20,0x20,0x20,0x20,0x00,0x00,0x00,0xFC,
+                 0x00,0x54,0x55,0x53,0x20,0x4C,0x32,0x36,0x58,0x58,0x58,0x0A,0x0A,0x0A,0x00,0xCF,
+              };
+              
+              static code UCHAR _Default_HDMI_EDID[256]={
+                  0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x09, 0xD1, 0x25, 0x78, 0x45, 0x54, 0x00, 0x00,       
+             -                        
+                  0x24, 0x12, 0x01, 0x03, 0x80, 0x35, 0x1E, 0x78, 0x2E, 0x60, 0x81, 0xA6, 0x56, 0x4A, 0x9C, 0x25,       
+             -                        
+                  0x12, 0x50, 0x54, 0xA5, 0x6B, 0x80, 0x71, 0x00, 0x81, 0xC0, 0x81, 0x40, 0x81, 0x80, 0xA9, 0xC0,       
+             -                        
+                  0xB3, 0x00, 0xD1, 0xC0, 0x01, 0x01, 0x02, 0x3A, 0x80, 0x18, 0x71, 0x38, 0x2D, 0x40, 0x58, 0x2C,       
+             -                        
+                  0x45, 0x00, 0x13, 0x2B, 0x21, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x30, 0x30, 0x30,       
+             -                        
+                  0x30, 0x30, 0x30, 0x30, 0x30, 0x53, 0x4C, 0x30, 0x0A, 0x20, 0x00, 0x00, 0x00, 0xFD, 0x00, 0x32,       
+             -                        
+                  0x4C, 0x18, 0x53, 0x11, 0x00, 0x0A, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0xFC,       
+             -                        
+                  0x00, 0x42, 0x65, 0x6E, 0x51, 0x20, 0x45, 0x57, 0x32, 0x34, 0x33, 0x30, 0x0A, 0x20, 0x01, 0x7B,       
+             -                        
+                  0x02, 0x03, 0x22, 0xF1, 0x4F, 0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x11, 0x12, 0x13, 0x14, 0x06,       
+             -                        
+                  0x07, 0x15, 0x16, 0x1F, 0x23, 0x09, 0x07, 0x07, 0x65, 0x03, 0x0C, 0x00, 0x10, 0x00, 0x83, 0x01,       
+             -                        
+                  0x00, 0x00, 0x02, 0x3A, 0x80, 0x18, 0x71, 0x38, 0x2D, 0x40, 0x58, 0x2C, 0x45, 0x00, 0x13, 0x2B,       
+             -                        
+                  0x21, 0x00, 0x00, 0x1F, 0x01, 0x1D, 0x80, 0x18, 0x71, 0x1C, 0x16, 0x20, 0x58, 0x2C, 0x25, 0x00,       
+             -                        
+                  0x13, 0x2B, 0x21, 0x00, 0x00, 0x9F, 0x01, 0x1D, 0x00, 0x72, 0x51, 0xD0, 0x1E, 0x20, 0x6E, 0x28,       
+             -                        
+                  0x55, 0x00, 0x13, 0x2B, 0x21, 0x00, 0x00, 0x1E, 0x8C, 0x0A, 0xD0, 0x8A, 0x20, 0xE0, 0x2D, 0x10,       
+             -                        
+                  0x10, 0x3E, 0x96, 0x00, 0x13, 0x2B, 0x21, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,       
+             -                        
+                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE7,
+              };
+              
+              #else
+ 219          
+ 220          #include "EDID.c"               
+ 221          
+ 222          #endif
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 5   
+
+ 223          
+ 224          
+ 225          //******************************************************************************
+ 226          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+ 227          //******************************************************************************
+ 228          
+ 229          //******************************************************************************
+ 230          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+ 231          //******************************************************************************
+ 232          static UCHAR NvramIsEmpty(void);
+ 233          static void NvramValidCheck(void);
+ 234          static void NvramClearAll(void);
+ 235          static void NvramWpOn(void);
+ 236          static void NvramWpOff(void);
+ 237          
+ 238          //******************************************************************************
+ 239          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+ 240          //******************************************************************************
+ 241          
+ 242          //******************************************************************************
+ 243          // F U N C T I O N   B O D Y S
+ 244          //******************************************************************************
+ 245          
+ 246          /**************************************************************************//**
+ 247           * Write the data to NVRam.
+ 248           * @param addr Address in NVRam.
+ 249           * @param len Length of the data array.
+ 250           * @param ptr Pointer to the data array.
+ 251           ******************************************************************************/
+ 252          void NvramWrite(USHRT addr, USHRT len, UCHAR *ptr)
+ 253          {
+ 254   1      #if ENABLE_FE2P == ON
+ 255   1          FE2P_NvramWrite(addr, len, ptr);
+ 256   1      #else
+                  #define PAGE_SIZE   16
+                  UCHAR slave, remainder;
+                  USHRT local_timer;
+              
+                  NvramWpOff();
+                  while (len) {
+                      remainder = PAGE_SIZE - (addr % PAGE_SIZE);
+                      if (remainder > len) {
+                          remainder = len;
+                      }
+                      slave =  NVRAM_ADDR | (UCHAR)((addr>>7) & 0x0E);
+                      NvramWriteIICSeq(slave, addr, remainder, ptr);
+                      addr += remainder;
+                      ptr += remainder;
+                      len -= remainder;
+                      local_timer = GetTimerTick();
+                      do {
+                          if (NvramCheckDevice(NVRAM_ADDR)) {
+                              break;
+                          }
+                      } while ((GetTimerTick()-local_timer) < 20);
+                  }
+                  NvramWpOn();
+              #endif
+ 281   1      }
+ 282          
+ 283          /**************************************************************************//**
+ 284           * Read the data from NVRam.
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 6   
+
+ 285           * @param addr Address in NVRam.
+ 286           * @param len Length of the data array.
+ 287           * @param[out] ptr Pointer to the data array.
+ 288           ******************************************************************************/
+ 289          void NvramRead(USHRT addr, USHRT len, UCHAR *ptr)
+ 290          {
+ 291   1      #if ENABLE_FE2P == ON
+ 292   1          FE2P_NvramRead(addr, len, ptr);
+ 293   1      #else
+                  UCHAR slave;
+              
+                  slave = NVRAM_ADDR | (((UCHAR)(addr>>8)) << 1);
+                  NvramReadIICSeq(slave, addr, len, ptr);
+              #endif
+ 299   1      }
+ 300          
+ 301          
+ 302          
+ 303          
+ 304          /**************************************************************************//**
+ 305           * Check the NVRam is empty or not
+ 306           * If NVRam is empty, load default values.
+ 307           * If NVRam is no empty, read back the user/system/... data from NVRam.
+ 308           ******************************************************************************/
+ 309          void NvramLoadData(void)
+ 310          {
+ 311   1          if (NvramIsEmpty() == NVRAM_UPDATE_ALL) 
+ 312   1              {
+ 313   2              NvramClearAll();                                        //To avoid previous wrong Nvram data
+ 314   2                      NvramInitialize(NVRAM_UPDATE_ALL);
+ 315   2                #if ENABLE_FE2P == ON
+ 316   2                      EraseTimeScale();
+ 317   2                #endif
+ 318   2          }
+ 319   1          else if (NvramIsEmpty() == NVRAM_UPDATE_USER) 
+ 320   1              {
+ 321   2                      NvramClearTiming();                             //To avoid previous wrong Nvram data
+ 322   2                      NvramInitialize(NVRAM_UPDATE_USER);
+ 323   2              }
+ 324   1      
+ 325   1          NvramReadUserData(&UserData);
+ 326   1          NvramReadCalibData(&CalibData);
+ 327   1          NvramReadSystemData(&SystemData);
+ 328   1          NvramValidCheck();
+ 329   1          //...
+ 330   1      #if ENABLE_FE2P == ON
+ 331   1          DecodeTimeScale();
+ 332   1      #endif
+ 333   1      }
+ 334          
+ 335          //CHIU
+ 336          code char TimeVER[] = __TIME__;
+ 337          code char DateVER[] = __DATE__;
+ 338          //USE DATE AND TIME FOR FIRMWARE VERSION CHECK
+ 339          UCHAR GetFirmwareVer(void)
+ 340          {
+ 341   1              UCHAR temp,i;
+ 342   1                      
+ 343   1              temp = 0;               
+ 344   1              for(i=0 ; i < strlen(TimeVER) ;i++)
+ 345   1              {
+ 346   2                      temp += TimeVER[i];     
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 7   
+
+ 347   2              }
+ 348   1              
+ 349   1              for(i=0 ; i < strlen(DateVER) ;i++)
+ 350   1              {
+ 351   2                      temp += DateVER[i];     
+ 352   2              }
+ 353   1              
+ 354   1              return temp;
+ 355   1      }
+ 356          
+ 357          
+ 358          /**************************************************************************//**
+ 359           * Check the NVRam is empty or not.
+ 360           * @return TRUE if NVRam is empty else FALSE.
+ 361           ******************************************************************************/
+ 362          static UCHAR NvramIsEmpty(void)
+ 363          {
+ 364   1          NvramSystemData system_data;
+ 365   1          USHRT nvram_id;
+ 366   1      
+ 367   1          do {
+ 368   2              NvramReadSystemData(&system_data);
+ 369   2              nvram_id = system_data.usNvramID;
+ 370   2              NvramReadSystemData(&system_data);
+ 371   2          } while (nvram_id != system_data.usNvramID);
+ 372   1      
+ 373   1          if (nvram_id != SystemDataDefault.usNvramID) {
+ 374   2              return NVRAM_UPDATE_ALL;
+ 375   2          }
+ 376   1          else if (system_data.usNVSysSize != SystemDataDefault.usNVSysSize) {
+ 377   2              return NVRAM_UPDATE_ALL;
+ 378   2          }
+ 379   1          else if (system_data.usNVCalSize != SystemDataDefault.usNVCalSize) {
+ 380   2              return NVRAM_UPDATE_ALL;
+ 381   2          }
+ 382   1          else if (system_data.usNVUsrSize != SystemDataDefault.usNVUsrSize) {
+ 383   2              return NVRAM_UPDATE_USER;
+ 384   2          }
+ 385   1          //CHIU    
+ 386   1          else if (system_data.usFirmwareVer != GetFirmwareVer() ) 
+ 387   1          {
+ 388   2              return NVRAM_UPDATE_ALL;                
+ 389   2          }
+ 390   1          
+ 391   1          /*
+ 392   1          else if (system_data.usFirmwareVer != SystemDataDefault.usFirmwareVer) {
+ 393   1              //return NVRAM_UPDATE_USER;  
+ 394   1              
+ 395   1              return NVRAM_UPDATE_ALL;        
+ 396   1          }
+ 397   1          */
+ 398   1          
+ 399   1          
+ 400   1          
+ 401   1          
+ 402   1      #if ENABLE_EMBEDDED_CHECKSUM == ON
+                  else if (system_data.usChkSum != GetEmbeddedCheckSum()) {
+                      return NVRAM_UPDATE_USER;
+                  }
+              #endif
+ 407   1          else {
+ 408   2              return NVRAM_UPDATE_FREE;
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 8   
+
+ 409   2          }
+ 410   1      }
+ 411          
+ 412          /**************************************************************************//**
+ 413           * Check size/address/the number of field are valid or not.
+ 414           * If the deployment of NVRam is invalid, hold the system!
+ 415           ******************************************************************************/
+ 416          static void NvramValidCheck(void)
+ 417          {
+ 418   1      #if     PWROn_Debug == ENABLE
+                      printf("NvramValidCheck\n");    //150526 george
+              #endif
+ 421   1      
+ 422   1          if (UserDataDefault.usUsrEnd != NVRAM_FIELD_END_FLAG) {
+ 423   2                      printf("WDT_Re-Boot_While(1)\n");       //150526 george
+ 424   2              while(1);       
+ 425   2          }
+ 426   1          if (CalibDataDefault.usCalEnd != NVRAM_FIELD_END_FLAG) {
+ 427   2                      printf("WDT_Re-Boot_While(1)\n");       //150526 george
+ 428   2              while(1);
+ 429   2          }
+ 430   1          if (SystemDataDefault.usSysEnd != NVRAM_FIELD_END_FLAG) {
+ 431   2                      printf("WDT_Re-Boot_While(1)\n");       //150526 george
+ 432   2              while(1);
+ 433   2          }
+ 434   1          if (sizeof(NvramUserData) > NVRAM_USER_SIZE) {
+ 435   2                      printf("WDT_Re-Boot_While(1)\n");       //150526 george
+ 436   2              while(1);
+ 437   2          }
+ 438   1          if (sizeof(NvramCalibData) > NVRAM_CALIB_SIZE) {
+ 439   2                      printf("WDT_Re-Boot_While(1)\n");       //150526 george
+ 440   2              while(1);
+ 441   2          }
+ 442   1          if (sizeof(NvramSystemData) > NVRAM_SYSTEM_SIZE) {
+ 443   2                      printf("WDT_Re-Boot_While(1)\n");       //150526 george
+ 444   2              while(1);
+ 445   2          }
+ 446   1      }
+ 447          
+ 448          /**************************************************************************//**
+ 449           * Load the default to NVRam.
+ 450           * @param type Update type.
+ 451           ******************************************************************************/
+ 452          void NvramInitialize(UCHAR type)
+ 453          {
+ 454   1          NvramUserData user_data;
+ 455   1          NvramCalibData calib_data;
+ 456   1          NvramSystemData system_data;
+ 457   1      
+ 458   1          user_data = UserDataDefault;
+ 459   1          if (type == NVRAM_UPDATE_ALL) {
+ 460   2              calib_data = CalibDataDefault;
+ 461   2              system_data = SystemDataDefault;
+ 462   2          }
+ 463   1          else {
+ 464   2              NvramReadSystemData(&system_data);
+ 465   2              //system_data.usFirmwareVer = SystemDataDefault.usFirmwareVer;  //CHIU
+ 466   2              system_data.ucTimingWriteIdx = SystemDataDefault.ucTimingWriteIdx;
+ 467   2              system_data.usNVUsrSize = SystemDataDefault.usNVUsrSize;
+ 468   2              system_data.usNVCalSize = SystemDataDefault.usNVCalSize;
+ 469   2              system_data.usNVSysSize = SystemDataDefault.usNVSysSize;
+ 470   2          }
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 9   
+
+ 471   1      
+ 472   1              system_data.usFirmwareVer = GetFirmwareVer();   //CHIU
+ 473   1      
+ 474   1      #if ENABLE_EMBEDDED_CHECKSUM == ON
+                  system_data.usChkSum = GetEmbeddedCheckSum();
+              #endif
+ 477   1          
+ 478   1          NvramWriteUserData(&user_data);
+ 479   1          if (type == NVRAM_UPDATE_ALL) {
+ 480   2              NvramWriteCalibData(&calib_data);
+ 481   2          }
+ 482   1          NvramWriteSystemData(&system_data);
+ 483   1      }
+ 484          
+ 485          /**************************************************************************//**
+ 486           * Initialize the whole NVRam to 0xFF.
+ 487           ******************************************************************************/
+ 488          static void NvramClearAll(void)
+ 489          {
+ 490   1          UCHAR init_data[16] = {
+ 491   1              0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+ 492   1              0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+ 493   1          };
+ 494   1          USHRT i;
+ 495   1          
+ 496   1          for (i=0; i<((NVRAM_END+1)/16); i++) {
+ 497   2              NvramWrite(16*i, 16, init_data);
+ 498   2          }
+ 499   1      }
+ 500          
+ 501          /**************************************************************************//**
+ 502           * Initialize the timing area in NVRam to 0xFF.
+ 503           ******************************************************************************/
+ 504          void NvramClearTiming(void)
+ 505          {
+ 506   1          UCHAR init_data[16] = { 
+ 507   1              0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+ 508   1              0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+ 509   1          };
+ 510   1          USHRT i;
+ 511   1          
+ 512   1          for (i = 0; i < (NVRAM_TIMING_AREA / 16); i++) {
+ 513   2              NvramWrite(i * 16 + NVRAM_TIMING_ADDR, 16, init_data);
+ 514   2          }
+ 515   1      }
+ 516          
+ 517          /**************************************************************************//**
+ 518           * Read back the timing data from Nvram.
+ 519           * @param[out] ptr Pointer to the timing data buffer.
+ 520           ******************************************************************************/
+ 521          BOOL NvramReadTimingData(InputTimingFormat *ptr)
+ 522          {
+ 523   1          BOOL found=FALSE;
+ 524   1          UCHAR i, nvram_timing_size;
+ 525   1          USHRT nvram_start_addr;
+ 526   1          NvramTimingFormat nvram;
+ 527   1      
+ 528   1          nvram_timing_size = (UCHAR) sizeof(NvramTimingFormat);
+ 529   1          for (i=0; i<(NVRAM_TIMING_AREA/nvram_timing_size); i++) {
+ 530   2              nvram_start_addr = (USHRT) NVRAM_TIMING_ADDR + i*nvram_timing_size;
+ 531   2              NvramRead(nvram_start_addr, nvram_timing_size, (UCHAR *)&nvram);
+ 532   2              if (ptr->usModeIndex == nvram.usModeIndex) { //We found current mode in NVRAM
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 10  
+
+ 533   3                  found = TRUE;
+ 534   3                  break;
+ 535   3              }
+ 536   2          }
+ 537   1      
+ 538   1          if (found == TRUE) {
+ 539   2              ptr->usHTotal = nvram.usHTotal;
+ 540   2              ptr->usHStart = nvram.usHStart;
+ 541   2              ptr->usVStart = nvram.usVStart;
+ 542   2              ptr->usHTotal50 = nvram.usHTotal50;
+ 543   2              ptr->usHStart50 = nvram.usHStart50;
+ 544   2              ptr->usVStart50 = nvram.usVStart50;
+ 545   2              ptr->ucPhase = nvram.ucPhase;
+ 546   2              ptr->ucAutoTune = nvram.ucAutoTune;
+ 547   2              return TRUE;
+ 548   2          }
+ 549   1          else {
+ 550   2              return FALSE;
+ 551   2          }
+ 552   1      }
+ 553          
+ 554          /**************************************************************************//**
+ 555           * Write the timing data to NVRam.
+ 556           * @param ptr Pointer to the timing data buffer.
+ 557           ******************************************************************************/
+ 558          void NvramWriteTimingData(InputTimingFormat *ptr)
+ 559          {
+ 560   1          BOOL found=FALSE;
+ 561   1          UCHAR i, nvram_timing_size;
+ 562   1          USHRT nvram_start_addr;
+ 563   1          NvramTimingFormat nvram;
+ 564   1      
+ 565   1          nvram_timing_size = (UCHAR) sizeof(NvramTimingFormat);
+ 566   1          for (i=0; i<(NVRAM_TIMING_AREA/nvram_timing_size); i++) {
+ 567   2              nvram_start_addr = (USHRT) NVRAM_TIMING_ADDR + i*nvram_timing_size;
+ 568   2              NvramRead(nvram_start_addr, nvram_timing_size, (UCHAR *)&nvram);
+ 569   2              if (nvram.usModeIndex == ptr->usModeIndex) { //Found the same mode index in Nvram
+ 570   3                  found = TRUE;
+ 571   3                  break;
+ 572   3              }
+ 573   2          }
+ 574   1      
+ 575   1          nvram.usHTotal = ptr->usHTotal;
+ 576   1          nvram.usHStart = ptr->usHStart;
+ 577   1          nvram.usVStart = ptr->usVStart;
+ 578   1          nvram.usHTotal50 = ptr->usHTotal50;
+ 579   1          nvram.usHStart50 = ptr->usHStart50;
+ 580   1          nvram.usVStart50 = ptr->usVStart50;
+ 581   1          nvram.ucPhase = ptr->ucPhase;
+ 582   1          nvram.ucAutoTune = ptr->ucAutoTune;
+ 583   1          nvram.usModeIndex = ptr->usModeIndex;
+ 584   1          
+ 585   1          if (found == FALSE) {
+ 586   2              nvram_start_addr = (USHRT) NVRAM_TIMING_ADDR + SystemData.ucTimingWriteIdx*nvram_timing_size;
+ 587   2              //Update system data
+ 588   2              SystemData.ucTimingWriteIdx = (SystemData.ucTimingWriteIdx+1) % (NVRAM_TIMING_AREA/nvram_timing_si
+             -ze);
+ 589   2              NvramWriteSystemData(&SystemData);
+ 590   2          }
+ 591   1          NvramWrite(nvram_start_addr, nvram_timing_size, (UCHAR *)&nvram);
+ 592   1      }
+ 593          
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 11  
+
+ 594          /**************************************************************************//**
+ 595           * Read back the user data from Nvram.
+ 596           * @param[out] ptr Pointer to the user data buffer.
+ 597           ******************************************************************************/
+ 598          void NvramReadUserData(NvramUserData *ptr)
+ 599          {
+ 600   1          NvramRead(NVRAM_USER_ADDR, sizeof(NvramUserData), (UCHAR *)ptr);
+ 601   1      }
+ 602          
+ 603          /**************************************************************************//**
+ 604           * Write the user data to Nvram.
+ 605           * @param ptr Pointer to the user data buffer.
+ 606           ******************************************************************************/
+ 607          void NvramWriteUserData(NvramUserData *ptr)
+ 608          {
+ 609   1          NvramWrite(NVRAM_USER_ADDR, sizeof(NvramUserData), (UCHAR *)ptr);
+ 610   1      }
+ 611          
+ 612          /**************************************************************************//**
+ 613           * Read back the calibration data from Nvram.
+ 614           * @param[out] ptr Pointer to the calibration data buffer.
+ 615           ******************************************************************************/
+ 616          void NvramReadCalibData(NvramCalibData *ptr)
+ 617          {
+ 618   1          NvramRead(NVRAM_CALIB_ADDR, sizeof(NvramCalibData), (UCHAR *)ptr);
+ 619   1      }
+ 620          
+ 621          /**************************************************************************//**
+ 622           * Write the calibration data to Nvram.
+ 623           * @param ptr Pointer to the calibration data buffer.
+ 624           ******************************************************************************/
+ 625          void NvramWriteCalibData(NvramCalibData *ptr)
+ 626          {
+ 627   1          NvramWrite(NVRAM_CALIB_ADDR, sizeof(NvramCalibData), (UCHAR *)ptr);
+ 628   1      }
+ 629          
+ 630          /**************************************************************************//**
+ 631           * Read back the system data from Nvram.
+ 632           * @param[out] ptr Pointer to the system data buffer.
+ 633           ******************************************************************************/
+ 634          void NvramReadSystemData(NvramSystemData *ptr)
+ 635          {
+ 636   1          NvramRead(NVRAM_SYSTEM_ADDR, sizeof(NvramSystemData), (UCHAR *)ptr);
+ 637   1      }
+ 638          
+ 639          /**************************************************************************//**
+ 640           * Write the system data to Nvram.
+ 641           * @param ptr Pointer to the system data buffer.
+ 642           ******************************************************************************/
+ 643          void NvramWriteSystemData(NvramSystemData *ptr)
+ 644          {
+ 645   1          NvramWrite(NVRAM_SYSTEM_ADDR, sizeof(NvramSystemData), (UCHAR *)ptr);
+ 646   1      }
+ 647          
+ 648          //******************************************************************************
+ 649          // Prototype: 
+ 650          //  void NvramDumpToSram(void)
+ 651          // Parameters:
+ 652          //  void
+ 653          // Return:
+ 654          //  None
+ 655          // Purpose:
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 12  
+
+ 656          //  Dump the Nvram data to SRAM
+ 657          // Notes:
+ 658          //  None
+ 659          //******************************************************************************
+ 660          /*
+ 661          xdata UCHAR SramArea[2048] _at_ 0xA800;
+ 662          void NvramDumpToSram(void)
+ 663          {
+ 664              NvramRead(0, sizeof(SramArea), SramArea);
+ 665          }
+ 666          */
+ 667          
+ 668          
+ 669          #if ENABLE_HDCP == ON
+ 670          #if ENABLE_NVT_HDCP_WRITER == ON
+              /**************************************************************************//**
+               * Write the HDCP data to Nvram.
+               * @param ptr Pointer to HDCP data.
+               ******************************************************************************/
+              void NvramWriteHDCPdata(UCHAR *ptr)
+              {
+                  NvramWrite(NVRAM_HDCP_ADDR, NUM_HDCP_TOTAL, ptr);
+              }
+              #endif
+ 680          /**************************************************************************//**
+ 681           * Read back the HDCP data from Nvram.
+ 682           * @param[out] ptr Pointer to HDCP data buffer.
+ 683           ******************************************************************************/
+ 684          void NvramReadHDCPdata(UCHAR *ptr)
+ 685          {
+ 686   1          NvramRead(NVRAM_HDCP_ADDR, NUM_HDCP_TOTAL, ptr);
+ 687   1      }
+ 688          #endif
+ 689          
+ 690          #if USE_INTERNAL_EDID == 1
+ 691          #if VGA_DDC_CHANNEL != 0xFF
+ 692          /**************************************************************************//**
+ 693           * Write the VGA EDID to Nvram
+ 694           * @param ptr Pointer to VGA EDID.
+ 695           ******************************************************************************/
+ 696          void NvramWriteVGAEdid(UCHAR *ptr)
+ 697          {
+ 698   1          NvramWrite(NVRAM_VGA_EDID_ADDR, NVRAM_VGA_EDID_AREA, ptr);
+ 699   1      }
+ 700          
+ 701          /**************************************************************************//**
+ 702           * Read back the VGA EDID from Nvram
+ 703           * @param[out] ptr Pointer to VGA EDID.
+ 704           ******************************************************************************/
+ 705          void NvramReadVGAEdid(UCHAR *ptr)
+ 706          {
+ 707   1      #if DefaultEDID == ON
+ 708   1          USHRT i;
+ 709   1          for (i=0; i<128; i++) {
+ 710   2              *ptr = _Default_VGA_EDID[i];
+ 711   2              ptr++;
+ 712   2          }
+ 713   1      #else
+                  NvramRead(NVRAM_VGA_EDID_ADDR, NVRAM_VGA_EDID_AREA, ptr);
+              #endif
+ 716   1      }
+ 717          #endif
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 13  
+
+ 718          
+ 719          #if DVI_DDC_CHANNEL != 0xFF
+ 720          /**************************************************************************//**
+ 721           * Write the DVI EDID to Nvram
+ 722           * @param ptr Pointer to DVI EDID.
+ 723           ******************************************************************************/
+ 724          void NvramWriteDVIEdid(UCHAR *ptr)
+ 725          {
+ 726   1          NvramWrite(NVRAM_DVI_EDID_ADDR, NVRAM_DVI_EDID_AREA, ptr);
+ 727   1      }
+ 728          
+ 729          /**************************************************************************//**
+ 730           * Read back the DVI EDID from Nvram
+ 731           * @param[out] ptr Pointer to DVI EDID.
+ 732           ******************************************************************************/
+ 733          void NvramReadDVIEdid(UCHAR *ptr)
+ 734          {
+ 735   1      #if DefaultEDID == ON
+ 736   1          USHRT i, k;
+ 737   1      #if DVI_DDC_CHANNEL == 0
+                  if (MCU_DDC0_EDIDLEN == 0) {
+                      k = 128;
+                  }
+                  else {
+                      k = 256;
+                  }
+              #endif
+ 745   1      #if DVI_DDC_CHANNEL == 1
+ 746   1          if (MCU_DDC1_EDIDLEN == 0) {
+ 747   2              k = 128;
+ 748   2          }
+ 749   1          else {
+ 750   2              k = 256;
+ 751   2          }
+ 752   1      #endif
+ 753   1      #if DVI_DDC_CHANNEL == 2
+                  if (MCU_DDC2_EDIDLEN == 0) {
+                      k = 128;
+                  }
+                  else {
+                      k = 256;
+                  }
+              #endif
+ 761   1      #if DVI_DDC_CHANNEL == 3
+                  if (MCU_DDC3_EDIDLEN == 0) {
+                      k = 128;
+                  }
+                  else {
+                      k = 256;
+                  }
+              #endif
+ 769   1      
+ 770   1          if (k == 128) {
+ 771   2              for (i=0; i<128; i++) {
+ 772   3                  *ptr = _Default_DVI_EDID[i];
+ 773   3                  ptr++;
+ 774   3              }
+ 775   2          }
+ 776   1          else {
+ 777   2              for (i=0; i<256; i++) {
+ 778   3                  *ptr = _Default_HDMI_EDID[i];
+ 779   3                  ptr++;
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 14  
+
+ 780   3              }
+ 781   2          }
+ 782   1      #else
+                  NvramRead(NVRAM_DVI_EDID_ADDR, NVRAM_DVI_EDID_AREA, ptr);
+              #endif
+ 785   1      }
+ 786          #endif
+ 787          
+ 788          #if HDMI_DDC_CHANNEL != 0xFF
+ 789          /**************************************************************************//**
+ 790           * Write the HDMI EDID to Nvram
+ 791           * @param ptr Pointer to HDMI EDID.
+ 792           ******************************************************************************/
+ 793          void NvramWriteHDMIEdid(UCHAR *ptr)
+ 794          {
+ 795   1          NvramWrite(NVRAM_HDMI_EDID_ADDR, NVRAM_HDMI_EDID_AREA, ptr);
+ 796   1      }
+ 797          
+ 798          /**************************************************************************//**
+ 799           * Read back the HDMI EDID from Nvram
+ 800           * @param[out] ptr Pointer to HDMI EDID.
+ 801           ******************************************************************************/
+ 802          void NvramReadHDMIEdid(UCHAR *ptr)
+ 803          {
+ 804   1      #if DefaultEDID == ON
+ 805   1          USHRT i;
+ 806   1          for (i=0; i<256; i++) {
+ 807   2              *ptr = _Default_HDMI_EDID[i];
+ 808   2              ptr++;
+ 809   2          }
+ 810   1      #else
+                  NvramRead(NVRAM_HDMI_EDID_ADDR, NVRAM_HDMI_EDID_AREA, ptr);
+              #endif
+ 813   1      }
+ 814          #endif
+ 815          
+ 816          /**************************************************************************//**
+ 817           * Save EDID from DDC buffer to NVRam
+ 818           ******************************************************************************/
+ 819          void NvramSaveEDID(void)
+ 820          {
+ 821   1      #if VGA_DDC_CHANNEL == 0
+ 822   1          NvramWriteVGAEdid(EDID_SRAM_BUFF0);
+ 823   1      #elif VGA_DDC_CHANNEL == 1
+                  NvramWriteVGAEdid(EDID_SRAM_BUFF1);
+              #elif VGA_DDC_CHANNEL == 2
+                  NvramWriteVGAEdid(EDID_SRAM_BUFF2);
+              #elif VGA_DDC_CHANNEL == 3
+                  NvramWriteVGAEdid(EDID_SRAM_BUFF3);
+              #endif
+ 830   1      
+ 831   1      #if DVI_DDC_CHANNEL == 0
+                  NvramWriteDVIEdid(EDID_SRAM_BUFF0);
+              #elif DVI_DDC_CHANNEL == 1
+ 834   1          NvramWriteDVIEdid(EDID_SRAM_BUFF1);
+ 835   1      #elif DVI_DDC_CHANNEL == 2
+                  NvramWriteDVIEdid(EDID_SRAM_BUFF2);
+              #elif DVI_DDC_CHANNEL == 3
+                  NvramWriteDVIEdid(EDID_SRAM_BUFF3);
+              #endif
+ 840   1      
+ 841   1      #if HDMI_DDC_CHANNEL == 0
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 15  
+
+                  NvramWriteHDMIEdid(EDID_SRAM_BUFF0);
+              #elif HDMI_DDC_CHANNEL == 1
+                  NvramWriteHDMIEdid(EDID_SRAM_BUFF1);
+              #elif HDMI_DDC_CHANNEL == 2
+ 846   1          NvramWriteHDMIEdid(EDID_SRAM_BUFF2);
+ 847   1      #elif HDMI_DDC_CHANNEL == 3
+                  NvramWriteHDMIEdid(EDID_SRAM_BUFF3);
+              #endif
+ 850   1      }
+ 851          
+ 852          /**************************************************************************//**
+ 853           * Load EDID from NVRam to DDC buffer.
+ 854           ******************************************************************************/
+ 855          void NvramLoadEDID(void)
+ 856          {
+ 857   1      #if VGA_DDC_CHANNEL == 0
+ 858   1          NvramReadVGAEdid(EDID_SRAM_BUFF0);
+ 859   1      #elif VGA_DDC_CHANNEL == 1
+                  NvramReadVGAEdid(EDID_SRAM_BUFF1);
+              #elif VGA_DDC_CHANNEL == 2
+                  NvramReadVGAEdid(EDID_SRAM_BUFF2);
+              #elif VGA_DDC_CHANNEL == 3
+                  NvramReadVGAEdid(EDID_SRAM_BUFF3);
+              #endif
+ 866   1      
+ 867   1      #if DVI_DDC_CHANNEL == 0
+                  NvramReadDVIEdid(EDID_SRAM_BUFF0);
+              #elif DVI_DDC_CHANNEL == 1
+ 870   1          NvramReadDVIEdid(EDID_SRAM_BUFF1);
+ 871   1      #elif DVI_DDC_CHANNEL == 2
+                  NvramReadDVIEdid(EDID_SRAM_BUFF2);
+              #elif DVI_DDC_CHANNEL == 3
+                  NvramReadDVIEdid(EDID_SRAM_BUFF3);
+              #endif
+ 876   1      
+ 877   1      #if HDMI_DDC_CHANNEL == 0
+                  NvramReadHDMIEdid(EDID_SRAM_BUFF0);
+              #elif HDMI_DDC_CHANNEL == 1
+                  NvramReadHDMIEdid(EDID_SRAM_BUFF1);
+              #elif HDMI_DDC_CHANNEL == 2
+ 882   1          NvramReadHDMIEdid(EDID_SRAM_BUFF2);
+ 883   1      #elif HDMI_DDC_CHANNEL == 3
+                  NvramReadHDMIEdid(EDID_SRAM_BUFF3);
+              #endif
+ 886   1      }
+ 887          #endif
+ 888                   
+ 889          #if ENABLE_FE2P == OFF
+              /**************************************************************************//**
+               * Turn on the NVRAM write protect function.
+               ******************************************************************************/
+              static void NvramWpOn(void)
+              {
+                  McuSetIOBit(NVRAM_WP_PORT, NVRAM_WP_BIT, NVRAM_WP_ACTIVE);
+              }
+              
+              /**************************************************************************//**
+               * Turn off the NVRAM write protect function.
+               ******************************************************************************/
+              static void NvramWpOff(void)
+              {
+                  McuSetIOBit(NVRAM_WP_PORT, NVRAM_WP_BIT, ~NVRAM_WP_ACTIVE);
+C51 COMPILER V8.02   NVRAM                                                                 08/07/2015 16:22:21 PAGE 16  
+
+              }
+              #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1535    ----
+   CONSTANT SIZE    =    925    ----
+   XDATA SIZE       =      6     189
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

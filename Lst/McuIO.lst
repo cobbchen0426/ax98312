@@ -1,0 +1,356 @@
+C51 COMPILER V8.02   MCUIO                                                                 08/07/2015 16:22:22 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MCUIO
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\McuIO.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\McuIO.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\App\Use
+                    -r;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\
+                    -Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\McuIO.lst) OBJEC
+                    -T(.\Bin\ADS\AXI\104N\McuIO.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          
+  18          //******************************************************************************
+  19          // G L O B A L   V A R I A B L E S
+  20          //******************************************************************************
+  21          
+  22          //******************************************************************************
+  23          // S T A T I C   V A R I A B L E S
+  24          //******************************************************************************
+  25          
+  26          //******************************************************************************
+  27          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  28          //******************************************************************************
+  29          
+  30          //******************************************************************************
+  31          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  32          //******************************************************************************
+  33          
+  34          //******************************************************************************
+  35          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  36          //******************************************************************************
+  37          
+  38          //******************************************************************************
+  39          // F U N C T I O N   B O D Y S
+  40          //******************************************************************************
+  41          
+  42          /**************************************************************************//**
+  43           * Change the output of MCU port.
+  44           * @param port MCU I/O Port, one of MCU_PORT_A ~ MCU_PORT_E.
+  45           * @param value Output value.
+  46           ******************************************************************************/
+  47          void McuSetIOByte(UCHAR port, UCHAR value)
+  48          {
+  49   1          switch (port) {
+  50   2              case MCU_PORT_A:
+  51   2                  PortA = value;
+  52   2                  break;
+C51 COMPILER V8.02   MCUIO                                                                 08/07/2015 16:22:22 PAGE 2   
+
+  53   2      
+  54   2              case MCU_PORT_B:
+  55   2                  PortB = value;
+  56   2                  break;
+  57   2      
+  58   2              case MCU_PORT_C:
+  59   2                  PortC = value;
+  60   2                  break;
+  61   2      
+  62   2              case MCU_PORT_D:
+  63   2                  PortD = value;
+  64   2                  break;
+  65   2      
+  66   2              case MCU_PORT_E:
+  67   2                  PortE = value;
+  68   2                  break;
+  69   2      #ifdef PORT_3_DEFAULT_OUT                               
+                      case MCU_PORT_3:
+                          P3 = value | 0xCC ; //bit7,6,2,3 must setting 1(high).
+                          break;
+              #endif            
+  74   2          }
+  75   1      }
+  76          
+  77          /**************************************************************************//**
+  78           * Change the output of MCU port.
+  79           * @param port MCU I/O Port, one of MCU_PORT_A ~ MCU_PORT_E.
+  80           * @param mask Select which bit, 0x00: bit 0, 0x01: bit 1, ... 0x80: bit 7.
+  81           * @param value 0 or 1.
+  82           ******************************************************************************/
+  83          void McuSetIOBit(UCHAR port, UCHAR mask, UCHAR value)
+  84          {
+  85   1          value &= BIT0;
+  86   1      
+  87   1          if (value == 1) { //Set the bit to 1
+  88   2              switch (port) {
+  89   3                  case MCU_PORT_A:
+  90   3                      PortA = PortA | RDPA_REG | mask;
+  91   3                      break;
+  92   3          
+  93   3                  case MCU_PORT_B:
+  94   3                      PortB = PortB | RDPB_REG | mask;
+  95   3                      break;
+  96   3          
+  97   3                  case MCU_PORT_C:
+  98   3                      PortC = PortC | RDPC_REG | mask;
+  99   3                      break;
+ 100   3          
+ 101   3                  case MCU_PORT_D:
+ 102   3                      PortD = PortD | RDPD_REG | mask;
+ 103   3                      break;
+ 104   3          
+ 105   3                  case MCU_PORT_E:
+ 106   3                      PortE = PortE | RDPE_REG | mask;
+ 107   3                      break;
+ 108   3      
+ 109   3                  case MCU_PORT_3:
+ 110   3                      P3 |= mask;
+ 111   3                      break;
+ 112   3              }
+ 113   2          }
+ 114   1          else { //Set the bit to 0
+C51 COMPILER V8.02   MCUIO                                                                 08/07/2015 16:22:22 PAGE 3   
+
+ 115   2              switch (port) {
+ 116   3                  case MCU_PORT_A:
+ 117   3                      PortA = (PortA | RDPA_REG) & (~mask);
+ 118   3                      break;
+ 119   3          
+ 120   3                  case MCU_PORT_B:
+ 121   3                      PortB = (PortB | RDPB_REG) & (~mask);
+ 122   3                      break;
+ 123   3          
+ 124   3                  case MCU_PORT_C:
+ 125   3                      PortC = (PortC | RDPC_REG) & (~mask);
+ 126   3                      break;
+ 127   3          
+ 128   3                  case MCU_PORT_D:
+ 129   3                      PortD = (PortD | RDPD_REG) & (~mask);
+ 130   3                      break;
+ 131   3          
+ 132   3                  case MCU_PORT_E:
+ 133   3                      PortE = (PortE | RDPE_REG) & (~mask);
+ 134   3                      break;
+ 135   3      
+ 136   3                  case MCU_PORT_3:
+ 137   3                      P3 &= ~mask;
+ 138   3                      break;
+ 139   3              }
+ 140   2          }
+ 141   1      }
+ 142          
+ 143          /**************************************************************************//**
+ 144           * Change MCU I/O direction.
+ 145           * @param port MCU I/O Port, one of MCU_PORT_A ~ MCU_PORT_E.
+ 146           * @param value It will be assigned to the direction control register of port.
+ 147           ******************************************************************************/
+ 148          void McuSetIODirByte(UCHAR port, UCHAR value)
+ 149          {
+ 150   1          switch (port) {
+ 151   2              case MCU_PORT_A:
+ 152   2                  RDPA_REG = value;
+ 153   2                  break;
+ 154   2      
+ 155   2              case MCU_PORT_B:
+ 156   2                  RDPB_REG = value;
+ 157   2                  break;
+ 158   2      
+ 159   2              case MCU_PORT_C:
+ 160   2                  RDPC_REG = value;
+ 161   2                  break;
+ 162   2      
+ 163   2              case MCU_PORT_D:
+ 164   2                  RDPD_REG = value;
+ 165   2                  break;
+ 166   2      
+ 167   2              case MCU_PORT_E:
+ 168   2                  RDPE_REG = value;
+ 169   2                  break;
+ 170   2          }
+ 171   1      }
+ 172          
+ 173          /**************************************************************************//**
+ 174           * Change single bit direction of MCU I/O port.
+ 175           * @param port MCU I/O Port, one of MCU_PORT_A ~ MCU_PORT_E.
+ 176           * @param mask Select which bit, 0x00: bit 0, 0x01: bit 1, ... 0x80: bit 7.
+C51 COMPILER V8.02   MCUIO                                                                 08/07/2015 16:22:22 PAGE 4   
+
+ 177           * @param value 0 is output. 1 is input.
+ 178           ******************************************************************************/
+ 179          /*
+ 180          void McuSetIODirBit(UCHAR port, UCHAR mask, UCHAR value)
+ 181          {
+ 182              value &= BIT0;
+ 183          
+ 184              if (value == 1) { //Set the bit to Input
+ 185                  switch (port) {
+ 186                      case MCU_PORT_A:
+ 187                          RDPA_REG |= mask;
+ 188                          break;
+ 189              
+ 190                      case MCU_PORT_B:
+ 191                          RDPB_REG |= mask;
+ 192                          break;
+ 193              
+ 194                      case MCU_PORT_C:
+ 195                          RDPC_REG |= mask;
+ 196                          break;
+ 197              
+ 198                      case MCU_PORT_D:
+ 199                          RDPD_REG |= mask;
+ 200                          break;
+ 201              
+ 202                      case MCU_PORT_E:
+ 203                          RDPE_REG |= mask;
+ 204                          break;
+ 205                  }
+ 206              }
+ 207              else { //Set the bit to Output
+ 208                  switch (port) {
+ 209                      case MCU_PORT_A:
+ 210                          RDPA_REG &= ~mask;
+ 211                          break;
+ 212              
+ 213                      case MCU_PORT_B:
+ 214                          RDPB_REG &= ~mask;
+ 215                          break;
+ 216              
+ 217                      case MCU_PORT_C:
+ 218                          RDPC_REG &= ~mask;
+ 219                          break;
+ 220              
+ 221                      case MCU_PORT_D:
+ 222                          RDPD_REG &= ~mask;
+ 223                          break;
+ 224              
+ 225                      case MCU_PORT_E:
+ 226                          RDPE_REG &= ~mask;
+ 227                          break;
+ 228                  }
+ 229              }
+ 230          }
+ 231          */
+ 232          /**************************************************************************//**
+ 233           * Get single bit of MCU I/O port.
+ 234           * @param port MCU I/O Port, one of MCU_PORT_A ~ MCU_PORT_E.
+ 235           * @param mask Select which bit, 0x00: bit 0, 0x01: bit 1, ... 0x80: bit 7.
+ 236           * @return TRUE if bit is 1 else FALSE.
+ 237           ******************************************************************************/
+ 238          BOOL McuGetIOBit(UCHAR port, UCHAR mask)
+C51 COMPILER V8.02   MCUIO                                                                 08/07/2015 16:22:22 PAGE 5   
+
+ 239          {
+ 240   1          UCHAR result;
+ 241   1      
+ 242   1          switch (port) {
+ 243   2              case MCU_PORT_A:
+ 244   2                  result = PortA & mask;
+ 245   2                  break;
+ 246   2      
+ 247   2              case MCU_PORT_B:
+ 248   2                  result = PortB & mask;
+ 249   2                  break;
+ 250   2      
+ 251   2              case MCU_PORT_C:
+ 252   2                  result = PortC & mask;
+ 253   2                  break;
+ 254   2      
+ 255   2              case MCU_PORT_D:
+ 256   2                  result = PortD & mask;
+ 257   2                  break;
+ 258   2      
+ 259   2              case MCU_PORT_E:
+ 260   2                  result = PortE & mask;
+ 261   2                  break;
+ 262   2      
+ 263   2              case MCU_PORT_3:
+ 264   2                  result = P3 & mask;
+ 265   2                  break;
+ 266   2                  
+ 267   2              default:
+ 268   2                  result = 0;
+ 269   2                  break;
+ 270   2          }
+ 271   1      
+ 272   1          if (result != 0) {
+ 273   2              return TRUE;
+ 274   2          }
+ 275   1          else {
+ 276   2              return FALSE;
+ 277   2          }
+ 278   1      }
+ 279          
+ 280          #if ENABLE_NEW_MCU_IO == 1
+ 281          /**************************************************************************//**
+ 282           * Change port type, Push-Pull or Open-Drain, of MCU I/O port.
+ 283           * @param port MCU I/O Port, one of MCU_PORT_A ~ MCU_PORT_E.
+ 284           * @param pp Push-pull or open-drain configuration.
+ 285           * @param pu Pull-up resistor configuration.
+ 286           ******************************************************************************/
+ 287          void McuCfgIOType(UCHAR port, UCHAR pp, UCHAR pu)
+ 288          {
+ 289   1          switch (port) {
+ 290   2              case MCU_PORT_A:
+ 291   2                  PTA_PP_REG = pp;
+ 292   2                  PTA_PU_REG = pu;
+ 293   2                  break;
+ 294   2      
+ 295   2              case MCU_PORT_B:
+ 296   2                  PTB_PP_REG = pp;
+ 297   2                  PTB_PU_REG = pu;
+ 298   2                  break;
+ 299   2      
+ 300   2              case MCU_PORT_C:
+C51 COMPILER V8.02   MCUIO                                                                 08/07/2015 16:22:22 PAGE 6   
+
+ 301   2                  PTC_PP_REG = pp;
+ 302   2                  PTC_PU_REG = pu;
+ 303   2                  break;
+ 304   2      
+ 305   2              case MCU_PORT_D:
+ 306   2                  PTD_PP_REG = pp;
+ 307   2                  PTD_PU_REG = pu;
+ 308   2                  break;
+ 309   2              case MCU_PORT_E:
+ 310   2                  PTE_PP_REG = pp;
+ 311   2                  PTE_PU_REG = pu;
+ 312   2                  break;
+ 313   2      #ifdef PORT_3_DEFAULT_PU
+ 314   2              case MCU_PORT_3:
+ 315   2                  PT3_PU_REG = pu;
+ 316   2                  break;
+ 317   2      #endif
+ 318   2          }
+ 319   1      }
+ 320          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    412    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

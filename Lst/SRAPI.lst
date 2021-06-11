@@ -1,0 +1,285 @@
+C51 COMPILER V8.02   SRAPI                                                                 08/07/2015 16:22:33 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SRAPI
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\SRAPI.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\SRAPI.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\
+                    -App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\
+                    -Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT
+                    -(.\Lst\SRAPI.lst) OBJECT(.\Bin\ADS\AXI\104N\SRAPI.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          #if ENABLE_SR == ON
+  16          //******************************************************************************
+  17          // M A C R O   D E F I N I T I O N S
+  18          //******************************************************************************
+  19          
+  20          //******************************************************************************
+  21          // G L O B A L   V A R I A B L E S
+  22          //******************************************************************************
+  23          
+  24          //******************************************************************************
+  25          // S T A T I C   V A R I A B L E S
+  26          //******************************************************************************
+  27          /*!
+  28           * Default setting of SR.
+  29           */
+  30          static code UCHAR ucSuperResolutionTable[12] = {
+  31          //    0x00, 0x00, 0x00, 0x01, 0x03, 0x06, 0x03, 0x0F, 0x19, 0x06, 0x19, 0x2C //Defualt
+  32          //    0x00, 0x00, 0x00, 0x00, 0x03, 0x06, 0x03, 0x0F, 0x19, 0x06, 0x19, 0x2C //Defualt
+  33              0x0A, 0x00, 0x00, 0x00, 0x28, 0x0D, 0xE2, 0x14, 0x28, 0xAF, 0x00, 0x00 //Defualt
+  34          };
+  35          
+  36          static code UCHAR ucSuperResolutionTable2[8] = {
+  37              0x31, 0xD1, 0x10, 0x0D, 0x0D, 0x1E, 0x14, 0x0D
+  38          };
+  39          
+  40          static code UCHAR ucSuperResolutionTable3[8] = {
+  41              0x30, 0x11, 0x00, 0x08, 0x00, 0x06, 0x00, 0x04
+  42          };
+  43          
+  44          //******************************************************************************
+  45          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  46          //******************************************************************************
+  47          
+  48          //******************************************************************************
+  49          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  50          //******************************************************************************
+  51          
+  52          //******************************************************************************
+C51 COMPILER V8.02   SRAPI                                                                 08/07/2015 16:22:33 PAGE 2   
+
+  53          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  54          //******************************************************************************
+  55          
+  56          //******************************************************************************
+  57          // F U N C T I O N   B O D Y S
+  58          //******************************************************************************
+  59          
+  60          /**************************************************************************//**
+  61           * Initialize SR-related registers.
+  62           ******************************************************************************/
+  63          void SRAPI_InitSR(void)
+  64          {
+  65   1          UCHAR i, *p;
+  66   1      
+  67   1          p = &FLT3_COEFFICENT;
+  68   1          for (i = 0; i < sizeof(ucSuperResolutionTable); i++) {
+  69   2              *p = ucSuperResolutionTable[i];
+  70   2              p++;
+  71   2          }
+  72   1          p = &FLT1_CONTROL_THR;
+  73   1          for (i = 0; i < sizeof(ucSuperResolutionTable2); i++) {
+  74   2              *p = ucSuperResolutionTable2[i];
+  75   2              p++;
+  76   2          }
+  77   1          p = &SC_SR_CONTROL;
+  78   1          for (i = 0; i < sizeof(ucSuperResolutionTable3); i++) {
+  79   2              *p = ucSuperResolutionTable3[i];
+  80   2              p++;
+  81   2          }
+  82   1          
+  83   1          SC_SR_CTRL = SCREG_EA0; //SR off
+  84   1          FLT3_MAX_VAR_LO = 0xCC;
+  85   1          FLT3_MAX_VAR_HI = 0x08;
+  86   1          FLT3_MEAN_VAR_LO = 0x00;
+  87   1          FLT3_MEAN_VAR_HI = 0x00;
+  88   1          FLT3_ADD_SUB_SOURCE = 0x00;
+  89   1          FLT3_BRIGHT_DARK_SOURCE = 0x00;
+  90   1          FLT3_BRIGHT_DARK_SLOP = 0xC4; // For pattern 1 white line
+  91   1          FLT3_CORING_SLOP = 0x07; // value : 6 ~ 8 is better
+  92   1          FLT1_CONTROL1 = 0x23;
+  93   1          FLT1_CONTROL2 = 0x44;
+  94   1          
+  95   1      }
+  96          
+  97          /**************************************************************************//**
+  98           * Turn on/off SR.
+  99           * @param on ON to turn on SR else OFF.
+ 100           ******************************************************************************/
+ 101          void SRAPI_TurnOnOff(UCHAR on)
+ 102          {
+ 103   1          //WaitDisVSync();
+ 104   1          if (on) {
+ 105   2              SC_SR_CTRL |= BIT0;
+ 106   2              SC_DIGITAL_CTRL |= BIT7;
+ 107   2          }
+ 108   1          else {
+ 109   2              SC_SR_CTRL &= ~BIT0;
+ 110   2              if ((SC_ADC_MID_CH_SEL & 0x07) == YPBPR_CLAMP) {
+ 111   3                  SC_DIGITAL_CTRL |= BIT7;  
+ 112   3              }
+ 113   2              else {
+ 114   3                  SC_DIGITAL_CTRL &= ~BIT7;  
+C51 COMPILER V8.02   SRAPI                                                                 08/07/2015 16:22:33 PAGE 3   
+
+ 115   3              }
+ 116   2          }
+ 117   1      }
+ 118          
+ 119          /*
+ 120          BOOL SRAPI_IsTurnOn()
+ 121          {
+ 122              if ((SC_SR_CTRL & BIT0) != 0 ) {
+ 123                  return TRUE;
+ 124              }
+ 125              else {
+ 126                  return FALSE;
+ 127              }
+ 128          }
+ 129          */
+ 130          
+ 131          /**************************************************************************//**
+ 132           * Set median filter.
+ 133           * @param ptr Pointer to the median filter block.
+ 134           ******************************************************************************/
+ 135          void SRAPI_SetMDNFilter(MDNBlock *ptr)
+ 136          {
+ 137   1          USHRT tmp;
+ 138   1      
+ 139   1          FLT1_TH = ptr->ucCutOffTH;
+ 140   1          FLT1_CUT_SLOP = ptr->ucCutOffSlop;
+ 141   1      
+ 142   1          tmp = (((ptr->ucHiVarGain & 0x0F) << 4) | (ptr->ucLoVarGain & 0x0F));
+ 143   1          FLT1_SLOP_TH = tmp;
+ 144   1      
+ 145   1          tmp = ((ptr->usVarTH & 0x0FFF) | (0 << 12));
+ 146   1          WriteShortScaler(&FLT1_VAR_TH_LO, tmp);
+ 147   1      }
+ 148          
+ 149          /**************************************************************************//**
+ 150           * Set USM filter.
+ 151           * @param ptr_rgn Pointer to the USM region block.
+ 152           * @param ptr_gain Pointer to the USM gain block.
+ 153           ******************************************************************************/
+ 154          void SRAPI_SetUSMFilter(USMRegionBlock *ptr_rgn, USMGainBlock *ptr_gain)
+ 155          {
+ 156   1          USHRT tmp;
+ 157   1      
+ 158   1          FLT3_CORING_TH = ptr_rgn->ucCutOffTH;
+ 159   1      
+ 160   1          tmp = (((ptr_rgn->ucHiVarGain & 0x0F) << 4) | (ptr_rgn->ucLoVarGain & 0x0F));
+ 161   1          FLT3_CORING_UP_LOW_TH = tmp;
+ 162   1      
+ 163   1          tmp = ((ptr_rgn->usVarTH & 0x0FFF) | (5 << 12));
+ 164   1          WriteShortScaler(&FLT3_COR_VAR_TH_LO, tmp);
+ 165   1      
+ 166   1          FLT3_GAIN = ptr_gain->ucGain & 0x3F;
+ 167   1      
+ 168   1          tmp = (((ptr_gain->ucHiVarGain & 0x0F) << 4) | (ptr_gain->ucLoVarGain & 0x0F));
+ 169   1          FLT3_GAIN_UP_LOW_TH = tmp;
+ 170   1      
+ 171   1          tmp = ((ptr_gain->usVarTH & 0x0FFF) | (4 << 12));
+ 172   1          WriteShortScaler(&FLT3_GAIN_VAR_TH_LO, tmp);
+ 173   1      }
+ 174          
+ 175          /**************************************************************************//**
+ 176           * Set threshold of USM low pass filter.
+C51 COMPILER V8.02   SRAPI                                                                 08/07/2015 16:22:33 PAGE 4   
+
+ 177           * @param threshold Threshold of USM low poass filter.
+ 178           ******************************************************************************/
+ 179          void SRAPI_SetUSMLPThreshold(USHRT threshold)
+ 180          {
+ 181   1          WriteShortScaler(&FLT3_LP_VAR_TH_LO, ((threshold & 0x0FFF) | (4 << 12)));
+ 182   1      }
+ 183          
+ 184          /**************************************************************************//**
+ 185           * Set Dark Limit enable
+ 186           * @param enable dark limit of USM.
+ 187           ******************************************************************************/
+ 188          void SRAPI_SetUSMDarkLimit(UCHAR darkLimit)
+ 189          {
+ 190   1          SC_SR_CONTROL = ((SC_SR_CONTROL & 0xDF) | (darkLimit<<5));
+ 191   1      }
+ 192          
+ 193          /**************************************************************************//**
+ 194           * Set demo area of SR.
+ 195           * @param on ON to turn on demo mode else OFF.
+ 196           * @param region Left side or right side.
+ 197           * @param value Width of demo area.
+ 198           ******************************************************************************/
+ 199          void SRAPI_SetDemoRegion(UCHAR on, SRDemoRegion region ,USHRT value)
+ 200          {
+ 201   1          USM_DEMO_MODE = (on & 0xFE) | (region << 1);
+ 202   1          WriteShortScaler(&USM_DEMO_WIDTH_LO, (value & 0x0FFF));
+ 203   1      }
+ 204          
+ 205          /**************************************************************************//**
+ 206           * Set Htotal (HPLL divider) pixel of SR.
+ 207           * @param htotal Horizontal pixel count of input timing.
+ 208           ******************************************************************************/
+ 209          void SRAPI_SetHtotal(USHRT htotal)
+ 210          {
+ 211   1          if (htotal < InputTiming.usCapHActive) {
+ 212   2              htotal = InputTiming.usCapHActive + 20;
+ 213   2          }
+ 214   1          htotal |= 0x8000;
+ 215   1          WriteShortScaler(&SC_SR_HTOTAL_LO, htotal);
+ 216   1      }
+ 217          
+ 218          /**************************************************************************//**
+ 219           * Set input timing width and input timing height area of SR.
+ 220           * @param width Capture width.
+ 221           * @param height Capture height.
+ 222           ******************************************************************************/
+ 223          void SRAPI_SetCaptureSize(USHRT width, USHRT height)
+ 224          {
+ 225   1          WriteShortScaler(&SC_SR_HACT_LO, (width& 0x0FFF));
+ 226   1          WriteShortScaler(&SC_SR_VACT_LO, (height& 0x0FFF));
+ 227   1          SC_SR_HBACKPORCH = 0x20;
+ 228   1      }
+ 229          
+ 230          /**************************************************************************//**
+ 231           * Enable SR Block
+ 232           ******************************************************************************/
+ 233          void SRAPI_SRBlockEnable(void)
+ 234          {
+ 235   1          if(GetHCaptureSize() > 1920){// SR limitation
+ 236   2              SC_ADC_BAND_GAP |= BIT0;
+ 237   2          }
+ 238   1          else{
+C51 COMPILER V8.02   SRAPI                                                                 08/07/2015 16:22:33 PAGE 5   
+
+ 239   2              SC_ADC_BAND_GAP &= ~BIT0;
+ 240   2          }
+ 241   1      }
+ 242          
+ 243          /**************************************************************************//**
+ 244           * Disable SR Block
+ 245           ******************************************************************************/
+ 246          void SRAPI_SRBlockDisable(void)
+ 247          {
+ 248   1           SC_ADC_BAND_GAP |= BIT0;
+ 249   1      }
+ 250          
+ 251          #endif //ENABLE_SR == ON
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    518    ----
+   CONSTANT SIZE    =     28    ----
+   XDATA SIZE       =      6       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

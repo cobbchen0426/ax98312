@@ -1,0 +1,1330 @@
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE OSDAPI
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\OSDAPI.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\OSDAPI.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.
+                    -\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT
+                    -\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRIN
+                    -T(.\Lst\OSDAPI.lst) OBJECT(.\Bin\ADS\AXI\104N\OSDAPI.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // M A C R O   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          /*!
+  18           * Data type for the API of OSD window rotation.
+  19           * This type is used in the OSDAPI.c only.
+  20           */
+  21          typedef enum _OSDWIN_DEGREE_ {
+  22              OSD_WIN_DEGREE_0,   /*!< Rotate 0 degree. */
+  23              OSD_WIN_DEGREE_90,  /*!< Rotate 90 degree. */
+  24              OSD_WIN_DEGREE_180, /*!< Rotate 180 degree. */
+  25              OSD_WIN_DEGREE_270, /*!< Rotate 270 degree. */
+  26              NUM_OSD_WIN_DEGREE  /*!< Number of rotation modes for OSD windows. */
+  27          } OSDWinDegree;
+  28          
+  29          /*!
+  30           * Macro function to set indent OSD attribute.
+  31           * This macro is used in the OSDAPI.c only.
+  32           */
+  33          #define SetIndentAlign(a) (ucOSDConfig = (ucOSDConfig&0xFC)|(a&0x03))
+  34          /*!
+  35           * Macro function to get indent OSD attribute.
+  36           * This macro is used in the OSDAPI.c only.
+  37           */
+  38          #define GetIndentAlign()  (ucOSDConfig & 0x03)
+  39          /*!
+  40           * Macro function to set OSD rotation attribute.
+  41           * This macro is used in the OSDAPI.c only.
+  42           */
+  43          #define SetOSDPosRot(r) (ucOSDConfig = (ucOSDConfig&0xF3)|((r&0x03) << 2))
+  44          /*!
+  45           * Macro function to get OSD rotation attribute.
+  46           * This macro is used in the OSDAPI.c only.
+  47           */
+  48          #define GetOSDPosRot()  ((ucOSDConfig & 0x0C) >> 2)
+  49          /*!
+  50           * Macro function to set the attribute of OSD window rotation.
+  51           * This macro is used in the OSDAPI.c only.
+  52           */
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 2   
+
+  53          #define SetOSDWinRotStatus(i, r) { \
+  54                  USHRT __mask__; \
+  55                  UCHAR __id__; \
+  56                  __id__ = i * 2; \
+  57                  __mask__ = 0x0003 << __id__; \
+  58                  __mask__ = ~__mask__; \
+  59                  usOSDWinRotStatus &= __mask__; \
+  60                  __mask__ = r; \
+  61                  usOSDWinRotStatus |= (__mask__ << __id__); \
+  62              }
+  63          /*!
+  64           * Macro function to get the attribute of OSD window rotation.
+  65           * This macro is used in the OSDAPI.c only.
+  66           */
+  67          #define GetOSDWinRotStatus(i) ((usOSDWinRotStatus >> (i * 2)) & 0x0003)
+  68          
+  69          
+  70          //******************************************************************************
+  71          // G L O B A L   V A R I A B L E S
+  72          //******************************************************************************
+  73          
+  74          //******************************************************************************
+  75          // S T A T I C   V A R I A B L E S
+  76          //******************************************************************************
+  77          static xdata UCHAR ucOSDConfig = (OSD_POS_ROT_OFF << 2) | OSD_ALIGN_LEFT; /*!< Variable for OSD indent sta
+             -tus and OSD rotation status. */
+  78          static xdata USHRT usOSDWinRotStatus = 0x0000; /*!< Rotation status of each OSD window. */
+  79          static xdata UCHAR ucOSDFontHeight; /*!< Variable for OSD font height. */
+  80          static xdata UCHAR ucOSDFontWidth;  /*!< Variable for OSD font width. */
+  81          static xdata UCHAR ucOSDHeight;     /*!< Variable for OSD height. Unit is OSD font height. */
+  82          static xdata UCHAR ucOSDWidth;      /*!< Variable for OSD width. Unit is OSD font width. */
+  83          static xdata UCHAR ucWinUnitWidth;  /*!< Variable for the pixel number of the unit of OSD window width. */
+  84          static xdata UCHAR ucWinUnitHeight; /*!< Variable for the pixel number of the unit of OSD window height. *
+             -/
+  85          
+  86          //******************************************************************************
+  87          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  88          //******************************************************************************
+  89          
+  90          //******************************************************************************
+  91          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  92          //******************************************************************************
+  93          static void OSDAPI_RotateOSDWinPosition(USHRT sx, USHRT sy, USHRT ex, USHRT ey, OSDWinDegree degree, UCHAR
+             - rot);
+  94          
+  95          //******************************************************************************
+  96          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  97          //******************************************************************************
+  98          
+  99          //******************************************************************************
+ 100          // F U N C T I O N   B O D Y S
+ 101          //******************************************************************************
+ 102          
+ 103          /**************************************************************************//**
+ 104           * Set 1/2/3/4-bits OSD font start address in OSD sram.
+ 105           * @param type Bits size per font.
+ 106           * @param addr Start address of x-bits OSD font.
+ 107           ******************************************************************************/
+ 108          void OSDAPI_SetFontAddress(OSDFontBits type, USHRT addr)
+ 109          {
+ 110   1          switch (type) {
+ 111   2              case OSD_FONTBITS_1b:
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 3   
+
+ 112   2                  SC_OSD_FONT1B_ADDR_LO = addr & 0x00ff;
+ 113   2                  SC_OSD_FONT1B_ADDR_HI = (addr & 0xff00) >> 8;
+ 114   2                  break;
+ 115   2              case OSD_FONTBITS_2b:
+ 116   2                  SC_OSD_FONT2B_ADDR_LO = addr & 0x00ff;
+ 117   2                  SC_OSD_FONT2B_ADDR_HI = (addr & 0xff00) >> 8;
+ 118   2                  break;
+ 119   2              case OSD_FONTBITS_3b:
+ 120   2                  SC_OSD_SEPARATE_ROW_CTRL |= BIT7;
+ 121   2                  SC_OSD_FONT4B_ADDR_LO = addr & 0x00ff;
+ 122   2                  SC_OSD_FONT4B_ADDR_HI = (addr & 0xff00) >> 8;
+ 123   2                  break;
+ 124   2              case OSD_FONTBITS_4b:
+ 125   2                  SC_OSD_SEPARATE_ROW_CTRL &= ~BIT7;
+ 126   2                  SC_OSD_FONT4B_ADDR_LO = addr & 0x00ff;
+ 127   2                  SC_OSD_FONT4B_ADDR_HI = (addr & 0xff00) >> 8;
+ 128   2                  break;
+ 129   2              default:
+ 130   2                  break;
+ 131   2          }
+ 132   1      }
+ 133          
+ 134          /**************************************************************************//**
+ 135           * Clear user-defined area of OSD sram by scaler.
+ 136           ******************************************************************************/
+ 137          void OSDAPI_ClearOSD(void)
+ 138          {
+ 139   1          OSDAPI_OSDPowerOn();
+ 140   1          SC_OSD_CODE_FC = 0x00;
+ 141   1          SC_OSD_CODE_FC_CTL |= BIT0;
+ 142   1          while ((SC_OSD_CODE_FC_CTL & BIT0) == BIT0) {
+ 143   2              // Do something to avoid dead loop here
+ 144   2          }
+ 145   1      }
+ 146          
+ 147          /**************************************************************************//**
+ 148           * Indicate OSD width.
+ 149           * @param width OSD width.
+ 150           ******************************************************************************/
+ 151          void OSDAPI_SetOSDWidth(UCHAR width)
+ 152          {
+ 153   1          ucOSDWidth = width;
+ 154   1      }
+ 155          
+ 156          /**************************************************************************//**
+ 157           * Indicate OSD height.
+ 158           * @param height OSD height.
+ 159           ******************************************************************************/
+ 160          void OSDAPI_SetOSDHeight(UCHAR height)
+ 161          {
+ 162   1          ucOSDHeight = height;
+ 163   1      }
+ 164          
+ 165          /**************************************************************************//**
+ 166           * Get OSD width.
+ 167           * @return OSD width.
+ 168           ******************************************************************************/
+ 169          UCHAR OSDAPI_GetOSDWidth(void)
+ 170          {
+ 171   1          return ucOSDWidth;
+ 172   1      }
+ 173          
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 4   
+
+ 174          /**************************************************************************//**
+ 175           * Get OSD height.
+ 176           * @return OSD height.
+ 177           ******************************************************************************/
+ 178          UCHAR OSDAPI_GetOSDHeight(void)
+ 179          {
+ 180   1          return ucOSDHeight;
+ 181   1      }
+ 182          
+ 183          /**************************************************************************//**
+ 184           * Indicate OSD font size. There are four types of OSD font size,
+ 185           * 10x16, 10x18, 12x16, 12x18.
+ 186           * @param size OSD font size.
+ 187           ******************************************************************************/
+ 188          void OSDAPI_SetFontSize(OSDFontSize size)
+ 189          {
+ 190   1          UCHAR ctrl;
+ 191   1          ctrl = SC_OSD_SPACE_CTL & 0x3F;
+ 192   1          switch (size) {
+ 193   2              case OSD_FONT_10X16:
+ 194   2                  ucOSDFontWidth = 10;
+ 195   2                  ucOSDFontHeight = 16;
+ 196   2                  SC_OSD_SPACE_CTL = ctrl | BIT7 | BIT6;
+ 197   2                  break;
+ 198   2              case OSD_FONT_10X18:
+ 199   2                  ucOSDFontWidth = 10;
+ 200   2                  ucOSDFontHeight = 18;
+ 201   2                  SC_OSD_SPACE_CTL = ctrl | BIT6;
+ 202   2                  break;
+ 203   2              case OSD_FONT_12X16:
+ 204   2                  ucOSDFontWidth = 12;
+ 205   2                  ucOSDFontHeight = 16;
+ 206   2                  SC_OSD_SPACE_CTL = ctrl | BIT7;
+ 207   2                  break;
+ 208   2              case OSD_FONT_12X18:
+ 209   2                  ucOSDFontWidth = 12;
+ 210   2                  ucOSDFontHeight = 18;
+ 211   2                  SC_OSD_SPACE_CTL = ctrl;
+ 212   2                  break;
+ 213   2              default:
+ 214   2                  break;
+ 215   2          };
+ 216   1      }
+ 217          
+ 218          /**************************************************************************//**
+ 219           * Get OSD font width. The value is \a 10 or \a 12.
+ 220           * @return OSD font width.
+ 221           ******************************************************************************/
+ 222          UCHAR OSDAPI_GetOSDFontWidth(void)
+ 223          {
+ 224   1          return ucOSDFontWidth;
+ 225   1      }
+ 226          
+ 227          /**************************************************************************//**
+ 228           * Get OSD font height. The value is \a 16 or \a 18.
+ 229           * @return OSD font height.
+ 230           ******************************************************************************/
+ 231          UCHAR OSDAPI_GetOSDFontHeight(void)
+ 232          {
+ 233   1          return ucOSDFontHeight;
+ 234   1      }
+ 235          
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 5   
+
+ 236          /**************************************************************************//**
+ 237           * Set OSD rotation.
+ 238           * @param rot OSD rotation mode.
+ 239           ******************************************************************************/
+ 240          void OSDAPI_RotateOSDPosition(OSDPosRotation rot)
+ 241          {
+ 242   1          SetOSDPosRot(rot);
+ 243   1      }
+ 244          
+ 245          /**************************************************************************//**
+ 246           * Set OSD position on screen.
+ 247           * @param x x position of OSD on screen. Step unit is font width.
+ 248           * @param y y position of OSD on screen. Step unit is font height.
+ 249           ******************************************************************************/
+ 250          void OSDAPI_SetPosition(USHRT x, USHRT y)        
+ 251          {
+ 252   1      #define OSDPOS_BOUNDRY(a,b,c) ((a < (b * c)) ? 0 : (a - b * c))
+ 253   1      
+ 254   1          USHRT fw, fh, ow, oh;
+ 255   1          USHRT xy;
+ 256   1      
+ 257   1          OSDAPI_OSDPowerOn(); 
+ 258   1          fw = OSDAPI_GetOSDFontWidth();
+ 259   1          fh = OSDAPI_GetOSDFontHeight();
+ 260   1          ow = OSDAPI_GetOSDWidth();
+ 261   1          oh = OSDAPI_GetOSDHeight();
+ 262   1          switch(GetOSDPosRot()) 
+ 263   1              {
+ 264   2              //case OSD_POS_ROT_90: // 90
+ 265   2              //    break;
+ 266   2              //case OSD_POS_ROT_180: //180
+ 267   2              //    break;
+ 268   2              case OSD_POS_ROT_270: //270
+ 269   2                  xy = PANEL_WIDTH - OSD_YPOS_TOP_OFFSET - OSD_YPOS_BOTTOM_OFFSET;
+ 270   2                  xy = (ULONG) OSDPOS_BOUNDRY(xy, fh, oh) * (OSD_POS_STEPS - y) / OSD_POS_STEPS;
+ 271   2                  xy += OSD_YPOS_TOP_OFFSET;
+ 272   2                  SC_OSD_HS_LO = (xy & 0x00FF);
+ 273   2                  SC_OSD_HS_HI = (xy & 0xFF00) >> 8;
+ 274   2                  SC_OSD_HW = ow - 1;
+ 275   2                  xy = PANEL_HEIGHT - OSD_XPOS_LEFT_OFFSET - OSD_XPOS_RIGHT_OFFSET;
+ 276   2                  xy = (ULONG) OSDPOS_BOUNDRY(xy, fw, ow) * x / OSD_POS_STEPS;
+ 277   2                  xy += OSD_XPOS_RIGHT_OFFSET;
+ 278   2                  SC_OSD_VS_LO = (xy & 0x00FF);
+ 279   2                  SC_OSD_VS_HI = (xy & 0xFF00) >> 8;
+ 280   2                  SC_OSD_VH = oh - 1;
+ 281   2                  break;
+ 282   2              default:
+ 283   2                  xy = PANEL_WIDTH - OSD_XPOS_LEFT_OFFSET - OSD_XPOS_RIGHT_OFFSET;
+ 284   2                  xy = (ULONG) OSDPOS_BOUNDRY(xy, fw, ow) * x / OSD_POS_STEPS;
+ 285   2                  xy += OSD_XPOS_LEFT_OFFSET;
+ 286   2                  SC_OSD_HS_LO = (xy & 0x00FF);
+ 287   2                  SC_OSD_HS_HI = (xy & 0xFF00) >> 8;
+ 288   2                  SC_OSD_HW = ow - 1;
+ 289   2                  xy = PANEL_HEIGHT - OSD_YPOS_TOP_OFFSET - OSD_YPOS_BOTTOM_OFFSET;
+ 290   2                  xy = (ULONG) OSDPOS_BOUNDRY(xy, fh, oh) * (OSD_POS_STEPS - y) / OSD_POS_STEPS;
+ 291   2                  xy += OSD_YPOS_TOP_OFFSET;
+ 292   2      #if defined (SET_OSD_LEFT_TOP) 
+                          SC_OSD_VS_LO = 1;
+                          SC_OSD_VS_HI = 0;
+              #else
+ 296   2                  SC_OSD_VS_LO = (xy & 0x00FF);
+ 297   2                  SC_OSD_VS_HI = (xy & 0xFF00) >> 8;
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 6   
+
+ 298   2      #endif
+ 299   2                  SC_OSD_VH = oh - 1;
+ 300   2                  break;
+ 301   2          }
+ 302   1      
+ 303   1          WaitDisVSync();  // Always waiting display VSync to insure OSD H/V has been
+ 304   1                           // loaded into scaler.
+ 305   1                           // Jude 2010/10/08
+ 306   1      #undef OSDPOS_BOUNDRY
+ 307   1      }
+ 308          
+ 309          /**************************************************************************//**
+ 310           * Set OSD position on screen.
+ 311           * @param x x position of OSD on screen. Step unit is one pixel.
+ 312           * @param y y position of OSD on screen. Step unit is one pixel.
+ 313           ******************************************************************************/
+ 314          void OSDAPI_SetRowPosition(USHRT x, USHRT y)
+ 315          {
+ 316   1          SC_OSD_HS_LO = (x & 0x00FF);
+ 317   1          SC_OSD_HS_HI = (x & 0xFF00) >> 8;
+ 318   1          SC_OSD_HW = ucOSDWidth - 1;
+ 319   1          SC_OSD_VS_LO = (y & 0x00FF);
+ 320   1          SC_OSD_VS_HI = (y & 0xFF00) >> 8;
+ 321   1          SC_OSD_VH = ucOSDHeight - 1;
+ 322   1          WaitDisVSync();
+ 323   1      }
+ 324          
+ 325          /**************************************************************************//**
+ 326           * Show string at (x,y) on OSD.
+ 327           * @param attr Set OSD attributes at font(x,y).
+ 328           * @param x x position of string on OSD.
+ 329           * @param y y position of string on OSD.
+ 330           * @param len Number of characters of the string.
+ 331           * @param pstr Point to a list of font index.
+ 332           ******************************************************************************/
+ 333          void OSDAPI_WriteXYString(BOOL attr, UCHAR x, UCHAR y, UCHAR len, UCHAR *pstr)
+ 334          {
+ 335   1          UCHAR i;
+ 336   1          USHRT m;
+ 337   1      
+ 338   1          ResetWDTimer();
+ 339   1          m = (USHRT) y * ucOSDWidth + x;
+ 340   1      
+ 341   1          if (attr == TRUE) {
+ 342   2              SC_INDEX_CTRL = 0x90;
+ 343   2          }
+ 344   1          else {
+ 345   2              SC_INDEX_CTRL = 0x40;
+ 346   2          }
+ 347   1          SC_INDEX_ADDR_LO = (UCHAR) m;
+ 348   1          SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 349   1      
+ 350   1          for (i = 0; i < len; i++) {
+ 351   2              SC_INDEX_DATA = pstr[i];
+ 352   2          }
+ 353   1          ResetWDTimer();
+ 354   1      }
+ 355          
+ 356          /**************************************************************************//**
+ 357           * Show string at (x,y) on OSD with specified alignment.
+ 358           * @param attr Set OSD attributes at OSD(x,y).
+ 359           * @param x x position of string on OSD.
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 7   
+
+ 360           * @param y y position of string on OSD.
+ 361           * @param len Length of the string.
+ 362           * @param pstr Point to a list of font index.
+ 363           * @param align_len Length of the alignment.
+ 364           ******************************************************************************/
+ 365          /*
+ 366          void OSDAPI_WriteXYStringAlign(BOOL attr, UCHAR x, UCHAR y, UCHAR len, UCHAR *pstr, UCHAR align_len)
+ 367          {
+ 368              UCHAR new_x;
+ 369          
+ 370              if (align_len < len) { //Error handling
+ 371                  align_len = len;
+ 372              }
+ 373          
+ 374              switch (GetIndentAlign()) {
+ 375                  case OSD_ALIGN_LEFT:
+ 376                      new_x = x;
+ 377                      break;
+ 378          
+ 379                  case OSD_ALIGN_RIGHT:
+ 380                      new_x = x + (align_len-len);
+ 381                      break;
+ 382          
+ 383                  case OSD_ALIGN_CENTER:
+ 384                      new_x = x + (align_len-len)/2;
+ 385                      break;
+ 386              }
+ 387          
+ 388              OSDAPI_WriteXYRepeatChar(attr, x, y, align_len, 0x00);
+ 389              OSDAPI_WriteXYString(attr, new_x, y, len, pstr);
+ 390          }
+ 391          */
+ 392          
+ 393          /**************************************************************************//**
+ 394           * Show string. The x/y information is composed in the string.
+ 395           * @param attr Set OSD attributes.
+ 396           * @param pstr point to a list of font index with (x,y,len).
+ 397           ******************************************************************************/
+ 398          /*
+ 399          void OSDAPI_WriteString(BOOL attr, UCHAR *pstr)
+ 400          {
+ 401              UCHAR i, l;
+ 402              USHRT m;
+ 403          
+ 404              ResetWDTimer();
+ 405              m = pstr[2] * ucOSDWidth + pstr[1];
+ 406          
+ 407              if (attr == TRUE) {
+ 408                  SC_INDEX_CTRL = 0x90;
+ 409              }
+ 410              else {
+ 411                  SC_INDEX_CTRL = 0x40;
+ 412              }
+ 413              SC_INDEX_ADDR_LO = (UCHAR) m;
+ 414              SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 415          
+ 416              l = pstr[0] + 1;
+ 417              for (i = 3; i < l; i++) {
+ 418                  SC_INDEX_DATA = pstr[i];
+ 419              }
+ 420              ResetWDTimer();
+ 421          }
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 8   
+
+ 422          */
+ 423          
+ 424          /**************************************************************************//**
+ 425           * Show a string with same characters on OSD.
+ 426           * @param attr Set OSD attributes.
+ 427           * @param x x position of string on OSD.
+ 428           * @param y y position of string on OSD.
+ 429           * @param num Number of characters to be displayed on OSD.
+ 430           * @param ch The character to be showed on OSD.
+ 431           ******************************************************************************/
+ 432          void OSDAPI_WriteXYRepeatChar(BOOL attr, UCHAR x, UCHAR y, UCHAR num, UCHAR ch)
+ 433          {
+ 434   1          UCHAR i;
+ 435   1          USHRT m;
+ 436   1      
+ 437   1          ResetWDTimer();
+ 438   1          m = y * ucOSDWidth + x;
+ 439   1      
+ 440   1          if (attr == TRUE) {
+ 441   2              SC_INDEX_CTRL = 0x90;
+ 442   2          }
+ 443   1          else {
+ 444   2              SC_INDEX_CTRL = 0x40;
+ 445   2          }
+ 446   1          SC_INDEX_ADDR_LO = (UCHAR) m;
+ 447   1          SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 448   1      
+ 449   1          for (i = 0; i < num; i++) {
+ 450   2              SC_INDEX_DATA = ch;
+ 451   2          }
+ 452   1          ResetWDTimer();
+ 453   1      }
+ 454          
+ 455          /**************************************************************************//**
+ 456           * Show character at OSD(x,y).
+ 457           * @param attr Set OSD attributes.
+ 458           * @param x x position of char on OSD.
+ 459           * @param y y position of char on OSD.
+ 460           * @param ch The character to be showed on OSD.
+ 461           ******************************************************************************/
+ 462          /*
+ 463          void OSDAPI_WriteXYChar(BOOL attr, UCHAR x, UCHAR y, UCHAR ch)
+ 464          {
+ 465              USHRT m;
+ 466          
+ 467              ResetWDTimer();
+ 468              m = y * ucOSDWidth + x;
+ 469          
+ 470              if (attr == TRUE) {
+ 471                  SC_INDEX_CTRL = 0x90;    
+ 472              }
+ 473              else {
+ 474                  SC_INDEX_CTRL = 0x40;
+ 475              }
+ 476              SC_INDEX_ADDR_LO = (UCHAR) m;
+ 477              SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 478              SC_INDEX_DATA = ch;
+ 479              ResetWDTimer();
+ 480          }
+ 481          */
+ 482          
+ 483          /**************************************************************************//**
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 9   
+
+ 484           * Set same OSD font attributes to a string at OSD(x,y).
+ 485           * @param x x position of a string on OSD.
+ 486           * @param y y position of a string on OSD.
+ 487           * @param num Length of a string.
+ 488           * @param attr Set OSD attributes.
+ 489           ******************************************************************************/
+ 490          void OSDAPI_FillLineAttr(UCHAR x, UCHAR y, UCHAR num, USHRT attr)
+ 491          {
+ 492   1          UCHAR i;
+ 493   1          USHRT m;
+ 494   1      
+ 495   1          ResetWDTimer();
+ 496   1          m = y * ucOSDWidth + x;
+ 497   1      
+ 498   1          SC_INDEX_CTRL = 0x70;
+ 499   1          SC_INDEX_ADDR_LO = (UCHAR) m;
+ 500   1          SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 501   1          for (i = 0; i < num; i++) {
+ 502   2              SC_INDEX_DATA = (UCHAR) attr;
+ 503   2              SC_INDEX_DATA = (UCHAR)(attr >> 8);
+ 504   2          }
+ 505   1          ResetWDTimer();
+ 506   1      }
+ 507          
+ 508          /**************************************************************************//**
+ 509           * Set font attributes with a list of attribute settings.
+ 510           * @param x x start position of a string on OSD.
+ 511           * @param y y start position of a string on OSD.
+ 512           * @param num Length of a string.
+ 513           * @param ptr Pointer to the list of font attributes.
+ 514           ******************************************************************************/
+ 515          void OSDAPI_FillLineAttrList(UCHAR x, UCHAR y, UCHAR num, USHRT *ptr)
+ 516          {
+ 517   1          UCHAR i;
+ 518   1          USHRT m;
+ 519   1      
+ 520   1          ResetWDTimer();
+ 521   1          m = y * ucOSDWidth + x;
+ 522   1      
+ 523   1          SC_INDEX_CTRL = 0x70;
+ 524   1          SC_INDEX_ADDR_LO = (UCHAR) m;
+ 525   1          SC_INDEX_ADDR_HI = (UCHAR)(m >> 8);
+ 526   1      
+ 527   1          for (i = 0; i < num; i++) {
+ 528   2              SC_INDEX_DATA = (UCHAR) *ptr;
+ 529   2              SC_INDEX_DATA = (UCHAR)(*ptr >> 8);
+ 530   2              ptr++;
+ 531   2          }
+ 532   1          ResetWDTimer();
+ 533   1      }
+ 534          
+ 535          /**************************************************************************//**
+ 536           * Indicate position alignment, right, left or center, on OSD.
+ 537           * @param algn Position alignment on OSD.
+ 538           ******************************************************************************/
+ 539          void OSDAPI_SetAlignType(OSDAlignment algn)
+ 540          {
+ 541   1          SetIndentAlign(algn);
+ 542   1      }
+ 543          
+ 544          /**************************************************************************//**
+ 545           * Return position alignment, right, left or center, on OSD.
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 10  
+
+ 546           * @return Position alignment. OSD_ALIGN_LEFT, OSD_ALIGN_RIGHT or OSD_ALIGN_CENTER.
+ 547           ******************************************************************************/
+ 548          UCHAR OSDAPI_GetAlignType(void)
+ 549          {
+ 550   1          return GetIndentAlign();
+ 551   1      }
+ 552          
+ 553          #if ENABLE_OSD_ROTATION == ON
+              /**************************************************************************//**
+               * Rotate OSD font.
+               * @param[out] des Pointer to destination font buffer.
+               * @param[in] src Pointer to source font buffer.
+               ******************************************************************************/
+              void OSDAPI_RotateFont(UCHAR *des, UCHAR *src)
+              {
+              #define B0(a) (a&0x01)
+              #define B1(a) ((a&0x02)>>1)
+              #define B2(a) ((a&0x04)>>2)
+              #define B3(a) ((a&0x08)>>3)
+              #define B4(a) ((a&0x10)>>4)
+              #define B5(a) ((a&0x20)>>5)
+              #define B6(a) ((a&0x40)>>6)
+              #define B7(a) ((a&0x80)>>7)
+              
+                  des[26] = (B4(src[25])<<7) | (B0(src[24])<<6) | (B4(src[22])<<5) | (B0(src[21])<<4) | 
+                            (B4(src[19])<<3) | (B0(src[18])<<2) | (B4(src[16])<<1) | (B0(src[15])<<0);
+                  des[25] = (B4(src[13])<<7) | (B0(src[12])<<6) | (B4(src[10])<<5) | (B0(src[ 9])<<4) | 
+                            (B4(src[ 7])<<3) | (B0(src[ 6])<<2) | (B4(src[ 4])<<1) | (B0(src[ 3])<<0);
+                  des[24] = (B4(src[ 1])<<7) | (B0(src[ 0])<<6) | (B5(src[25])<<5) | (B1(src[24])<<4) | 
+                            (B5(src[22])<<3) | (B1(src[21])<<2) | (B5(src[19])<<1) | (B1(src[18])<<0);
+                  des[23] = (B5(src[16])<<7) | (B1(src[15])<<6) | (B5(src[13])<<5) | (B1(src[12])<<4) | 
+                            (B5(src[10])<<3) | (B1(src[ 9])<<2) | (B5(src[ 7])<<1) | (B1(src[ 6])<<0);
+                  des[22] = (B5(src[ 4])<<7) | (B1(src[ 3])<<6) | (B5(src[ 1])<<5) | (B1(src[ 0])<<4) | 
+                            (B6(src[25])<<3) | (B2(src[24])<<2) | (B6(src[22])<<1) | (B2(src[21])<<0);
+                  des[21] = (B6(src[19])<<7) | (B2(src[18])<<6) | (B6(src[16])<<5) | (B2(src[15])<<4) | 
+                            (B6(src[13])<<3) | (B2(src[12])<<2) | (B6(src[10])<<1) | (B2(src[ 9])<<0);
+                  des[20] = (B6(src[ 7])<<7) | (B2(src[ 6])<<6) | (B6(src[ 4])<<5) | (B2(src[ 3])<<4) | 
+                            (B6(src[ 1])<<3) | (B2(src[ 0])<<2) | (B7(src[25])<<1) | (B3(src[24])<<0);
+                  des[19] = (B7(src[22])<<7) | (B3(src[21])<<6) | (B7(src[19])<<5) | (B3(src[18])<<4) | 
+                            (B7(src[16])<<3) | (B3(src[15])<<2) | (B7(src[13])<<1) | (B3(src[12])<<0);
+                  des[18] = (B7(src[10])<<7) | (B3(src[ 9])<<6) | (B7(src[ 7])<<5) | (B3(src[ 6])<<4) | 
+                            (B7(src[ 4])<<3) | (B3(src[ 3])<<2) | (B7(src[ 1])<<1) | (B3(src[ 0])<<0);
+                  des[17] = (B0(src[26])<<7) | (B4(src[24])<<6) | (B0(src[23])<<5) | (B4(src[21])<<4) | 
+                            (B0(src[20])<<3) | (B4(src[18])<<2) | (B0(src[17])<<1) | (B4(src[15])<<0);  
+                  des[16] = (B0(src[14])<<7) | (B4(src[12])<<6) | (B0(src[11])<<5) | (B4(src[ 9])<<4) | 
+                            (B0(src[ 8])<<3) | (B4(src[ 6])<<2) | (B0(src[ 5])<<1) | (B4(src[ 3])<<0);   
+                  des[15] = (B0(src[ 2])<<7) | (B4(src[ 0])<<6) | (B1(src[26])<<5) | (B5(src[24])<<4) | 
+                            (B1(src[23])<<3) | (B5(src[21])<<2) | (B1(src[20])<<1) | (B5(src[18])<<0);
+                  des[14] = (B1(src[17])<<7) | (B5(src[15])<<6) | (B1(src[14])<<5) | (B5(src[12])<<4) | 
+                            (B1(src[11])<<3) | (B5(src[ 9])<<2) | (B1(src[ 8])<<1) | (B5(src[ 6])<<0);
+                  des[13] = (B1(src[ 5])<<7) | (B5(src[ 3])<<6) | (B1(src[ 2])<<5) | (B5(src[ 0])<<4) | 
+                            (B2(src[26])<<3) | (B6(src[24])<<2) | (B2(src[23])<<1) | (B6(src[21])<<0);
+                  des[12] = (B2(src[20])<<7) | (B6(src[18])<<6) | (B2(src[17])<<5) | (B6(src[15])<<4) | 
+                            (B2(src[14])<<3) | (B6(src[12])<<2) | (B2(src[11])<<1) | (B6(src[ 9])<<0);
+                  des[11] = (B2(src[ 8])<<7) | (B6(src[ 6])<<6) | (B2(src[ 5])<<5) | (B6(src[ 3])<<4) | 
+                            (B2(src[ 2])<<3) | (B6(src[ 0])<<2) | (B3(src[26])<<1) | (B7(src[24])<<0);
+                  des[10] = (B3(src[23])<<7) | (B7(src[21])<<6) | (B3(src[20])<<5) | (B7(src[18])<<4) | 
+                            (B3(src[17])<<3) | (B7(src[15])<<2) | (B3(src[14])<<1) | (B7(src[12])<<0);
+                  des[ 9] = (B3(src[11])<<7) | (B7(src[ 9])<<6) | (B3(src[ 8])<<5) | (B7(src[ 6])<<4) | 
+                            (B3(src[ 5])<<3) | (B7(src[ 3])<<2) | (B3(src[ 2])<<1) | (B7(src[ 0])<<0);    
+                  des[ 8] = (B4(src[26])<<7) | (B0(src[25])<<6) | (B4(src[23])<<5) | (B0(src[22])<<4) | 
+                            (B4(src[20])<<3) | (B0(src[19])<<2) | (B4(src[17])<<1) | (B0(src[16])<<0);
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 11  
+
+                  des[ 7] = (B4(src[14])<<7) | (B0(src[13])<<6) | (B4(src[11])<<5) | (B0(src[10])<<4) | 
+                            (B4(src[ 8])<<3) | (B0(src[ 7])<<2) | (B4(src[ 5])<<1) | (B0(src[ 4])<<0);
+                  des[ 6] = (B4(src[ 2])<<7) | (B0(src[ 1])<<6) | (B5(src[26])<<5) | (B1(src[25])<<4) | 
+                            (B5(src[23])<<3) | (B1(src[22])<<2) | (B5(src[20])<<1) | (B1(src[19])<<0);
+                  des[ 5] = (B5(src[17])<<7) | (B1(src[16])<<6) | (B5(src[14])<<5) | (B1(src[13])<<4) | 
+                            (B5(src[11])<<3) | (B1(src[10])<<2) | (B5(src[ 8])<<1) | (B1(src[ 7])<<0);
+                  des[ 4] = (B5(src[ 5])<<7) | (B1(src[ 4])<<6) | (B5(src[ 2])<<5) | (B1(src[ 1])<<4) | 
+                            (B6(src[26])<<3) | (B2(src[25])<<2) | (B6(src[23])<<1) | (B2(src[22])<<0);
+                  des[ 3] = (B6(src[20])<<7) | (B2(src[19])<<6) | (B6(src[17])<<5) | (B2(src[16])<<4) | 
+                            (B6(src[14])<<3) | (B2(src[13])<<2) | (B6(src[11])<<1) | (B2(src[10])<<0);
+                  des[ 2] = (B6(src[ 8])<<7) | (B2(src[ 7])<<6) | (B6(src[ 5])<<5) | (B2(src[ 4])<<4) | 
+                            (B6(src[ 2])<<3) | (B2(src[ 1])<<2) | (B7(src[26])<<1) | (B3(src[25])<<0);
+                  des[ 1] = (B7(src[23])<<7) | (B3(src[22])<<6) | (B7(src[20])<<5) | (B3(src[19])<<4) | 
+                            (B7(src[17])<<3) | (B3(src[16])<<2) | (B7(src[14])<<1) | (B3(src[13])<<0);
+                  des[ 0] = (B7(src[11])<<7) | (B3(src[10])<<6) | (B7(src[ 8])<<5) | (B3(src[ 7])<<4) | 
+                            (B7(src[ 5])<<3) | (B3(src[ 4])<<2) | (B7(src[ 2])<<1) | (B3(src[ 1])<<0);
+              
+              #undef B0
+              #undef B1
+              #undef B2
+              #undef B3
+              #undef B4
+              #undef B5
+              #undef B6
+              #undef B7
+              }
+              
+              /**************************************************************************//**
+               * Rotate indent OSD font.
+               * @param[out] des Pointer to destination font buffer.
+               * @param[in] src Pointer to source font buffer.
+               ******************************************************************************/
+              void OSDAPI_RotateIdentFont(UCHAR *des, USHRT *src)
+              {
+                  UCHAR i,buffer[27];
+              
+                  for (i = 0; i < 9; i++) {
+                      buffer[3*i]   = (UCHAR)(src[2*i]>>4);
+                      buffer[3*i+1] = (UCHAR)((src[2*i+1]&0x00F0) | (src[2*i]>>12));
+                      buffer[3*i+2] = (UCHAR)(src[2*i+1]>>8);
+                  }
+                  OSDAPI_RotateFont(des, buffer);
+              }
+              #endif //ENABLE_OSD_ROTATION == ON
+ 652          
+ 653          #if ENABLE_OSD_MIRROR == ON
+              /**************************************************************************//**
+               * Reverse the bit string of a character.
+               * @param target The original character.
+               * @return Reversed character.
+               ******************************************************************************/
+              static UCHAR OSDAPI_ReverseChar(UCHAR target)
+              {
+                  UCHAR tmp,i;
+                  
+                  tmp = 0;    
+                  for (i = 0; i < 8; i++) {
+                      tmp = (tmp << 1) | ((target>>i)&0x01);
+                  }
+                      
+                  return tmp;
+              }
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 12  
+
+              
+              /**************************************************************************//**
+               * Reverse the bit string of a short(2 x character).
+               * @param target The original short.
+               * @return Reversed short.
+               ******************************************************************************/
+              static USHRT OSDAPI_ReverseShort(USHRT target)
+              {
+                  USHRT tmp;
+                  UCHAR i;
+                  tmp = 0;
+                      
+                  for (i = 0; i < 16; i++) {
+                      tmp = (tmp << 1) | ((target>>i)&0x01);
+                  }
+                  
+                  return tmp;
+              }
+              
+              /**************************************************************************//**
+               * Mirror one OSD font.
+               * @param[out] des Pointer to destination font buffer.
+               * @param[in] src Pointer to source font buffer.
+               * @param width OSD font width (10 or 12).
+               ******************************************************************************/
+              void OSDAPI_MirrorFont(UCHAR *des, UCHAR *src, UCHAR width)
+              {
+                  UCHAR i;
+                  UCHAR tmp1,tmp2,tmp3;
+                  UCHAR mrr1,mrr2,mrr3;
+              
+                  for (i = 0; i < 9; i++) {
+                      tmp1 = OSDAPI_ReverseChar(src[i*3+0]);
+                      tmp2 = OSDAPI_ReverseChar(src[i*3+1]);
+                      tmp3 = OSDAPI_ReverseChar(src[i*3+2]);
+                      mrr1 = ((tmp2&0xf0) >> 4) | ((tmp1&0x0f) << 4);
+                      mrr2 = ((tmp1&0xf0) >> 4) | ((tmp3&0x0f) << 4);
+                      mrr3 = ((tmp3&0xf0) >> 4) | ((tmp2&0x0f) << 4);
+                      des[i*3+0] = (mrr1 << (12-width));
+                      des[i*3+1] = (mrr2 << (12-width));
+                      des[i*3+2] = (mrr3 << (12-width));
+                  }
+              }
+              
+              /**************************************************************************//**
+               * Mirror one indent OSD font.
+               * @param[out] des Pointer to destination font buffer.
+               * @param[in] src Pointer to source font buffer.
+               * @param width indent OSD font width.
+               ******************************************************************************/
+              void OSDAPI_MirrorIdentFont(USHRT *des, USHRT *src, UCHAR width)
+              {
+                  UCHAR i;
+                  for (i = 0; i < 18; i++) {
+                      des[i] = (OSDAPI_ReverseShort(src[i]) << (16-width));
+                  }
+              }
+              #endif //ENABLE_OSD_MIRROR == ON
+ 728          
+ 729          #if ENABLE_OSD_FLIP == ON
+              /**************************************************************************//**
+               * Flip one OSD font.
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 13  
+
+               * @param[out] des Pointer to destination font buffer.
+               * @param[in] src Pointer to source font buffer.
+               * @param height OSD font height.
+               ******************************************************************************/
+              void OSDAPI_FlipFont(UCHAR *des, UCHAR *src, UCHAR height)
+              {
+                  UCHAR buffer[27], i;
+                  
+                  for (i = 0; i < (height/2*3); i++) {
+                      buffer[i] = src[height/2*3-1-i];
+                  }
+                  for (i = 0; i < height/2; i++) {
+                      des[i*3]   = ((buffer[i*3+1]&0xf0)>>4)+((buffer[i*3]&0x0f)<<4);
+                      des[i*3+1] = ((buffer[i*3]&0xf0)>>4)+((buffer[i*3+2]&0x0f)<<4);
+                      des[i*3+2] = ((buffer[i*3+2]&0xf0)>>4)+((buffer[i*3+1]&0x0f)<<4);
+                  }
+              }
+              
+              /**************************************************************************//**
+               * Flip one indent OSD font.
+               * @param[out] des Pointer to destination font buffer.
+               * @param[in] src Pointer to source font buffer.
+               * @param height indent OSD font height.
+               ******************************************************************************/
+              void OSDAPI_FlipIdentFont(USHRT *des, USHRT *src, UCHAR height)
+              {
+                  UCHAR i;
+                  
+                  for (i = 0; i < (height/2); i++) {
+                      des[i] = src[height-1-i];
+                      des[height-1-i] = src[i];
+                  }
+              }
+              #endif //ENABLE_OSD_FLIP == ON
+ 766          
+ 767          #if ENABLE_OSD_WINDOWS == ON
+ 768          /**************************************************************************//**
+ 769           * Turn on OSD window.
+ 770           * @param id Window ID.
+ 771           ******************************************************************************/
+ 772          void OSDAPI_OSDWinOn(OSDWindow id)
+ 773          {
+ 774   1          switch (id) {
+ 775   2              case OSD_WINDOW1:
+ 776   2                  SC_OSD_CTRL1 |= BIT1;
+ 777   2                  break;
+ 778   2              case OSD_WINDOW2:
+ 779   2                  SC_OSD_CTRL1 |= BIT2;
+ 780   2                  break;
+ 781   2              case OSD_WINDOW3:
+ 782   2                  SC_OSD_CTRL1 |= BIT3;
+ 783   2                  break;
+ 784   2              case OSD_WINDOW4:
+ 785   2                  SC_OSD_CTRL1 |= BIT4;
+ 786   2                  break;
+ 787   2              case OSD_WINDOW5:
+ 788   2                  SC_OSD_WIN_SEL |= BIT4;
+ 789   2                  break;
+ 790   2              case OSD_WINDOW6:
+ 791   2                  SC_OSD_WIN_SEL |= BIT5;
+ 792   2                  break;
+ 793   2              case OSD_WINDOW7:
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 14  
+
+ 794   2                  SC_OSD_WIN_SEL |= BIT6;
+ 795   2                  break;
+ 796   2              case OSD_WINDOW8:
+ 797   2                  SC_OSD_WIN_SEL |= BIT7;
+ 798   2                  break;
+ 799   2              default:
+ 800   2                  break;
+ 801   2          }
+ 802   1      }
+ 803          
+ 804          /**************************************************************************//**
+ 805           * Turn off OSD window.
+ 806           * @param id Window ID.
+ 807           ******************************************************************************/
+ 808          void OSDAPI_OSDWinOff(OSDWindow id)
+ 809          {
+ 810   1          switch (id) {
+ 811   2              case OSD_WINDOW1:
+ 812   2                  SC_OSD_CTRL1 &= ~BIT1;
+ 813   2                  break;
+ 814   2              case OSD_WINDOW2:
+ 815   2                  SC_OSD_CTRL1 &= ~BIT2;
+ 816   2                  break;
+ 817   2              case OSD_WINDOW3:
+ 818   2                  SC_OSD_CTRL1 &= ~BIT3;
+ 819   2                  break;
+ 820   2              case OSD_WINDOW4:
+ 821   2                  SC_OSD_CTRL1 &= ~BIT4;
+ 822   2                  break;
+ 823   2              case OSD_WINDOW5:
+ 824   2                  SC_OSD_WIN_SEL &= ~BIT4;
+ 825   2                  break;
+ 826   2              case OSD_WINDOW6:
+ 827   2                  SC_OSD_WIN_SEL &= ~BIT5;
+ 828   2                  break;
+ 829   2              case OSD_WINDOW7:
+ 830   2                  SC_OSD_WIN_SEL &= ~BIT6;
+ 831   2                  break;
+ 832   2              case OSD_WINDOW8:
+ 833   2                  SC_OSD_WIN_SEL &= ~BIT7;
+ 834   2                  break;
+ 835   2              case OSD_WIN_OFF:
+ 836   2              default:
+ 837   2                  SC_OSD_CTRL1 &= 0xE1;
+ 838   2                  SC_OSD_WIN_SEL &= 0x0F;
+ 839   2                  break;
+ 840   2          }
+ 841   1      }
+ 842          
+ 843          /**************************************************************************//**
+ 844           * Select the accessible OSD window.
+ 845           * @param id Window ID.
+ 846           ******************************************************************************/
+ 847          void OSDAPI_SelOSDWin(OSDWindow id)
+ 848          {
+ 849   1          if (id > OSD_WINDOW8)
+ 850   1              return;
+ 851   1          SC_OSD_WIN_SEL = (SC_OSD_WIN_SEL & 0xf8) | id;
+ 852   1      }
+ 853          
+ 854          /**************************************************************************//**
+ 855           * Set OSD window width/height unit.
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 15  
+
+ 856           * @param width Set unit size (number of pixels) of window width.
+ 857           * @param height Set unit size(number of pixels) of window height.
+ 858           ******************************************************************************/
+ 859          void OSDAPI_SetOSDWinSizeUnit(UCHAR width, UCHAR height)
+ 860          {
+ 861   1          ucWinUnitWidth  = width;
+ 862   1          ucWinUnitHeight = height;
+ 863   1      }
+ 864          
+ 865          /**************************************************************************//**
+ 866           * Set OSD window position and size.
+ 867           * The units of position and size are set by OSDAPI_SetOSDWinSizeUnit.
+ 868           * @param sx Start position of x.
+ 869           * @param sy Start position of y.
+ 870           * @param ex End position of x.
+ 871           * @param ey End position of y.
+ 872           ******************************************************************************/
+ 873          void OSDAPI_SetOSDWinSize(USHRT sx, USHRT sy, USHRT ex, USHRT ey)
+ 874          {
+ 875   1      #if ENABLE_OSD_ROTATION == ON
+                  UCHAR id, rot;
+              
+                  sx = sx * ucWinUnitWidth;
+                  ex = (ex + 1) * ucWinUnitWidth;
+                  sy = sy * ucWinUnitHeight;
+                  ey = (ey + 1) * ucWinUnitHeight;
+              
+                  switch(GetOSDPosRot()) {
+                      case OSD_POS_ROT_90:
+                          OSDAPI_RotateOSDWinPosition(sx, sy, ex, ey, OSD_WIN_DEGREE_90, FALSE);
+                          break;
+                      case OSD_POS_ROT_180:
+                          OSDAPI_RotateOSDWinPosition(sx, sy, ex, ey, OSD_WIN_DEGREE_180, FALSE);
+                          break;
+                      case OSD_POS_ROT_270:
+                          OSDAPI_RotateOSDWinPosition(sx, sy, ex, ey, OSD_WIN_DEGREE_270, FALSE);
+                          break;
+                      default :
+                          OSDAPI_RotateOSDWinPosition(sx, sy, ex, ey, OSD_WIN_DEGREE_0, FALSE);
+                          break;
+                  }
+              
+                  id = (SC_OSD_WIN_SEL & 0x07);
+                  rot = GetOSDPosRot();
+                  SetOSDWinRotStatus(id, rot);
+              #else
+ 902   1          USHRT tmp1;
+ 903   1      
+ 904   1          sx = sx * ucWinUnitWidth;
+ 905   1          ex = (ex + 1) * ucWinUnitWidth;
+ 906   1          sy = sy * ucWinUnitHeight;
+ 907   1          ey = (ey + 1) * ucWinUnitHeight;
+ 908   1      
+ 909   1          SC_OSD_WIN_HOR_START_LO = (UCHAR)sx;
+ 910   1          SC_OSD_WIN_HOR_END_LO = (UCHAR)ex;
+ 911   1          tmp1 = ((sx >> 8) & 0x000F) | ((ex >> 4) & 0x00F0);
+ 912   1          SC_OSD_WIN_HOR_HI = (UCHAR)tmp1;
+ 913   1          SC_OSD_WIN_VER_START_LO = (UCHAR)sy;
+ 914   1          SC_OSD_WIN_VER_END_LO = (UCHAR)ey;
+ 915   1          tmp1 = ((sy >> 8) & 0x000F) | ((ey >> 4) & 0x00F0);
+ 916   1          SC_OSD_WIN_VER_HI = (UCHAR)tmp1;
+ 917   1      
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 16  
+
+ 918   1          WaitDisVSync();
+ 919   1      #endif //ENABLE_OSD_ROTATION == ON
+ 920   1      }
+ 921          
+ 922          /**************************************************************************//**
+ 923           * Set attribute of the selected window.
+ 924           * @param attr OSD window attribute.
+ 925           ******************************************************************************/
+ 926          void OSDAPI_SetOSDWinAttr(OSDWinAttr attr)
+ 927          {
+ 928   1          SC_OSD_WIN_COLOR = attr.ucWinClr;
+ 929   1          if (CHK_WINATTR_BEVEL(attr)) {
+ 930   2              SC_OSD_WIN_ATTRIBUTE |= BIT7;
+ 931   2          }
+ 932   1          else {
+ 933   2              SC_OSD_WIN_ATTRIBUTE &= ~BIT7;
+ 934   2          }
+ 935   1          
+ 936   1          if (CHK_WINATTR_FADEINOUT(attr)) {
+ 937   2              SC_OSD_WIN_ATTRIBUTE |= BIT0;
+ 938   2          }
+ 939   1          else {
+ 940   2              SC_OSD_WIN_ATTRIBUTE &= ~BIT0;
+ 941   2          }
+ 942   1      
+ 943   1          if (CHK_WINATTR_SHADOW(attr)) {
+ 944   2              SC_OSD_WIN_ATTRIBUTE |= BIT1;
+ 945   2          }
+ 946   1          else {
+ 947   2              SC_OSD_WIN_ATTRIBUTE &= ~BIT1;
+ 948   2          }
+ 949   1      
+ 950   1          if (CHK_WINATTR_BEVEL_SHADOW_TRANS(attr)) {
+ 951   2              SC_OSD_CODE_FC_CTL |= BIT2;
+ 952   2          }
+ 953   1          else {
+ 954   2              SC_OSD_CODE_FC_CTL &= ~BIT2;
+ 955   2          }
+ 956   1      
+ 957   1          //SC_OSD_WIN_ATTRIBUTE |= BIT4;   // Force translucent for window
+ 958   1          SC_OSD_WIN_ATTRIBUTE |= ((attr.ucBorderAttr & 0x30) << 1); // Bevel Type
+ 959   1          SC_OSD_WIN_BEVEL_WIDTH = attr.ucBorderAttr & 0x07; // Bevel Width
+ 960   1          SC_OSD_WIN_BEVEL_COLOR_R = attr.ucRBorderClr;
+ 961   1          SC_OSD_WIN_BEVEL_COLOR_L = attr.ucLBorderClr;
+ 962   1      }
+ 963          
+ 964          /**************************************************************************//**
+ 965           * Set OSD window transparency.
+ 966           * @param tran Level of OSD window transparency. Range is 0 to 8.
+ 967           ******************************************************************************/
+ 968          void OSDAPI_SetOSDWinTran(UCHAR tran)
+ 969          {
+ 970   1          if (tran == 0xFF) {
+ 971   2              return;
+ 972   2          }
+ 973   1          else if (tran > 8) {
+ 974   2              tran = 8;
+ 975   2          }
+ 976   1      
+ 977   1          if (tran == 0) {
+ 978   2              SC_OSD_TRANSLUCENT_CTL &= 0xC7;//TP_LEVEL_TWO
+ 979   2              SC_OSD_WIN_ATTRIBUTE &= ~BIT4;//WIN_MIX
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 17  
+
+ 980   2          }
+ 981   1          else {
+ 982   2              SC_OSD_TRANSLUCENT_CTL = (SC_OSD_TRANSLUCENT_CTL & 0xC7) | ((tran - 1) << 3);//TP_LEVEL_TWO
+ 983   2              SC_OSD_WIN_ATTRIBUTE |= BIT4;//WIN_MIX
+ 984   2          }
+ 985   1      }
+ 986          
+ 987          /**************************************************************************//**
+ 988           * Set gradient color of window.
+ 989           * @param dir Left-right or top-button direction.
+ 990           * @param inc Increase or decrease gray variance.
+ 991           * @param step Increase/decrease gray levels per step.
+ 992           * @param pixel Number of pixel per step.
+ 993           ******************************************************************************/
+ 994          void OSDAPI_SetOSDWinGrad(UCHAR dir, UCHAR inc, UCHAR step, UCHAR pixel)
+ 995          {
+ 996   1      #if ENABLE_OSD_ROTATION == ON
+                  switch(GetOSDPosRot()) {
+                      case OSD_POS_ROT_90:
+                          dir = ~dir;
+                          break;
+                      case OSD_POS_ROT_180:
+                          inc = ~inc;
+                          break;
+                      case OSD_POS_ROT_270:
+                          dir = ~dir;
+                          //inc = ~inc;
+                          break;
+                      default:
+                          break;
+                  }
+              #endif //ENABLE_OSD_ROTATION == ON
+1012   1      
+1013   1          SC_OSD_WIN_GRADIENT_CTRL = 0x00;
+1014   1          OSDAPI_TurnOnOffOSDWinGrad(ON);
+1015   1          SC_OSD_WIN_GRADIENT_CTRL |= ((dir&BIT0)<<4);
+1016   1          SC_OSD_WIN_GRADIENT_RED_COLOR = ((pixel&0x1F) | ((inc&BIT0) << 7));
+1017   1          SC_OSD_WIN_GRADIENT_GREEN_COLOR = ((pixel&0x1F) | ((inc&BIT0) << 7));
+1018   1          SC_OSD_WIN_GRADIENT_BLUE_COLOR = ((pixel&0x1F) | ((inc&BIT0) << 7));
+1019   1          SC_OSD_WIN_GRADIENT_RED_STEP = step;
+1020   1          SC_OSD_WIN_GRADIENT_GREEN_STEP = step;
+1021   1          SC_OSD_WIN_GRADIENT_BLUE_STEP = step;
+1022   1      }
+1023          
+1024          /**************************************************************************//**
+1025           * Turn on/off OSD gradient function.
+1026           * @param on On/off OSD gradient.
+1027           ******************************************************************************/
+1028          void OSDAPI_TurnOnOffOSDWinGrad(UCHAR on)
+1029          {
+1030   1          if (on) {
+1031   2              SC_OSD_WIN_GRADIENT_CTRL |= 0x2F;
+1032   2          }
+1033   1          else {
+1034   2              SC_OSD_WIN_GRADIENT_CTRL &= 0xD0;
+1035   2          }
+1036   1      }
+1037          
+1038          #if ENABLE_OSD_ROTATION == ON
+              /**************************************************************************//**
+               * Rotate selected OSD window.
+               * @param id Window ID.
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 18  
+
+               * @param rot Rotation degree.
+               ******************************************************************************/
+              void OSDAPI_RotateOSDWin(OSDWindow id, OSDPosRotation rot)
+              {
+                  USHRT sx, sy, ex, ey, tmp;
+                  UCHAR dir;
+                  OSDPosRotation prev_rot;
+                  OSDWinDegree degree;
+              
+                  if (id > OSD_WINDOW8) {
+                      return;
+                  }
+              
+                  OSDAPI_SelOSDWin(id);
+              
+                  tmp = (USHRT)SC_OSD_WIN_HOR_HI;
+                  sx = ((tmp & 0x0F) << 8) + SC_OSD_WIN_HOR_START_LO;
+                  ex = ((tmp & 0xF0) << 4) + SC_OSD_WIN_HOR_END_LO;
+                  tmp = (USHRT)SC_OSD_WIN_VER_HI;
+                  sy = ((tmp & 0x0F) << 8) + SC_OSD_WIN_VER_START_LO;
+                  ey = ((tmp & 0xF0) << 4) + SC_OSD_WIN_VER_END_LO;
+              
+                  prev_rot = GetOSDWinRotStatus(id);
+                  degree = (NUM_OSD_WIN_DEGREE + rot - prev_rot) % NUM_OSD_WIN_DEGREE;
+              
+                  if ((prev_rot == OSD_POS_ROT_90) || (prev_rot == OSD_POS_ROT_270)) {
+                      dir = TRUE;
+                  }
+                  else {
+                      dir = FALSE;
+                  }
+                  OSDAPI_RotateOSDWinPosition(sx, sy, ex, ey, degree, dir);
+              
+                  if ((degree == OSD_WIN_DEGREE_90) || (degree == OSD_WIN_DEGREE_270)) {
+                      dir = !(SC_OSD_WIN_GRADIENT_CTRL & BIT4);
+                      SC_OSD_WIN_GRADIENT_CTRL &= ~BIT4;
+                      SC_OSD_WIN_GRADIENT_CTRL |= (dir << 4);
+                  }
+              
+              //    SC_OSD_WIN_GRADIENT_RED_COLOR = ((pixel&0x1F) | ((inc&BIT0) << 7));
+              //    SC_OSD_WIN_GRADIENT_GREEN_COLOR = ((pixel&0x1F) | ((inc&BIT0) << 7));
+              //    SC_OSD_WIN_GRADIENT_BLUE_COLOR = ((pixel&0x1F) | ((inc&BIT0) << 7));
+              
+                  SetOSDWinRotStatus(id, rot);
+              }
+              
+              /**************************************************************************//**
+               * Set the position of OSD window with rotation.
+               * @param sx Start position of x.
+               * @param sy Start position of y.
+               * @param ex End position of x.
+               * @param ey End position of y.
+               * @param degree Rotation degree.
+               * @param rot TRUE if OSD has been rotated 90/270 degree. Otherwise FALSE.
+               ******************************************************************************/
+              static void OSDAPI_RotateOSDWinPosition(USHRT sx, USHRT sy, USHRT ex, USHRT ey, OSDWinDegree degree, UCHAR
+             - rot)
+              {
+                  USHRT fw, fh, ow, oh;
+                  USHRT tmp1, tmp2;
+                  UCHAR border;
+              
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 19  
+
+                  if (rot) {
+                      fh = OSDAPI_GetOSDFontWidth();
+                      fw = OSDAPI_GetOSDFontHeight();
+                      oh = OSDAPI_GetOSDWidth();
+                      ow = OSDAPI_GetOSDHeight();
+                  }
+                  else {
+                      fw = OSDAPI_GetOSDFontWidth();
+                      fh = OSDAPI_GetOSDFontHeight();
+                      ow = OSDAPI_GetOSDWidth();
+                      oh = OSDAPI_GetOSDHeight();
+                  }
+              
+                  border = 0;
+                  if (SC_OSD_WIN_ATTRIBUTE & BIT7) {
+                      border = (SC_OSD_WIN_BEVEL_WIDTH & 0x07) + 1;
+                  }
+              
+                  switch (degree) {
+                      case OSD_WIN_DEGREE_90 :
+                          tmp1 = sx;
+                          tmp2 = ex;
+                          sx = fh * oh - ey;
+                          if (sx >= border) {
+                              sx -= border;
+                          }
+                          ex = fh * oh - sy - border;
+                          sy = tmp1;
+                          ey = tmp2;
+                          break;
+                      case OSD_WIN_DEGREE_180 :
+                          tmp1 = sx;
+                          tmp2 = ex;
+                          sx = fw * ow - tmp2;
+                          if (sx >= border) {
+                              sx -= border;
+                          }
+                          ex = fw * ow - tmp1 - border;
+                          tmp1 = sy;
+                          tmp2 = ey;
+                          sy = fh * oh - tmp2;
+                          if (sy >= border) {
+                              sy -= border;
+                          }
+                          ey = fh * oh - tmp1 - border;
+                          break;
+                      case OSD_WIN_DEGREE_270 :
+                          tmp1 = sx;
+                          tmp2 = ex;
+                          sx = sy;
+                          ex = ey;
+                          sy = fw * ow - tmp2;
+                          if (sy >= border) {
+                              sy -= border;
+                          }
+                          ey = fw * ow - tmp1 - border;
+                          break;
+                      default :
+                          break;
+                  }
+              
+                  SC_OSD_WIN_HOR_START_LO = (UCHAR)sx;
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 20  
+
+                  SC_OSD_WIN_HOR_END_LO = (UCHAR)ex;
+                  tmp1 = ((sx >> 8) & 0x000F) | ((ex >> 4) & 0x00F0);
+                  SC_OSD_WIN_HOR_HI = (UCHAR)tmp1;
+                  SC_OSD_WIN_VER_START_LO = (UCHAR)sy;
+                  SC_OSD_WIN_VER_END_LO = (UCHAR)ey;
+                  tmp1 = ((sy >> 8) & 0x000F) | ((ey >> 4) & 0x00F0);
+                  SC_OSD_WIN_VER_HI = (UCHAR)tmp1;
+              
+                  WaitDisVSync();
+              }
+              #endif //ENABLE_OSD_ROTATION == ON
+1176          #endif //ENABLE_OSD_WINDOWS == ON
+1177          
+1178          /**************************************************************************//**
+1179           * Set OSD zoom times.
+1180           * @param times OSD zoom times. The range is 0~3.
+1181           ******************************************************************************/
+1182          void OSDAPI_SetHVZoom(UCHAR times)
+1183          {
+1184   1          if (times == 0) {
+1185   2              SC_OSD_ZOOM_CTL &= ~(BIT1|BIT0);
+1186   2          } 
+1187   1          else {
+1188   2              SC_OSD_ZOOM_CTL |= (BIT1|BIT0);
+1189   2              SC_OSD_VHGLOB_ZMRNG = 0x55*times;
+1190   2          }
+1191   1      }
+1192          
+1193          /**************************************************************************//**
+1194           * Set OSD foreground and background transparency.
+1195           * @param tran Level of OSD fg/bg transparency. Range is 0 to 8.
+1196           ******************************************************************************/
+1197          void OSDAPI_SetOSDFgBgTran(UCHAR tran)
+1198          {
+1199   1          if (tran == 0xFF) {
+1200   2              return;
+1201   2          }
+1202   1          else if (tran > 8) {
+1203   2              tran = 8;
+1204   2          }
+1205   1      
+1206   1          if (tran == 0) {
+1207   2              SC_OSD_TRANSLUCENT_CTL &= 0xF8;//TP_LEVEL_ONE
+1208   2              SC_OSD_CODE_FC_CTL &= ~0x30;//BG_MIX_EN and FG_MIX_EN
+1209   2          }
+1210   1          else {
+1211   2              SC_OSD_TRANSLUCENT_CTL = (SC_OSD_TRANSLUCENT_CTL & 0xF8) | (tran - 1);//TP_LEVEL_ONE
+1212   2              SC_OSD_CODE_FC_CTL |= 0x30;//BG_MIX_EN and FG_MIX_EN
+1213   2          }
+1214   1      }
+1215                  
+1216          /**************************************************************************//**
+1217           * Set OSD special background transparency.
+1218           * @param tran Level of OSD special BG transparency. Range is 0 to 8.
+1219           ******************************************************************************/
+1220          void OSDAPI_SetOSDSpecialBgTran(UCHAR tran)
+1221          {
+1222   1          if (tran == 0xFF) {
+1223   2              return;
+1224   2              }
+1225   1          else if (tran > 8) {
+1226   2              tran = 8;
+C51 COMPILER V8.02   OSDAPI                                                                08/07/2015 16:22:28 PAGE 21  
+
+1227   2          }
+1228   1          // NOTE:
+1229   1          // This function works ONLY when the BG_INDEX[3:0] = b'0001!
+1230   1          // and it can't be separately configured from WINDOW transparency! (commonly used)
+1231   1          if (tran == 0) {
+1232   2              SC_OSD_TRANSLUCENT_CTL &= 0xC7;//TP_LEVEL_TWO
+1233   2              SC_OSD_CODE_FC_CTL &= ~BIT5;//BG_MIX_EN
+1234   2          }
+1235   1          else {
+1236   2              SC_OSD_TRANSLUCENT_CTL = (SC_OSD_TRANSLUCENT_CTL & 0xC7) | ((tran - 1) << 3);//TP_LEVEL_TWO
+1237   2              SC_OSD_CODE_FC_CTL |= BIT5;//BG_MIX_EN
+1238   2          }
+1239   1      }
+1240          
+1241          /**************************************************************************//**
+1242           * Set OSD fade in/out.
+1243           * @param vspeed OSD fade in/out vertical frecuency for every step
+1244           * @param hspeed OSD fade in/out horizontal frecuency for every step
+1245           * @param vstep OSD fade in/out vertical step
+1246           * @param hstep OSD fade in/out horizontal step
+1247           * @param dir OSD fade in/out direction select
+1248           ******************************************************************************/
+1249          void OSDAPI_SetOSDFadeInOut(UCHAR vspeed, UCHAR hspeed, UCHAR vstep, UCHAR hstep, UCHAR dir)
+1250          {
+1251   1          if (vstep == 0 && hstep == 0) {//disable fade in/out function
+1252   2              SC_OSD_FADE_STEP = 0x00;
+1253   2              SC_OSD_FADE_FREQ = 0x00;
+1254   2              }
+1255   1          else {
+1256   2              SC_OSD_CODE_FC_CTL |= (dir & 0x03) << 6;
+1257   2              SC_OSD_FADE_STEP = ((vstep & 0x0f) << 4) | (hstep & 0x0f);
+1258   2              SC_OSD_FADE_FREQ = ((vspeed & 0x07) << 4) | (hspeed & 0x0f) | BIT7;
+1259   2          }
+1260   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1912    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     15      57
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

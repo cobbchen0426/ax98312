@@ -1,0 +1,701 @@
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE SCALER_COMMON
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\Scaler_Common.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\NT68655_770_850 Series\Scaler_Common.c LARGE OPTIMIZE(9,SPEED) BROWSE I
+                    -NCDIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy
+                    -\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X21
+                    -5) PRINT(.\Lst\Scaler_Common.lst) OBJECT(.\Bin\ADS\AXI\104N\Scaler_Common.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          #include "ScalerProfile.h"
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          
+  19          //******************************************************************************
+  20          // G L O B A L   V A R I A B L E S
+  21          //******************************************************************************
+  22          
+  23          //******************************************************************************
+  24          // S T A T I C   V A R I A B L E S
+  25          //******************************************************************************
+  26          
+  27          //******************************************************************************
+  28          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+  29          //******************************************************************************
+  30          extern xdata UCHAR ucZpInterface; /*!< Input interface when system is under low power mode. */
+  31          
+  32          //******************************************************************************
+  33          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+  34          //******************************************************************************
+  35          
+  36          //******************************************************************************
+  37          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+  38          //******************************************************************************
+  39          
+  40          //******************************************************************************
+  41          // F U N C T I O N   B O D Y S
+  42          //******************************************************************************
+  43          
+  44          /**************************************************************************//**
+  45           * Initialize scaler registers, including Power/ADC/LVDS/TMDS/SyncProce etc...
+  46           ******************************************************************************/
+  47          void ScalerInitialize(void)
+  48          {
+  49   1          SC_HW_RST = 0x10;
+  50   1          SC_HW_RST = 0x11;
+  51   1      
+  52   1          SetNormalPowerMode();
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 2   
+
+  53   1      
+  54   1          SC_DPLL_FREQ_CTRL = 0x0C;
+  55   1          SC_POWER_CTRL1 = 0x20;
+  56   1          SC_POWER_CTRL1 = 0x00;
+  57   1          SC_VGA_ADC_BIST = 0;
+  58   1      #if ENABLE_MMU == ON
+                  SC_POWER_CTRL2 = 0x6E;
+              #else
+  61   1          SC_POWER_CTRL2 = 0x6A;
+  62   1      #endif
+  63   1      #if ENABLE_SCALER_AUDIO
+  64   1          SC_POWER_CTRL2 |= BIT7;
+  65   1      #endif
+  66   1      
+  67   1          ADCInit();
+  68   1          LVDSInit();
+  69   1          DisplayInit();
+  70   1          TMDSInit();
+  71   1          CAPInit();
+  72   1          SyncInit();
+  73   1      #if ENABLE_HDMI == ON
+  74   1          HDMIInit();
+  75   1      #endif
+  76   1          DithInit();
+  77   1          NRInit();
+  78   1          EnableScalerPWM(PWM_ALL);
+  79   1      
+  80   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+  81   1          MHLInit();
+  82   1      #endif
+  83   1      
+  84   1      #if ENABLE_MMU == ON
+                  MMUInitialize();
+              #endif
+  87   1      
+  88   1      #if (INPUT_INTERFACE&INPUT_DP)
+  89   1          DPInit();
+  90   1      #if (ENABLE_DP_AUX_MONITOR==ON)
+                  Init_DP_Strobe();   
+              #endif 
+  93   1      #endif
+  94   1      
+  95   1      #if ENABLE_HW_CEC == ON
+                  InitialCEC(HDMI_CEC_CHANNEL);
+              #endif
+  98   1      
+  99   1      #if ENABLE_SCALER_3D == ON
+ 100   1          SC3DAPI_Init();
+ 101   1      #endif
+ 102   1      
+ 103   1      #if ENABLE_SCALER_LEDDRV == ON
+                  InitLEDDriver();
+              #else
+ 106   1      #if ENABLE_SCALER_LEDDRV_IO_MODE   
+                  InitLEDDriverIOCtrl();
+              #endif
+ 109   1      #endif
+ 110   1      
+ 111   1      #if IS_NT68850_SERIES || IS_NT68790_SERIES
+ 112   1          SC_APR_LDO_V_CTRL |= BIT0;//NT68850 沒有 LDO, 所以 b53 的 control register 後來都被拿去當 apr2 的 cloc
+             -k gen control 使用
+ 113   1      #endif
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 3   
+
+ 114   1      }
+ 115          
+ 116          /**************************************************************************//**
+ 117           * Configure the scaler input to the specified interface
+ 118           * @param interface Input interface.
+ 119           ******************************************************************************/
+ 120          void SetInputInterface(UCHAR interface)
+ 121          {
+ 122   1          code UCHAR *interface_tab[] = 
+ 123   1              {
+ 124   1                      &SC_ADC_CTRL,
+ 125   1                      &SC_ADC_MID_CH_SEL,
+ 126   1                      &SC_SOG_SLICER_EN,
+ 127   1                      &SC_ADC_CLAMP_CTRL,
+ 128   1                      &SC_GPORT_CTRL,
+ 129   1                      &SC_CLAMP_BEGIN,
+ 130   1                      &SC_DIGITAL_CTRL,
+ 131   1                      &SC_INPUT_SELECT,
+ 132   1                      &SC_ADC_CK_CTRL,
+ 133   1                      &SC_CAP_SWAP,
+ 134   1                      &SC_GI_ALT_CTRL,
+ 135   1                      &SC_GI_SYNC_CTRL,
+ 136   1                      &SC_SOG_SLICER_CTRL,
+ 137   1                      &SC_BP_SYNC_CTRL,
+ 138   1                      &SC_ADC_TEST_MODE
+ 139   1              };
+ 140   1         //------------------- 
+ 141   1          code UCHAR interface_data[][sizeof(interface_tab)/sizeof(UCHAR *)] = 
+ 142   1          {
+ 143   1            //0x000,0x008,0x00A,0x00F,0x020,0x021,0x023,0x024,       0x025,0x026,0x038,       0x196,0x012,0x072,
+             -0x1E6
+ 144   1              {0x10, 0x00, 0xF0, 0x00, 0x81, 0x81, 0x00, 0x80, SCREG_025_A, 0x00, SCREG_038_A, 0x20, 0x00, 0x01,
+             - 0x01}, //ANALOG_SEP_INPUT0
+ 145   1              {0x10, 0x00, 0xF0, 0x00, 0x81, 0x81, 0x00, 0x80, SCREG_025_A, 0x80, SCREG_038_A, 0x21, 0x00, 0x00,
+             - 0x01}, //ANALOG_COM_INPUT0
+ 146   1              {0x18, 0x00, 0xF8, 0x00, 0x81, 0x01, 0x40, 0x80, SCREG_025_A, 0x80, SCREG_038_A, 0x21, 0xC0, 0x10,
+             - 0x51}, //ANALOG_SOG_INPUT0
+ 147   1              //======================//DIGITAL_INPUT0
+ 148   1               #if DVI_MODE == DVI_HV_MODE
+                              {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x00, 0x82, SCREG_025_D, 0x00, SCREG_038_D, 0x90, 0x00, 0x00
+             -, 0x01}, //DIGITAL_INPUT0
+                      #elif DVI_MODE == DVI_DE_MODE
+                              {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x00, 0x82, SCREG_025_D, 0x00, SCREG_038_D, 0x20, 0x00, 0x00
+             -, 0x01}, //DIGITAL_INPUT0
+                      #elif DVI_MODE == DVI_HVDE_MODE 
+ 153   1                      {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x08, 0x82, SCREG_025_D, 0x00, SCREG_038_D, 0x90, 0x00, 0x00
+             -, 0x01}, //DIGITAL_INPUT0
+ 154   1              #endif
+ 155   1          //======================//ANALOG_INPUT1             
+ 156   1              {0x10, 0x00, 0xF0, 0x00, 0x81, 0x81, 0x00, 0x81, SCREG_025_A, 0x00, SCREG_038_A, 0x20, 0x00, 0x01,
+             - 0x01}, //ANALOG_SEP_INPUT1
+ 157   1              {0x10, 0x00, 0xF0, 0x00, 0x81, 0x81, 0x00, 0x81, SCREG_025_A, 0x80, SCREG_038_A, 0x21, 0x00, 0x00,
+             - 0x01}, //ANALOG_COM_INPUT1
+ 158   1              {0x18, 0x00, 0xF8, 0x00, 0x81, 0x01, 0x40, 0x81, SCREG_025_A, 0x80, SCREG_038_A, 0x21, 0xC0, 0x10,
+             - 0x51}, //ANALOG_SOG_INPUT1
+ 159   1          //======================//DIGITAL_INPUT1
+ 160   1          #if DVI_MODE == DVI_HV_MODE
+                      {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x00, 0x86, SCREG_025_D, 0x00, SCREG_038_D, 0x90, 0x00, 0x00,
+             - 0x01}, //DIGITAL_INPUT1
+                  #elif DVI_MODE == DVI_DE_MODE
+                      {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x00, 0x86, SCREG_025_D, 0x00, SCREG_038_D, 0x20, 0x00, 0x00,
+             - 0x01}, //DIGITAL_INPUT1
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 4   
+
+                  #elif DVI_MODE == DVI_HVDE_MODE
+ 165   1              {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x08, 0x86, SCREG_025_D, 0x00, SCREG_038_D, 0x90, 0x00, 0x00,
+             - 0x01}, //DIGITAL_INPUT1
+ 166   1          #endif
+ 167   1          //======================//ANALOG_INPUT0     
+ 168   1              {0x18, 0x03, 0xF8, 0x00, 0x81, 0x01, 0xC0, 0x80, SCREG_025_A, 0x80, SCREG_038_A, 0x21, 0xC0, 0x10,
+             - 0x51}, //ANALOG_YPBPR_INPUT0
+ 169   1              {0x18, 0x03, 0xF8, 0x00, 0x81, 0x01, 0xC0, 0x81, SCREG_025_A, 0x80, SCREG_038_A, 0x21, 0xC0, 0x10,
+             - 0x51}, //ANALOG_YPBPR_INPUT1
+ 170   1      #if (INPUT_INTERFACE&INPUT_DP)      
+ 171   1          #if DVI_MODE == DVI_HV_MODE
+                      {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x00, 0x87, SCREG_025_D, 0x00, SCREG_038_D, 0x90, 0x00, 0x00,
+             - 0x01}, //DISPLAY_PORT_INPUT
+                  #elif DVI_MODE == DVI_DE_MODE
+                      {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x00, 0x87, SCREG_025_D, 0x00, SCREG_038_D, 0x20, 0x00, 0x00,
+             - 0x01}, //DISPLAY_PORT_INPUT
+                  #elif DVI_MODE == DVI_HVDE_MODE
+ 176   1              {0x10, 0x00, 0xF0, 0x00, 0x83, 0x01, 0x08, 0x87, SCREG_025_D, 0x00, SCREG_038_D, 0x90, 0x00, 0x00,
+             - 0x01}, //DISPLAY_PORT_INPUT
+ 177   1          #endif
+ 178   1      #endif
+ 179   1          };
+ 180   1        //-------------  
+ 181   1          UCHAR *p;
+ 182   1          UCHAR i, k, interface_index, tmp;
+ 183   1      
+ 184   1          ucZpInterface = interface;
+ 185   1          if (IsZpMode()) return;
+ 186   1          
+ 187   1      #if ENABLE_OVERSCAN == ON
+ 188   1          DisableOverSample();    
+ 189   1      #endif
+ 190   1          PowerUpAllInput();
+ 191   1      
+ 192   1          tmp = SC_HCNT_THR;
+ 193   1          SC_HCNT_THR = 0x00;
+ 194   1          Sleep(10);  // Delay 10ms to force mode change
+ 195   1          SC_HCNT_THR = tmp;
+ 196   1      
+ 197   1      #if ENABLE_HDMI == ON
+ 198   1          // Always enable preamble detection during sync detection
+ 199   1          HDMIEnablePreambleDetection(TRUE);
+ 200   1          HDMISoftReset();
+ 201   1      #endif
+ 202   1      
+ 203   1          SC_ADC_ZERO_POWER_CTRL &= 0xF3;
+ 204   1      
+ 205   1          switch (interface) 
+ 206   1              {
+ 207   2                      case ANALOG_SEP_INPUT0:
+ 208   2                                      SC_ADC_REG_1D &= ~BIT5;
+ 209   2                                      SC_GI_SYNC_CTRL3 = 0x42;
+ 210   2                              #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 211   2                                      SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 212   2                                      SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 213   2                                      SC_SCALER_3D_DEBUG1 = 0x00;
+ 214   2                              #endif
+ 215   2                                      interface_index = 0;
+ 216   2                                      break;
+ 217   2      
+ 218   2              case ANALOG_COM_INPUT0:
+ 219   2                                      SC_ADC_REG_1D &= ~BIT5;
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 5   
+
+ 220   2                                      SC_GI_SYNC_CTRL3 = 0x42;
+ 221   2                              #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 222   2                                      SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 223   2                                      SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 224   2                                      SC_SCALER_3D_DEBUG1 = 0x00;
+ 225   2                              #endif
+ 226   2                                      interface_index = 1;
+ 227   2                                      break;
+ 228   2      
+ 229   2              case ANALOG_SOG_INPUT0:
+ 230   2                                      SC_ADC_REG_1D |= BIT5;
+ 231   2                                      SC_GI_SYNC_CTRL3 = 0x42;
+ 232   2                                      SC_ADC_ZERO_POWER_CTRL |= BIT3;
+ 233   2                                      SC_CLAMP_BEGIN |= BIT6;
+ 234   2                                      Sleep(2);
+ 235   2                                      SC_CLAMP_BEGIN &= ~BIT6;
+ 236   2                              #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 237   2                                      SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 238   2                                      SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 239   2                                      SC_SCALER_3D_DEBUG1 = 0x00;
+ 240   2                              #endif
+ 241   2                                      interface_index = 2;
+ 242   2                                      break;
+ 243   2      
+ 244   2              case DIGITAL_INPUT0:
+ 245   2                                      SC_DVI_RB_SWAP = DIGITAL0_CHANNEL_SWAP << 1;
+ 246   2                  
+ 247   2                                      SC_ADC_REG_1D &= ~BIT5;
+ 248   2              #if DVI_MODE == DVI_DE_MODE
+                                              SC_GI_SYNC_CTRL3 = 0x46;
+                      #else
+ 251   2                                      SC_GI_SYNC_CTRL3 = 0x42;
+ 252   2              #endif
+ 253   2                                      HDCP_MUX = DIGITAL_INPUT0_HDCP_MUX;
+ 254   2                                      SC_HSDDS_DIVIDER_LO = 0x00;
+ 255   2                                      SC_HSDDS_DIVIDER_HI = 0x02;
+ 256   2                                      SC_HPLL_FREQ_CTRL &= ~BIT6; //Enable updating HS_CNT
+ 257   2                                      SC_HPLL_PHASE_CTRL1 = 0x00;
+ 258   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 259   2                                      SC_HDMI_AUTO_CTRL |= BIT6;
+ 260   2                                      SC_HDMI_3D_INTERLACE_CTRL |= BIT7;
+ 261   2                                      SC_SCALER_3D_DEBUG1 = 0x83;
+ 262   2      #endif
+ 263   2                                      interface_index = 3;
+ 264   2      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL0) //Switch 2 path connected-MHL
+                          if ( MHL_Is_CDSense1_IO_HIGH() ) 
+                              {
+                                      SC_DVI_CTRL_339 = 0x16;
+                                      SC_DVI_CTRL_33A = 0x60;
+                              if ( MHLIsCBus2On() && GetCbusConnectStatus() != MHL_NONE ) 
+                                      {
+                                              MHLCBus2Off();
+                                              SC_CBUS_CONTROL |= BIT3;
+                                              SC_CBUS_CONTROL &= ~BIT3;
+                                              SetCbusConnectStatus(MHL_NONE);
+                                       }
+                                              MHL_SetCbusCH(0); 
+                                              MHLCBus1On();
+                          }
+              #endif
+ 280   2                  break;
+ 281   2      
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 6   
+
+ 282   2              case ANALOG_SEP_INPUT1:
+ 283   2                  SC_ADC_REG_1D &= ~BIT5;
+ 284   2                  SC_GI_SYNC_CTRL3 = 0x42;
+ 285   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 286   2                  SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 287   2                  SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 288   2                  SC_SCALER_3D_DEBUG1 = 0x00;
+ 289   2      #endif
+ 290   2                  interface_index = 4;
+ 291   2                  break;
+ 292   2      
+ 293   2              case ANALOG_COM_INPUT1:
+ 294   2                  SC_ADC_REG_1D &= ~BIT5;
+ 295   2                  SC_GI_SYNC_CTRL3 = 0x42;
+ 296   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 297   2                  SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 298   2                  SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 299   2                  SC_SCALER_3D_DEBUG1 = 0x00;
+ 300   2      #endif
+ 301   2                  interface_index = 5;
+ 302   2                  break;
+ 303   2      
+ 304   2              case ANALOG_SOG_INPUT1:
+ 305   2                  SC_ADC_REG_1D |= BIT5;
+ 306   2                  SC_GI_SYNC_CTRL3 = 0x42;
+ 307   2                  SC_ADC_ZERO_POWER_CTRL |= BIT3;
+ 308   2                  SC_CLAMP_BEGIN |= BIT6;
+ 309   2                  Sleep(2);
+ 310   2                  SC_CLAMP_BEGIN &= ~BIT6;
+ 311   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 312   2                  SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 313   2                  SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 314   2                  SC_SCALER_3D_DEBUG1 = 0x00;
+ 315   2      #endif
+ 316   2                  interface_index = 6;
+ 317   2                  break;
+ 318   2      
+ 319   2              case DIGITAL_INPUT1:
+ 320   2                  SC_DVI_RB_SWAP = DIGITAL1_CHANNEL_SWAP << 1;
+ 321   2                  
+ 322   2                  SC_ADC_REG_1D &= ~BIT5;
+ 323   2              #if DVI_MODE == DVI_DE_MODE
+                          SC_GI_SYNC_CTRL3 = 0x46;
+                      #else
+ 326   2                  SC_GI_SYNC_CTRL3 = 0x42;
+ 327   2              #endif
+ 328   2                  HDCP_MUX = DIGITAL_INPUT1_HDCP_MUX;
+ 329   2                  SC_HSDDS_DIVIDER_LO = 0x00;
+ 330   2                  SC_HSDDS_DIVIDER_HI = 0x02;
+ 331   2                  SC_HPLL_FREQ_CTRL &= ~BIT6; //Enable updating HS_CNT
+ 332   2                  SC_HPLL_PHASE_CTRL1 = 0x00;
+ 333   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 334   2                  SC_HDMI_AUTO_CTRL |= BIT6;
+ 335   2                  SC_HDMI_3D_INTERLACE_CTRL |= BIT7;
+ 336   2                  SC_SCALER_3D_DEBUG1 = 0x83;
+ 337   2      #endif
+ 338   2                  interface_index = 7;
+ 339   2      #if IS_NT68770_SERIES && (INPUT_INTERFACE&INPUT_MHL1) //Switch 2 path connected-MHL
+                          if ( MHL_Is_CDSense2_IO_HIGH() ) 
+                              {
+                               SC_DVI_CTRL_339 = 0x16;
+                                       SC_DVI_CTRL_33A = 0x60;
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 7   
+
+                              if ( MHLIsCBus1On() && GetCbusConnectStatus() != MHL_NONE ) 
+                                      {
+                                              MHLCBus1Off();
+                                              SC_CBUS_CONTROL |= BIT3;
+                                              SC_CBUS_CONTROL &= ~BIT3;
+                                              SetCbusConnectStatus(MHL_NONE);
+                                      }
+                                      MHL_SetCbusCH(1); 
+                                      MHLCBus2On();
+                          }
+              #endif
+ 355   2                  break;
+ 356   2      
+ 357   2              case ANALOG_YPBPR_INPUT0:
+ 358   2                  SC_ADC_REG_1D |= BIT5;
+ 359   2                  SC_GI_SYNC_CTRL3 = 0x42;
+ 360   2                  SC_ADC_ZERO_POWER_CTRL |= BIT3;
+ 361   2                  SC_CLAMP_BEGIN |= BIT6;
+ 362   2                  Sleep(2);
+ 363   2                  SC_CLAMP_BEGIN &= ~BIT6;
+ 364   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 365   2                  SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 366   2                  SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 367   2                  SC_SCALER_3D_DEBUG1 = 0x00;
+ 368   2      #endif
+ 369   2                  interface_index = 8;
+ 370   2                  break;
+ 371   2      
+ 372   2              case ANALOG_YPBPR_INPUT1:
+ 373   2                  SC_ADC_REG_1D |= BIT5;
+ 374   2                  SC_GI_SYNC_CTRL3 = 0x42;
+ 375   2                  SC_ADC_ZERO_POWER_CTRL |= BIT3;
+ 376   2                  SC_CLAMP_BEGIN |= BIT6;
+ 377   2                  Sleep(2);
+ 378   2                  SC_CLAMP_BEGIN &= ~BIT6;
+ 379   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 380   2                  SC_HDMI_AUTO_CTRL &= ~BIT6;
+ 381   2                  SC_HDMI_3D_INTERLACE_CTRL &= ~BIT7;
+ 382   2                  SC_SCALER_3D_DEBUG1 = 0x00;
+ 383   2      #endif
+ 384   2                  interface_index = 9;
+ 385   2                  break;
+ 386   2      #if (INPUT_INTERFACE&INPUT_DP)
+ 387   2               case DISPLAY_PORT_INPUT:
+ 388   2                  SC_ADC_REG_1D &= ~BIT5;
+ 389   2              #if DVI_MODE == DVI_DE_MODE
+                          SC_GI_SYNC_CTRL3 = 0x4E;//0x46;
+                      #else
+ 392   2                  SC_GI_SYNC_CTRL3 = 0x4A;//0x42;
+ 393   2              #endif
+ 394   2                  HDCP_MUX = DIGITAL_INPUT1_HDCP_MUX;
+ 395   2                  SC_HSDDS_DIVIDER_LO = 0x00;
+ 396   2                  SC_HSDDS_DIVIDER_HI = 0x02;
+ 397   2                  SC_HPLL_FREQ_CTRL &= ~BIT6; //Enable updating HS_CNT
+ 398   2                  SC_HPLL_PHASE_CTRL1 = 0x00;
+ 399   2                  SC_TMDS_LINK_CLK_SEL = 0x01;//0x19;//0x51;
+ 400   2      #if IS_NT68770_SERIES || IS_NT68850_SERIES || IS_NT68790_SERIES
+ 401   2                  SC_HDMI_AUTO_CTRL |= BIT6;
+ 402   2                  SC_HDMI_3D_INTERLACE_CTRL |= BIT7;
+ 403   2                  SC_SCALER_3D_DEBUG1 = 0x83;
+ 404   2      #endif
+ 405   2                  interface_index = 10;
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 8   
+
+ 406   2                  break;
+ 407   2      #endif
+ 408   2          }
+ 409   1      
+ 410   1          k = (sizeof(interface_tab)/3); //Address is 3 bytes
+ 411   1          for (i=0; i<k; i++) 
+ 412   1               {
+ 413   2                      p = interface_tab[i];
+ 414   2                      *p = interface_data[interface_index][i];
+ 415   2                }
+ 416   1      
+ 417   1          Sleep(80);
+ 418   1      
+ 419   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+ 420   1          if ( (interface==DIGITAL_INPUT0 && MHLIsCBus1On() ) || (interface==DIGITAL_INPUT1 &&  MHLIsCBus2On() )
+             -) 
+ 421   1              {
+ 422   2               if ( MHLIsClearHPD() ) 
+ 423   2                   {
+ 424   3                       Sleep(20); //at least 100ms
+ 425   3                       MHLResetHPD();
+ 426   3                  }
+ 427   2              }
+ 428   1      #endif
+ 429   1      
+ 430   1      #if (INPUT_INTERFACE&INPUT_DP)
+ 431   1          if (interface==DISPLAY_PORT_INPUT) 
+ 432   1              {
+ 433   2               SC_V_CHANG_CTRL = 0x28; // DP 1080i
+ 434   2               SC_VPLL_CTRL |= BIT2; //audio fifo
+ 435   2                       SC_DP_CRPLL |= BIT2;//audio path
+ 436   2                       SC_OVERSCAN_MODE |= BIT7;
+ 437   2              }
+ 438   1          else 
+ 439   1              {
+ 440   2                      SC_V_CHANG_CTRL = 0x24;
+ 441   2                      SC_VPLL_CTRL &= ~BIT2; //audio 
+ 442   2                      SC_DP_CRPLL &= ~BIT2;//audio path
+ 443   2                      SC_OVERSCAN_MODE &= ~BIT7;
+ 444   2              }
+ 445   1      #endif
+ 446   1      }
+ 447          
+ 448          /**************************************************************************//**
+ 449           * Get current input interface.
+ 450           * @return Current input interface.
+ 451           ******************************************************************************/
+ 452          UCHAR GetCurrInputInterface(void)
+ 453          {
+ 454   1          UCHAR curr_interface;
+ 455   1          if (IsZpMode()) 
+ 456   1              {
+ 457   2               return ucZpInterface;
+ 458   2              }
+ 459   1      
+ 460   1          switch (SC_INPUT_SELECT & 0x03) 
+ 461   1              {
+ 462   2              case 0x00:                                                                                              
+ 463   2                  if ((SC_ADC_CTRL & BIT3) != 0)          
+ 464   2                              {
+ 465   3                      if ((SC_ADC_MID_CH_SEL & 0x07) == YPBPR_CLAMP) 
+ 466   3                                      {
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 9   
+
+ 467   4                                      curr_interface = ANALOG_YPBPR_INPUT0;
+ 468   4                                      }
+ 469   3                      else 
+ 470   3                                      {
+ 471   4                                      curr_interface = ANALOG_SOG_INPUT0;
+ 472   4                                      }
+ 473   3                              }
+ 474   2                  else 
+ 475   2                              {
+ 476   3                                      if ((SC_GI_SYNC_CTRL & BIT0) != 0)                          
+ 477   3                                      { 
+ 478   4                                               curr_interface = ANALOG_COM_INPUT0;
+ 479   4                      }
+ 480   3                      else                                                                                    
+ 481   3                                      { 
+ 482   4                                              curr_interface = ANALOG_SEP_INPUT0;
+ 483   4                      }
+ 484   3                  }
+ 485   2                  break;
+ 486   2              //======================================
+ 487   2              case 0x01:                                                                                              
+ 488   2                  if ((SC_ADC_CTRL & BIT3) != 0)                                                      
+ 489   2                  {  
+ 490   3                      if ((SC_ADC_MID_CH_SEL & 0x07) == YPBPR_CLAMP) 
+ 491   3                                      {
+ 492   4                                      curr_interface = ANALOG_YPBPR_INPUT1;
+ 493   4                      }
+ 494   3                      else 
+ 495   3                                      {
+ 496   4                                      curr_interface = ANALOG_SOG_INPUT1;
+ 497   4                      }
+ 498   3                  }
+ 499   2                  else {
+ 500   3                      if ((SC_GI_SYNC_CTRL & BIT0) != 0)                                      
+ 501   3                      {    
+ 502   4                                      curr_interface = ANALOG_COM_INPUT1;
+ 503   4                      }
+ 504   3                      else                                                                                             
+ 505   3                      {
+ 506   4                                      curr_interface = ANALOG_SEP_INPUT1;
+ 507   4                      }
+ 508   3                  }
+ 509   2                  break;
+ 510   2           //================================
+ 511   2              case 0x03:                                                                                              
+ 512   2      #if (INPUT_INTERFACE&INPUT_DP)
+ 513   2                              {
+ 514   3                  curr_interface = DISPLAY_PORT_INPUT;
+ 515   3                              }               
+ 516   2                  break;
+ 517   2      #endif
+ 518   2      //---------------------------------------------
+ 519   2              case 0x02:                                                                                              
+ 520   2                  if ( (SC_INPUT_SELECT & BIT2) == 0x00 ) 
+ 521   2                              {
+ 522   3                      curr_interface = DIGITAL_INPUT0;
+ 523   3                  }
+ 524   2                  else 
+ 525   2                              {
+ 526   3                      curr_interface = DIGITAL_INPUT1;                                                 
+ 527   3                  }
+ 528   2                  break;
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 10  
+
+ 529   2      //---------------------------------------------
+ 530   2              default:
+ 531   2                  curr_interface = INTERFACE_ERROR;
+ 532   2                  break;
+ 533   2          }
+ 534   1      
+ 535   1          return curr_interface;
+ 536   1      }
+ 537          
+ 538          /**************************************************************************//**
+ 539           * Get Scaler type and version
+ 540           ******************************************************************************/
+ 541          UCHAR GetSCID(void)
+ 542          {
+ 543   1      UCHAR ret = SCID_UNKNOWN;
+ 544   1      
+ 545   1         
+ 546   1          switch(SC_CHIP_ID)
+ 547   1              {
+ 548   2              case 0x0A:                                                                                      
+ 549   2                                                      ret = SCID_661;
+ 550   2                                                      break;
+ 551   2              //--------------------------------                      
+ 552   2              case 0x0B:                                                                                      
+ 553   2                                              switch(SC_REVISION_ID)
+ 554   2                                              {
+ 555   3                                                      case 0x03:
+ 556   3                                                              ret = SCID_850_D;
+ 557   3                                                              break;
+ 558   3                                                      case 0x02:
+ 559   3                                                              ret = SCID_850_C;
+ 560   3                                                              break;
+ 561   3                                              }
+ 562   2                                      break;
+ 563   2                //-------------------------------
+ 564   2              case 0x0C:                                                                                      
+ 565   2                              switch(SC_REVISION_ID)
+ 566   2                                              {
+ 567   3                                                      case 0x05:
+ 568   3                                                                              ret = SCID_770_H;
+ 569   3                                                      break;
+ 570   3                                                      case 0x04:
+ 571   3                                                                              ret = SCID_770_G;
+ 572   3                                                      break;
+ 573   3                                               case 0x03:
+ 574   3                                                                              ret = SCID_770_E;
+ 575   3                                                      break; 
+ 576   3                                      }  
+ 577   2                          break;
+ 578   2                    //-------------------------------                                    
+ 579   2                      case 0x0D:                                                                      
+ 580   2                                                      ret = SCID_655;
+ 581   2                                               break;
+ 582   2                    //-------------------------------                                  
+ 583   2                      case 0x0E:
+ 584   2                                               ret = SCID_370;
+ 585   2                                              break;
+ 586   2          }
+ 587   1          return ret;
+ 588   1      }
+ 589          
+ 590          /**************************************************************************//**
+C51 COMPILER V8.02   SCALER_COMMON                                                         08/07/2015 16:22:24 PAGE 11  
+
+ 591           * Get EFUSE Scaler type and version
+ 592           ******************************************************************************/
+ 593          #if ENABLE_HDCP_TRIM_MODE == ON
+              USHRT GetEFUSE_SCID(void)
+              {
+              UCHAR ret = SCID_UNKNOWN;
+                  switch(ucEFUSE_ID){
+                      case 0x0A: 
+                        ret = SCID_661;
+                      break;        
+                      case 0x0B: 
+                          switch(SC_REVISION_ID){
+                              case 0x03:
+                                  ret = SCID_850_D;
+                                  break;
+                              case 0x02:
+                                  ret = SCID_850_C;
+                                  break;
+                          }
+                      break;
+                      case 0x0C: 
+                          switch(SC_REVISION_ID){
+                              case 0x05:
+                                  ret = SCID_770_H;
+                                  break;
+                              case 0x04:
+                                  ret = SCID_770_G;
+                                  break;
+                              case 0x03:
+                           ret = SCID_770_E;
+                                  break; 
+                        }
+                      break;
+                      case 0x0D: 
+                          ret = SCID_655;
+                      break;
+                      case 0x0E:
+                          ret = SCID_370;
+                      break;
+                  }
+              
+                  return ret;
+              }
+              #endif
+ 635          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    996    ----
+   CONSTANT SIZE    =    210    ----
+   XDATA SIZE       =      6       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

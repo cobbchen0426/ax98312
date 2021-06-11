@@ -1,0 +1,1428 @@
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE INT
+OBJECT MODULE PLACED IN .\Bin\Int.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Lib\Int.c LARGE BROWSE INCDIR(.\App;.\App\OSD;.\App\User;.\Lib;.\Lib\NT6865
+                    -5_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI\NVT\Keypad;.\Sys;.\Sys\S
+                    -I\NVT;.\Phy\SI\NVT\Keypad\NT68857_MODULE_KEYPAD) DEFINE(SCALER_TYPE=NT68857,NT68857_MODULE,NVT_1920X1080,FLASH_BANK=4) P
+                    -RINT(.\Lst\Int.lst) OBJECT(.\Bin\Int.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+*** WARNING C318 IN LINE 254 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\ModelConfig.h'
+*** WARNING C318 IN LINE 255 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\GlobalTimerDef.h'
+*** WARNING C318 IN LINE 256 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\NonSupportTimingList.h'
+*** WARNING C318 IN LINE 257 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\OSDConfig.h'
+*** WARNING C318 IN LINE 258 OF .\SYS\SI\NVT\MODELCFG.H: can't open file 'NT68857_MODULE\SRConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 15 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 26 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 33 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 40 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 54 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 61 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 68 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 75 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 82 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 89 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 96 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 110 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 2   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 117 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 124 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 131 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 140 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 147 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 154 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 161 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 175 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 187 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 194 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 201 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 208 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 215 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 222 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 229 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 236 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 243 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 250 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 259 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 266 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 273 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 280 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 287 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 294 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 301 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 308 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 315 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 322 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 329 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 336 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 3   
+
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 343 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 350 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 360 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 367 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 374 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 381 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 388 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 395 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 402 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 409 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 419 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 426 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 438 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 442 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 452 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 460 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURC
+             -ECODE\SYS\SI\NVT\MODELVERIFICATION.H: unknown identifier
+*** WARNING C322 IN LINE 17 OF .\PHY\SI\NVT\BOARD\BOARD.H: unknown identifier
+*** WARNING C318 IN LINE 18 OF .\PHY\SI\NVT\BOARD\BOARD.H: can't open file 'NT68168_DEMO_BOARD\BoardConfig.h'
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** WARNING C322 IN LINE 11 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\PHY\SI\NVT\BOARD\BOARDVERIFY.H: unknown identifier
+*** ERROR C202 IN LINE 74 OF LIB\INT.H: 'UART_TX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 74 OF LIB\INT.H: invalid dimension size: [0]
+*** ERROR C202 IN LINE 75 OF LIB\INT.H: 'UART_RX_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 75 OF LIB\INT.H: invalid dimension size: [0]
+*** WARNING C322 IN LINE 127 OF LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 127 OF LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 132 OF LIB\INT.H: unknown identifier
+*** WARNING C322 IN LINE 16 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: unknown identifier
+*** WARNING C318 IN LINE 17 OF .\PHY\SI\NVT\KEYPAD\KEYPAD.H: can't open file 'NT68168_DEMO_KEYPAD\KeyPadConfig.h'
+*** WARNING C322 IN LINE 42 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_POWER.H: unknown identifier
+*** WARNING C322 IN LINE 36 OF \USERS\COBB.CHEN\DESKTOP\AD908\04_CODE_P6121_V100_160902-OK\CODE_P6121_V100_161116\SOURCE
+             -CODE\LIB\NT68655_770_850 SERIES\SCALER_PWM.H: unknown identifier
+*** WARNING C322 IN LINE 227 OF .\SYS\NVRAM.H: unknown identifier
+*** WARNING C322 IN LINE 103 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 168 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 505 OF .\APP\OSD\OSDCTRL.H: unknown identifier
+*** WARNING C322 IN LINE 97 OF .\APP\OSD\OSDINDEX.H: unknown identifier
+*** WARNING C322 IN LINE 66 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 148 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 4   
+
+*** WARNING C322 IN LINE 320 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 389 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** WARNING C322 IN LINE 475 OF .\APP\OSD\OSDVIEW.H: unknown identifier
+*** ERROR C320 IN LINE 170 OF .\PHY\PANEL\PANEL.H: "Please choose one panel at least!"
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** WARNING C322 IN LINE 172 OF .\PHY\PANEL\PANEL.H: unknown identifier
+*** ERROR C320 IN LINE 173 OF .\PHY\PANEL\PANEL.H: "Wrong PanelVTotal setting! Please review it!"
+*** WARNING C322 IN LINE 56 OF .\SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 56 OF .\SYS\SYNCHANDLER.H: unknown identifier
+*** WARNING C322 IN LINE 47 OF .\SYS\SYSAPI.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 107 OF .\APP\INCLUDE.H: unknown identifier
+*** WARNING C322 IN LINE 111 OF .\APP\INCLUDE.H: unknown identifier
+  13          #include "ScalerProfile.h"
+*** WARNING C322 IN LINE 134 OF .\LIB\NT68655_770_850 SERIES\SCALERPROFILE_NT68857.H: unknown identifier
+  14          
+  15          //******************************************************************************
+  16          // M A C R O   D E F I N I T I O N S
+  17          //******************************************************************************
+  18          #if BACKLIGHT_ACTIVE == HIGH
+*** WARNING C322 IN LINE 18 OF Lib\Int.c: unknown identifier
+                  #define BLOffMacro(port) { UCHAR _temp_; \
+                                             _temp_ = Port##port; \
+                                             _temp_ |= RDP##port##_REG; \
+                                             _temp_ &= ~BACKLIGHT_BIT; \
+                                             Port##port = _temp_; }
+              #else
+  25              #define BLOffMacro(port) { UCHAR _temp_; \
+  26                                         _temp_ = Port##port; \
+  27                                         _temp_ |= RDP##port##_REG; \
+  28                                         _temp_ |= BACKLIGHT_BIT; \
+  29                                         Port##port = _temp_; }
+  30          #endif
+  31          #if BACKLIGHT_PORT == MCU_PORT_A
+*** WARNING C322 IN LINE 31 OF Lib\Int.c: unknown identifier
+                  #define FastBLOff() BLOffMacro(A)
+              #elif BACKLIGHT_PORT == MCU_PORT_B
+*** WARNING C322 IN LINE 33 OF Lib\Int.c: unknown identifier
+                  #define FastBLOff() BLOffMacro(B)
+              #elif BACKLIGHT_PORT == MCU_PORT_C
+*** WARNING C322 IN LINE 35 OF Lib\Int.c: unknown identifier
+                  #define FastBLOff() BLOffMacro(C)
+              #elif BACKLIGHT_PORT == MCU_PORT_D
+*** WARNING C322 IN LINE 37 OF Lib\Int.c: unknown identifier
+                  #define FastBLOff() BLOffMacro(D)
+              #elif BACKLIGHT_PORT == MCU_PORT_E
+*** WARNING C322 IN LINE 39 OF Lib\Int.c: unknown identifier
+                  #define FastBLOff() BLOffMacro(E)
+              #elif BACKLIGHT_PORT == MCU_PORT_3
+*** WARNING C322 IN LINE 41 OF Lib\Int.c: unknown identifier
+                  #define FastBLOff() BLOffMacro(3)
+              #endif
+  44          
+  45          #if ENABLE_SCALER_LEDDRV == ON
+              #undef FastBLOff
+              #define FastBLOff() {SC_LEDDRIVER_ENABLE = 0x00;}
+              #endif
+  49          
+  50          //---------------------------------------------
+  51          #if (XRS232 == ADS_RS232)
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 5   
+
+  52                  #define CMD_LEN         4               //george                                
+  53          #elif (XRS232 == LWO_RS232)
+                      UartCommadType xdata g_UartCommand; // Uart command struct
+                      bit gbUartDetected; // decode command flag
+                      
+                      #define UART_CMD_LENGTH         6// (g_UartCommand.Buffer[_UART_CMD_CODE_] >> 5)
+                      #define UART_CMD        (g_UartCommand.Buffer[_UART_CMD_CODE_] & 0x1F)
+                      #define UART_CMD_START          'U'
+                      #define UART_CMD_ACK            'F'
+                      #define UART_CMD_NAK            'N'
+                      
+                      #define UART_CMD_MS_RW (g_UartCommand.Buffer[_UART_CMD_INDEX1_])
+                      #define UART_CMD_MS_INDEX (g_UartCommand.Buffer[_UART_CMD_INDEX2_])
+                      #define UART_CMD_MS_DAT (g_UartCommand.Buffer[_UART_CMD_INDEX3_])
+                      #define UART_CMD_MS_CRC (g_UartCommand.Buffer[_UART_CMD_INDEX4_])
+                      #else
+                      idata UCHAR ucUARTTxOut=0;
+                      idata UCHAR ucUARTTxIn=0;
+                      idata UCHAR ucUARTRxOut=0;
+                      idata UCHAR ucUARTRxIn=0;       //
+                      xdata UCHAR ucUARTTxBuffer[UART_TX_BUFFER_SIZE];
+                      xdata UCHAR ucUARTRxBuffer[UART_RX_BUFFER_SIZE];
+                      xdata UCHAR ucIsTransDisabled;
+                      idata UCHAR ucIsRecivCMDSS=0;   //gg
+                      idata UCHAR ucCntCmdLen=0;      //george                                
+              #endif //#if (XRS232 == ENABLE)
+  78          
+  79          //---------------------------------------------
+  80          //******************************************************************************
+  81          // G L O B A L   V A R I A B L E S
+  82          //******************************************************************************
+  83          
+  84          idata USHRT usMCUCLKDIVIDERLoop;
+  85          
+  86          
+  87          #if ENABLE_NEW_TIMER == ON
+*** WARNING C322 IN LINE 87 OF Lib\Int.c: unknown identifier
+                      //IntTimer0()
+                              // RC5_0.5 Cycle = 0.840ms
+                              // RC5_1.0 Cycle = 1.680ms ~~ 1.778ms
+              idata unsigned char  ucTimer_40us               = 0;
+              idata unsigned char  ucTimer_40to200us  = 0;                                                                                    
+              idata unsigned char  ucTimer_200us              = 0;
+              #endif
+  95          
+  96          
+  97          #if IR_REMOT_CTL == ENABLE
+  98          idata UCHAR ucTimer_IR = 0xFF;
+  99          idata USHRT usData;
+ 100          extern USHRT usIRData;
+ 101          extern bit bIrDetect;
+ 102          
+ 103          #endif
+ 104          
+ 105          //******************************************************************************
+ 106          // S T A T I C   V A R I A B L E S
+ 107          //******************************************************************************
+ 108          static BOOL bModeChanged = TRUE;
+ 109          static idata USHRT volatile usTimerTick_1ms;
+ 110          
+ 111          #if ENABLE_SERIAL_INT == ON
+*** WARNING C322 IN LINE 111 OF Lib\Int.c: unknown identifier
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 6   
+
+              /* 
+              static idata UCHAR ucUARTTxOut;
+              static idata UCHAR ucUARTTxIn;
+              static idata UCHAR ucUARTRxOut;
+              static idata UCHAR ucUARTRxIn;  //
+              static xdata UCHAR ucUARTTxBuffer[UART_TX_BUFFER_SIZE];
+              static xdata UCHAR ucUARTRxBuffer[UART_RX_BUFFER_SIZE];
+              static xdata UCHAR ucIsTransDisabled;
+              static xdata BOOL ucIsRecivCMDSS;       //gg
+              */
+              
+              /*idata UCHAR ucUARTTxOut;
+              idata UCHAR ucUARTTxIn;
+              idata UCHAR ucUARTRxOut;
+              idata UCHAR ucUARTRxIn=0;       //
+              xdata UCHAR ucUARTTxBuffer[UART_TX_BUFFER_SIZE];
+              xdata UCHAR ucUARTRxBuffer[UART_RX_BUFFER_SIZE];
+              xdata UCHAR ucIsTransDisabled;
+              idata BOOL ucIsRecivCMDSS=0;    //gg 
+              */
+                      #if (XRS232 == ADS_RS232)
+                              idata UCHAR ucUARTTxOut=0;
+                              idata UCHAR ucUARTTxIn=0;
+                              idata UCHAR ucUARTRxOut=0;
+                              idata UCHAR ucUARTRxIn=0;       //
+                              xdata UCHAR ucUARTTxBuffer[UART_TX_BUFFER_SIZE];
+                              xdata UCHAR ucUARTRxBuffer[UART_RX_BUFFER_SIZE];
+                              xdata UCHAR ucIsTransDisabled;
+                              idata UCHAR ucIsRecivCMDSS=0;   //gg
+                              idata UCHAR ucCntCmdLen=0;      //george                        
+                      #elif (XRS232 == LWO_RS232)
+                                      
+                      #endif //#if (XRS232 == ENABLE)
+              
+              
+              #endif 
+ 148          
+ 149          
+ 150          
+ 151          //******************************************************************************
+ 152          // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+ 153          //******************************************************************************
+ 154          extern BOOL bLowPowerMode;
+ 155          extern BOOL bIsAPLLPowerDown;
+ 156          extern idata UCHAR ucDdcciChannel;
+ 157          extern BOOL bDDCCmdUpdate;
+ 158          extern idata UCHAR ucDDCCiTxOut;
+ 159          extern idata UCHAR ucDDCCiTxIn;
+ 160          extern idata UCHAR ucDDCCiRxIn;
+ 161          extern idata UCHAR ucDDCCiRxOut;
+ 162          extern xdata UCHAR ucDDCCiTxBuffer[DDCCI_BUFFER_SIZE];
+*** ERROR C202 IN LINE 162 OF LIB\INT.C: 'DDCCI_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 162 OF LIB\INT.C: invalid dimension size: [0]
+ 163          extern xdata UCHAR ucDDCCiRxBuffer[DDCCI_BUFFER_SIZE];
+*** ERROR C202 IN LINE 163 OF LIB\INT.C: 'DDCCI_BUFFER_SIZE': undefined identifier
+*** ERROR C136 IN LINE 163 OF LIB\INT.C: invalid dimension size: [0]
+ 164          
+ 165          
+ 166          #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+*** WARNING C322 IN LINE 166 OF Lib\Int.c: unknown identifier
+*** WARNING C322 IN LINE 166 OF Lib\Int.c: unknown identifier
+              idata USHRT usTimerTickMHL = 0;
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 7   
+
+              extern idata USHRT usCBUSTimeoutDAT;
+              extern idata UCHAR ucMHLConnState;
+              extern idata UCHAR ucCBusState;
+              extern xdata UCHAR ucCbusBuffer[40];
+              extern BOOL bStartOfFrame;
+              extern BOOL bDDCWriteFlag;              // David, HTC debug.
+              extern BOOL bPackPixelModeIntFlag;
+              extern BOOL bWaitACK;
+              extern idata USHRT usCBUSTimeoutACK;
+              #endif
+ 178          
+ 179          #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 179 OF Lib\Int.c: unknown identifier
+              #if EN_AUX_STROBE_FUNC == ON // AUX strobe function 
+              #define AUXBUFLEN 20
+              idata UCHAR ucAuxStrobeIndex;
+              xdata UCHAR ucAuxStrobeBuf[AUXBUFLEN];
+              idata UCHAR ucDPEDIDPtr;
+              extern xdata UCHAR volatile EDID_SRAM_DP[];
+              extern xdata UCHAR bDP_AUX_DETECT;
+              #endif
+              #endif
+ 189          
+ 190          
+ 191          //******************************************************************************
+ 192          // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+ 193          //******************************************************************************
+ 194          static char UART_Putchar(UCHAR c);
+ 195          
+ 196          //******************************************************************************
+ 197          // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+ 198          //******************************************************************************
+ 199          
+ 200          //******************************************************************************
+ 201          // F U N C T I O N   B O D Y S
+ 202          //******************************************************************************
+ 203          
+ 204          /**************************************************************************//**
+ 205           * Mcu external interrupt 0 service routine.
+ 206           ******************************************************************************/
+ 207          void IntExt0(void) interrupt 0 using 1
+ 208          {
+ 209   1      
+ 210   1              #if ENABLE_LOW_PWR_MODE == ON   //george: have compiler here.
+                          SC_MCU_CLK_DIVIDER = 0x00;
+                      #endif
+ 213   1      
+ 214   1              #if IS_NT68850_SERIES 
+ 215   1              #if ((INPUT_INTERFACE&INPUT_DP) && ENABLE_DP_AUX_MONITOR==ON)
+*** WARNING C322 IN LINE 215 OF Lib\Int.c: unknown identifier
+                          if(AUX_STROBE_CTL&BIT0) 
+                          {
+                              move_aux_packet();
+                              return;
+                          }
+                      #endif
+ 222   1              #endif
+ 223   1      
+ 224   1      #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 224 OF Lib\Int.c: unknown identifier
+                  // Power Up DP AUX
+                  if(bLowPowerMode == TRUE) 
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 8   
+
+                      {
+                      if ((SC_DP_AUX_DETECT&0xC0) != 0) 
+                              {
+                          INTSC_EN &= ~BIT1;
+                          LDO_ADJ |= BIT7; //Power up APLL  //20130715_1006_SYS#3
+                          SC_HW_RST = 0x10;
+                          SC_HW_RST = 0x11;
+                          SC_ADC_ZERO_POWER_CTRL = 0x83;                      
+                                      
+                      #if ENABLE_CUT_POWER_ARCH == ON
+                          SC_POWER_CTRL1 |= BIT7;
+                          SC_CUT_POWER_CTRL |= BIT2;
+                          SC_CUT_POWER_CTRL |= BIT0;
+                          SC_ISOLATION_CONTROL = SCREB_B61_PU;
+                          SC_CUT_POWER_CTRL &= 0x07;
+                          SC_CUT_POWER_CTRL &= ~BIT1;
+                          SC_POWER_CTRL1 &= ~BIT7;
+                      #endif
+              
+                          SC_POWER_CTRL1 |= BIT5;
+                          SC_MCU_CLK_DIVIDER = 0x00;
+                          SC_MPLL_X2 &= ~(BIT4|BIT3); //SC_MPLL_X2 = 0x03; 
+                          SC_POWER_CTRL1 &= ~(BIT5|BIT1);
+              
+                          PortD = (PortD | RDPD_REG) & (~BIT4); // HPD Low  // v20_130823_1815_SYS#6
+                          DP_CTRL &= ~BIT4; // DP HPD_PAD disable
+              
+                          SC_TMDS_LINK_CLK_SEL = SCREG_1E7 | BIT0;  // dp_refclk select
+                          SC_DP_102F = REF_CLK*4/1000000;  // if 0x1E7[4:3] = 2'b00, dp_refclk = OSC clock*4
+                          
+                          DP_CLKOn();  
+                          DP_ConfigAUX2IICSpeed();                    
+                          DP_InitPHY();
+                          DP_InitDPCD();
+              
+                          SC_DP_AUX_CTRL = 0x31; // AUX En
+              
+                          DP_InitDPConfigPage();
+              
+                          PortD = (PortD | RDPD_REG) | BIT4; // HPD High
+                              DP_CTRL |= BIT4; // DP HPD_PAD enable
+                              
+                          SetDPLink();
+                      }
+                  }
+              #endif  //End #if (INPUT_INTERFACE&INPUT_DP)
+ 273   1      
+ 274   1      
+ 275   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+*** WARNING C322 IN LINE 275 OF Lib\Int.c: unknown identifier
+*** WARNING C322 IN LINE 275 OF Lib\Int.c: unknown identifier
+                  if ((MHL_SRC & INT_MHL) != 0) 
+                      {
+                              idata UCHAR i;
+                              SC_ADC_ZERO_POWER_CTRL |= (BIT7|BIT1);
+                              i = SC_CBUS_INT_FLAG;
+              
+                              #if ENABLE_INT_DISCOVERY == ON
+                              if ( i & DIS_INT_FLG ) {                        // Discovery int.
+                                  CbusDiscoveryHandler();
+                              //          SC_CBUS_INT_EN |= DIS_INT_CLR;
+                              }
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 9   
+
+                              #endif
+              
+              
+                              if ( i & TRANS_INT_FLG ) 
+                                      {
+                                  if (MHL_GetMSCCmd()) {
+                                      CbusMSCCmdHandler();
+                                  }
+                                  else if (MHL_GetDDCCmd()) {
+                                      CbusDDCCmdHandler();
+                                  }
+                                  SC_CBUS_INT_EN |= TRANS_INT_CLR;
+                              }
+              
+                              #if 1//def E_DEBUG
+                                      if (i & LINK_INT_FLG) 
+                                      {
+                                                      if (SC_CBUS_LINK_INT_FLAG & CBUS_ARB_FAIL) {
+                                                              bCBusArbFailFlag = TRUE;
+                                                      }
+                                              SC_CBUS_INT_EN |= LINK_INT_CLR;
+                                      }
+                              #endif
+                  }
+              #endif  //End #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+ 312   1      
+ 313   1      
+ 314   1      #if (INPUT_INTERFACE&INPUT_DP)
+*** WARNING C322 IN LINE 314 OF Lib\Int.c: unknown identifier
+              #if EN_AUX_STROBE_FUNC == ON // AUX strobe function 
+                      if(DP_SRC & BIT7) 
+                      {
+                      idata UCHAR i;
+                              // for INTS_SEL = command_end
+              //SC_DP_AUX_DETECT &= ~BIT0;//????????????????????????
+                              if (AUX_STROBE_CTL & BIT3) 
+                              {
+                          ucAuxStrobeIndex = 0;
+                                      while ((AUX_STROBE_FUN & BIT0) == 0) 
+                                      {
+                                              if (ucAuxStrobeIndex < AUXBUFLEN) {
+                                                      ucAuxStrobeBuf[ucAuxStrobeIndex++] = AUX_STROBE_PORT;
+                                                      //*pDDCPtr1++ = ucAuxStrobeBuf[ucAuxStrobeIndex++];
+                                              }
+                                              else {// Read out data for empty
+                                                      i = AUX_STROBE_PORT;
+                                              }                               
+                                      }
+                                      AUX_STROBE_CTL |= BIT3;         // clear AUX_STROBE_INT
+                              }
+              
+                              // decode AUX channel data.
+                              if ((ucAuxStrobeBuf[0] & BIT7) == 0)            // I2C-over-AUX
+                              {
+              
+                                      if ((ucAuxStrobeBuf[0] & (BIT5|BIT4)) == 0)     // Write
+                                      {
+                                              if ((ucAuxStrobeBuf[2] == 0x37) && (ucAuxStrobeIndex > 4))  {// DDC_CI Write
+                                                      // Reserved for DDC_CI Write decode....
+                                  ucDdcciChannel = 4;
+              //                    ucDDCCiRxIn = 0;
+                                  bDDCCmdUpdate = TRUE;
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 10  
+
+                                                      i = ucAuxStrobeBuf[3] + 1;
+                                                      for (ucAuxStrobeIndex=0; ucAuxStrobeIndex<i; ucAuxStrobeIndex++) {
+                                      ucDDCCiRxBuffer[ucDDCCiRxIn++] = ucAuxStrobeBuf[4+ucAuxStrobeIndex];
+                                          if (ucDDCCiRxIn > DDCCI_BUFFER_SIZE-1) {
+                                              ucDDCCiRxIn = 2;
+                                          }
+                                                      }
+                                              }
+                                              else if (ucAuxStrobeBuf[2] == 0x50) {   // EDID Write
+                                                      ucDPEDIDPtr = ucAuxStrobeBuf[4];
+                                              }
+                                              AUX_I2C_MANUAL = (AUX_I2C_MODE | AUX_I2C_FINSH);
+                                      }
+                                      else            // Read
+                                      {
+                                              if (ucAuxStrobeBuf[2] == 0x50)          // EDID Read
+                                              {
+                                                      if (ucAuxStrobeIndex <= 3) {            // No length
+                                                              AUX_I2C_MANUAL = (AUX_I2C_MODE | AUX_I2C_FINSH);
+                                                      }
+                                                      else {
+                                                              i = ucAuxStrobeBuf[3] + 1;
+                                                              for (ucAuxStrobeIndex=0; ucAuxStrobeIndex<i; ucAuxStrobeIndex++) {
+                                                                      AUX_I2C_MANUAL = (AUX_I2C_MODE);        // send ack
+                                                                      AUX_I2C_DATA = EDID_SRAM_DP[ucDPEDIDPtr++];
+                                                              }
+                                                              AUX_I2C_MANUAL = (AUX_I2C_MODE | AUX_I2C_FINSH);
+                                                      }
+                                              }
+                                              else if (ucAuxStrobeBuf[2] == 0x37)     // DDC_CI Read
+                                              {
+              //                    ucDdcciChannel = 4;
+                                                      if (ucAuxStrobeIndex <= 3) {            // No length
+                                                              AUX_I2C_MANUAL = (AUX_I2C_MODE | AUX_I2C_FINSH);
+                                                      }
+                                                      else 
+                                                      {
+                                                              i = ucAuxStrobeBuf[3] + 1;
+              //                        ucDDCCiTxOut = 0;
+                                                              for (ucAuxStrobeIndex=0; ucAuxStrobeIndex<i; ucAuxStrobeIndex++) {
+                                                                      AUX_I2C_MANUAL = (AUX_I2C_MODE);        // send ack
+                                          if (ucDDCCiTxOut != ucDDCCiTxIn) {
+                                                                      AUX_I2C_DATA = ucDDCCiTxBuffer[ucDDCCiTxOut++];
+                                          }
+                                          else {
+                                              AUX_I2C_DATA = ucDDCCiTxBuffer[ucDDCCiTxOut];
+                                              ucDDCCiTxOut = 0;
+                                          }
+                                                              }
+                                                              AUX_I2C_MANUAL = (AUX_I2C_MODE | AUX_I2C_FINSH);
+                                                      }                                       
+                                              }
+              
+                                      } //End else... Read
+                              } //End if ((ucAuxStrobeBuf[0] & BIT7)  ....  I2C-over-AUX
+              
+                              ucAuxStrobeIndex = 0;
+                      } //End if(DP_SRC & BIT7) 
+              
+                  else if (SC_DP_AUX_DETECT & BIT7) 
+                      {
+                      SC_DP_AUX_DETECT |= BIT1;
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 11  
+
+                      SC_DP_AUX_DETECT &= ~BIT1;
+                      bDP_AUX_DETECT = 1;
+                      //      INTSC_EN &= ~BIT1;
+                      //      AUX_STROBE_CTL = 0x00;
+                  }
+              #endif          //End #if EN_AUX_STROBE_FUNC == ON // AUX strobe function 
+              #endif
+ 417   1      
+ 418   1      
+ 419   1          if ((INT_SRC & INT_IIC0) != 0) 
+ 420   1              {
+ 421   2              ucDdcciChannel = 0;
+ 422   2              if (IIC0_INT_FLG & INTA) {
+ 423   3                  IIC0_INT_CLR = INTA;
+ 424   3                  if (IIC0_STATUS & DOWRITE) {  // Slave Addr || 0x01 ==> Read
+ 425   4                      IIC0_INT_CLR = (INTTX | CLR_TX_FIFO);
+ 426   4                      IIC0_TXDATA = ucDDCCiTxBuffer[0];
+ 427   4                      IIC0_INT_EN = (INTA | INTTX);
+ 428   4                      ucDDCCiTxOut = 1;
+ 429   4                  }
+ 430   3                  else {  // Slave Addr ==> Write
+ 431   4                      IIC0_INT_EN = (INTA | INTRX);
+ 432   4                      IIC0_CFG |= SEND_ACK;
+ 433   4                      ucDDCCiRxIn = 0;
+ 434   4                      bDDCCmdUpdate = TRUE;
+ 435   4                              }
+ 436   3                      }
+ 437   2      
+ 438   2              while (IIC0_INT_FLG & INTTX) {
+ 439   3                  if (ucDDCCiTxOut != ucDDCCiTxIn) {
+ 440   4                      IIC0_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut++];
+ 441   4                      IIC0_INT_CLR = INTTX;
+ 442   4                  }
+ 443   3                  else {
+ 444   4                      IIC0_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut];
+ 445   4                      IIC0_INT_CLR = INTTX;
+ 446   4                      ucDDCCiTxOut = 0;
+ 447   4                              }
+ 448   3                      }
+ 449   2      
+ 450   2              while (IIC0_INT_FLG & INTRX) {
+ 451   3                  ucDDCCiRxBuffer[ucDDCCiRxIn++] = IIC0_RXDATA;
+ 452   3                  IIC0_INT_CLR = INTRX;
+ 453   3                  bDDCCmdUpdate = TRUE;
+ 454   3                  if (ucDDCCiRxIn > DDCCI_BUFFER_SIZE-1) {
+*** ERROR C202 IN LINE 454 OF LIB\INT.C: 'DDCCI_BUFFER_SIZE': undefined identifier
+ 455   4                      ucDDCCiRxIn = 2;
+ 456   4                  }
+ 457   3              } 
+ 458   2              if (IIC0_INT_FLG & INTNAK) {
+ 459   3                  IIC0_INT_CLR = 0xFF;//INTNAK;
+ 460   3              }
+ 461   2              if (IIC0_INT_FLG & INTLOST) {
+ 462   3                  IIC0_INT_CLR = 0xFF;//INTLOST;
+ 463   3              }
+ 464   2          } //End if ((INT_SRC & INT_IIC0) != 0)
+ 465   1      
+ 466   1      
+ 467   1          if ((INT_SRC & INT_IIC2) != 0) 
+ 468   1              {
+ 469   2              ucDdcciChannel = 2;
+ 470   2              if (IIC2_INT_FLG & INTA) {
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 12  
+
+ 471   3                  IIC2_INT_CLR = INTA;
+ 472   3                  if (IIC2_STATUS & DOWRITE) {  // Slave Addr || 0x01 ==> Read
+ 473   4                      IIC2_INT_CLR = (INTTX | CLR_TX_FIFO);
+ 474   4                      IIC2_TXDATA = ucDDCCiTxBuffer[0];
+ 475   4                      IIC2_INT_EN = (INTA | INTTX);
+ 476   4                      ucDDCCiTxOut = 1;
+ 477   4                  }
+ 478   3                  else {  // Slave Addr ==> Write
+ 479   4                      IIC2_INT_EN = (INTA | INTRX);
+ 480   4                      IIC2_CFG |= SEND_ACK;
+ 481   4                      ucDDCCiRxIn = 0;
+ 482   4                      bDDCCmdUpdate = TRUE;
+ 483   4                  }
+ 484   3              }
+ 485   2      
+ 486   2              while (IIC2_INT_FLG & INTTX) {
+ 487   3                          if (ucDDCCiTxOut != ucDDCCiTxIn) {
+ 488   4                              IIC2_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut++];
+ 489   4                              IIC2_INT_CLR = INTTX;
+ 490   4                          }
+ 491   3                          else {
+ 492   4                              IIC2_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut];
+ 493   4                              IIC2_INT_CLR = INTTX;
+ 494   4                              ucDDCCiTxOut = 0;
+ 495   4                      }
+ 496   3                      }
+ 497   2      
+ 498   2              while (IIC2_INT_FLG & INTRX) {
+ 499   3                  ucDDCCiRxBuffer[ucDDCCiRxIn++] = IIC2_RXDATA;
+ 500   3                  IIC2_INT_CLR = INTRX;
+ 501   3                  bDDCCmdUpdate = TRUE;
+ 502   3                  if (ucDDCCiRxIn > DDCCI_BUFFER_SIZE-1) {
+*** ERROR C202 IN LINE 502 OF LIB\INT.C: 'DDCCI_BUFFER_SIZE': undefined identifier
+ 503   4                      ucDDCCiRxIn = 2;
+ 504   4                  }
+ 505   3              } 
+ 506   2              if (IIC2_INT_FLG & INTNAK) {
+ 507   3                  IIC2_INT_CLR = 0xFF;//INTNAK;
+ 508   3              }
+ 509   2              if (IIC2_INT_FLG & INTLOST) {
+ 510   3                  IIC2_INT_CLR = 0xFF;//INTLOST;
+ 511   3              }
+ 512   2          } //End if ((INT_SRC & INT_IIC2) != 0) 
+ 513   1      
+ 514   1      
+ 515   1              #if 0 //ENABLE_HDMI == ON
+                          if (((INT_SRC & INT_SC) != 0) || ((INT_SRC & INT_HDMI) != 0)) {
+                      #else
+ 518   1                  if ((INT_SRC & INT_SC) != 0) {
+ 519   2              #endif
+ 520   2      
+ 521   2                              #if ENABLE_FAST_BK_OFF == ON
+*** WARNING C322 IN LINE 521 OF Lib\Int.c: unknown identifier
+                                              FastBLOff();
+                                      #endif
+ 524   2                      
+ 525   2                              McuScalerIntDisable();
+ 526   2                      
+ 527   2                              #if 0 //ENABLE_HDMI == ON
+                                              McuScalerHDMIIntDisable();
+                                      #endif
+ 530   2      
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 13  
+
+ 531   2                      bModeChanged = TRUE;
+ 532   2                  }
+ 533   1      
+ 534   1              #if ENABLE_LOW_PWR_MODE == ON
+                          usMCUCLKDIVIDERLoop = 0;
+                      #endif
+ 537   1      }// End void IntExt0()
+ 538          
+ 539          /**************************************************************************//**
+ 540           * Mcu external interrupt 1 service routine.
+ 541           ******************************************************************************/
+ 542          void IntExt1(void) interrupt 2 using 3
+ 543          {
+ 544   1      
+ 545   1      
+ 546   1      #if ENABLE_LOW_PWR_MODE == ON
+                  SC_MCU_CLK_DIVIDER = 0x00;
+              #endif
+ 549   1      
+ 550   1      
+ 551   1          if ((INT_SRC & INT_IIC1) != 0) 
+ 552   1              {
+ 553   2              ucDdcciChannel = 1;
+ 554   2              if (IIC1_INT_FLG & INTA) {
+ 555   3                  IIC1_INT_CLR = INTA;
+ 556   3                  if (IIC1_STATUS & DOWRITE) {  // Slave Addr || 0x01 ==> Read
+ 557   4                      IIC1_INT_CLR = (INTTX | CLR_TX_FIFO);
+ 558   4                      IIC1_TXDATA = ucDDCCiTxBuffer[0];
+ 559   4                      IIC1_INT_EN = (INTA | INTTX);
+ 560   4                      ucDDCCiTxOut = 1;
+ 561   4                  }
+ 562   3                  else {  // Slave Addr ==> Write
+ 563   4                      IIC1_INT_EN = (INTA | INTRX);
+ 564   4                      IIC1_CFG |= SEND_ACK;
+ 565   4                      ucDDCCiRxIn = 0;
+ 566   4                      bDDCCmdUpdate = TRUE;
+ 567   4                  }
+ 568   3              }
+ 569   2      
+ 570   2              while (IIC1_INT_FLG & INTTX) {
+ 571   3                  if (ucDDCCiTxOut != ucDDCCiTxIn) {
+ 572   4                      IIC1_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut++];
+ 573   4                      IIC1_INT_CLR = INTTX;
+ 574   4                  }
+ 575   3                  else {
+ 576   4                      IIC1_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut];
+ 577   4                      IIC1_INT_CLR = INTTX;
+ 578   4                      ucDDCCiTxOut = 0;
+ 579   4                  }
+ 580   3              }
+ 581   2      
+ 582   2              while (IIC1_INT_FLG & INTRX) {
+ 583   3                  ucDDCCiRxBuffer[ucDDCCiRxIn++] = IIC1_RXDATA;
+ 584   3                  IIC1_INT_CLR = INTRX;
+ 585   3                  bDDCCmdUpdate = TRUE;
+ 586   3                  if (ucDDCCiRxIn > DDCCI_BUFFER_SIZE-1) {
+*** ERROR C202 IN LINE 586 OF LIB\INT.C: 'DDCCI_BUFFER_SIZE': undefined identifier
+ 587   4                      ucDDCCiRxIn = 2;
+ 588   4                  }
+ 589   3              } 
+ 590   2              if (IIC1_INT_FLG & INTNAK) {
+ 591   3                  IIC1_INT_CLR = 0xFF;//INTNAK;
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 14  
+
+ 592   3              }
+ 593   2              if (IIC1_INT_FLG & INTLOST) {
+ 594   3                  IIC1_INT_CLR = 0xFF;//INTLOST;
+ 595   3              }
+ 596   2          } //End if ((INT_SRC & INT_IIC1) != 0) 
+ 597   1      
+ 598   1      
+ 599   1          if ((INT_SRC & INT_IIC3) != 0) 
+ 600   1              {
+ 601   2              ucDdcciChannel = 3;
+ 602   2              if (IIC3_INT_FLG & INTA) {
+ 603   3                  IIC3_INT_CLR = INTA;
+ 604   3                  if (IIC3_STATUS & DOWRITE) {  // Slave Addr || 0x01 ==> Read
+ 605   4                      IIC3_INT_CLR = (INTTX | CLR_TX_FIFO);
+ 606   4                      IIC3_TXDATA = ucDDCCiTxBuffer[0];
+ 607   4                      IIC3_INT_EN = (INTA | INTTX);
+ 608   4                      ucDDCCiTxOut = 1;
+ 609   4                  }
+ 610   3                  else {  // Slave Addr ==> Write
+ 611   4                      IIC3_INT_EN = (INTA | INTRX);
+ 612   4                      IIC3_CFG |= SEND_ACK;
+ 613   4                      ucDDCCiRxIn = 0;
+ 614   4                      bDDCCmdUpdate = TRUE;
+ 615   4                  }
+ 616   3              }
+ 617   2      
+ 618   2              while (IIC3_INT_FLG & INTTX) {
+ 619   3                  if (ucDDCCiTxOut != ucDDCCiTxIn) {
+ 620   4                      IIC3_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut++];
+ 621   4                      IIC3_INT_CLR = INTTX;
+ 622   4                  }
+ 623   3                  else {
+ 624   4                      IIC3_TXDATA = ucDDCCiTxBuffer[ucDDCCiTxOut];
+ 625   4                      IIC3_INT_CLR = INTTX;
+ 626   4                      ucDDCCiTxOut = 0;
+ 627   4                  }
+ 628   3              }
+ 629   2      
+ 630   2              while (IIC3_INT_FLG & INTRX) {
+ 631   3                  ucDDCCiRxBuffer[ucDDCCiRxIn++] = IIC3_RXDATA;
+ 632   3                  IIC3_INT_CLR = INTRX;
+ 633   3                  bDDCCmdUpdate = TRUE;
+ 634   3                  if (ucDDCCiRxIn > DDCCI_BUFFER_SIZE-1) {
+*** ERROR C202 IN LINE 634 OF LIB\INT.C: 'DDCCI_BUFFER_SIZE': undefined identifier
+ 635   4                      ucDDCCiRxIn = 2;
+ 636   4                  }
+ 637   3              } 
+ 638   2              if (IIC3_INT_FLG & INTNAK) {
+ 639   3                  IIC3_INT_CLR = 0xFF;//INTNAK;
+ 640   3              }
+ 641   2              if (IIC3_INT_FLG & INTLOST) {
+ 642   3                  IIC3_INT_CLR = 0xFF;//INTLOST;
+ 643   3              }
+ 644   2          } //End if ((INT_SRC & INT_IIC3) != 0) 
+ 645   1      
+ 646   1      #if ENABLE_LOW_PWR_MODE == ON
+                  usMCUCLKDIVIDERLoop = 0;
+              #endif
+ 649   1      
+ 650   1      
+ 651   1      //---------------------------------------------
+ 652   1      #if IR_REMOT_CTL == ON
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 15  
+
+ 653   1              
+ 654   1         if((INT_SRC & INT_EXT) != 0) //is EX_INT
+ 655   1         {
+ 656   2                 if((INTEXT_FLG & INTE2) != 0)//is EX_INT0 PIN
+ 657   2                 {    
+ 658   3                              INTEXT_EN &= ~INTE2;    //=0;   //&= ~INTE2;    //Disable INTE2                 
+ 659   3      
+ 660   3                              {// Test OK.
+ 661   4                                      if(ucTimer_IR==0xFF)
+ 662   4                                      {
+ 663   5                                              ucTimer_IR =0;  //START-interrupt IR Command
+ 664   5                                      }else if(ucTimer_IR==0xFE)
+ 665   4                                      {
+ 666   5                                              ucTimer_IR++;   // to 0xFF
+ 667   5                                              INTEXT_EN |= INTE2;
+ 668   5                                      }
+ 669   4                              }                         
+ 670   3                              INT_SRC = 0x00;                                                 //Clear interrupt source flags
+ 671   3                              INTEXT_FLG = 0xFF;      //0xFF; //INTEXT_FLG |= INTE2;          //Clear INT : can't delete this.
+ 672   3      
+ 673   3                 }
+ 674   2         }
+ 675   1      #endif 
+ 676   1      
+ 677   1      
+ 678   1      }
+ 679          
+ 680          /**************************************************************************//**
+ 681           * Mcu timer 0 interrupt service routine.
+ 682           ******************************************************************************/
+ 683          void IntTimer0(void) interrupt 1 using 2
+ 684          {
+ 685   1              /* (1) Timer0 Count */
+ 686   1      
+ 687   1      
+ 688   1      #if ENABLE_NEW_TIMER == ON
+*** WARNING C322 IN LINE 688 OF Lib\Int.c: unknown identifier
+              
+                      if(ucTimer_IR != 0xFF )
+                      {                       
+                              ++ucTimer_40us;
+                              if(ucTimer_40us >= 43)  //84 )          
+                              {
+                              ucTimer_40us = 0;               // count_1.680msec : 1 IR-Command cycle
+                                      
+                                      if(ucTimer_IR==0)               // Fist Initial: Clear Data
+                                              usData = 0;                                                     
+              
+              
+                                      if(ucTimer_IR < 13)                     //Start ucTimer_IR counter 14 time
+                                      {
+                                              ucTimer_IR++;
+              
+                                              if( (PortC & BIT6) == BIT6) {   //bit High 
+                                                      usData <<= 1;                                   
+                                                      usData |= 0x0001;
+                                              }
+                                              else                                                    //bit Low
+                                                      usData <<= 1;
+              
+                                      }else{                                          //End-interrupt IR Command
+                                              usData = ~usData;
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 16  
+
+                                              usData = usData & 0x3FFF;
+              
+                                              //run ir.c -> IR_Process()
+                                              usIRData = usData;
+                                              bIrDetect = 1;
+              
+                                              ucTimer_IR  = 0xFF;             //End ucTimer_IR counter 14 time
+                                              INTEXT_EN  |= INTE2;    //Enable INTE2
+                                              INTEXT_FLG = 0xFF;              //Clear  INTE2 Flag
+                                              INT_SRC = 0x00;                 //Clear  INT_EXT Flag
+                                              ucTimer_40us=0;
+                                      }
+                              }
+                      } 
+              
+              
+                      ++ucTimer_40to200us;
+                  if(bIsAPLLPowerDown == TRUE)
+                      ucTimer_40to200us = 0;
+                      else if(ucTimer_40to200us >= 5)
+                              ucTimer_40to200us=0;    // count_0.2msec
+                  else
+                              return;
+              
+              
+                  ++ucTimer_200us;
+                  if(SC_MCU_CLK_DIVIDER == 0x22 && ucTimer_200us >= 2)
+                      ucTimer_200us = 0;
+                  else if(ucTimer_200us >= 8 && bIsAPLLPowerDown == TRUE)
+                      ucTimer_200us = 0;
+                  else if( ucTimer_200us >= 5)
+                      ucTimer_200us = 0;              // count_1msec  
+                  else
+                              return;
+              
+              
+              #else
+ 751   1              #if ENABLE_LOW_PWR_MODE == ON
+                              //George (Compiler use this)
+                              //    if (bLowPowerMode == TRUE) {//3MHz
+                          if (SC_MCU_CLK_DIVIDER == 0x22) //3MHz
+                              {
+                              TL0 = ucTL0_LOW_POWER_3M;
+                              TH0 = ucTH0_LOW_POWER_3M;
+                          }
+                          else if (bIsAPLLPowerDown == TRUE) {
+                      #else
+ 761   1                  if (bIsAPLLPowerDown == TRUE) {
+ 762   2              #endif    
+ 763   2      
+ 764   2                      TL0 = ucTL0_LOW_POWER;
+ 765   2                      TH0 = ucTH0_LOW_POWER;
+ 766   2                  }
+ 767   1                  else 
+ 768   1                      {       //source   0xEB2B: 1.005ms      (ucTL0_Normal_Power, ucTH0_Normal_Power)
+ 769   2                              //ok       0xEB52: 1.000ms
+ 770   2                      TL0 = ucTL0_Normal_Power;
+ 771   2                      TH0 = ucTH0_Normal_Power;
+ 772   2                  }
+ 773   1      
+ 774   1              TR0 = 1; //Start Timer 0
+ 775   1      
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 17  
+
+ 776   1      #endif 
+ 777   1      
+ 778   1              usTimerTick_1ms++;              // count_1msec ++
+ 779   1      
+ 780   1      
+ 781   1      
+ 782   1              /* (2) Light-Sensoer */
+ 783   1              #if ALS_EnDis == ALSMODE
+                              if(CkDevice_timer >0)
+                                      CkDevice_timer--;
+                      #elif ALS_EnDis == ALSOffSET    
+                              if(CkDevice_timer >0)
+                                      CkDevice_timer--;
+                      #elif ALS_EnDis == ALSRange
+                      
+                      #else   //Normal
+ 792   1              
+ 793   1              #endif  //#if ALS_EnDis == ENABLE
+ 794   1      
+ 795   1      
+ 796   1              /* (3) MHL InputSource */
+ 797   1              #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+*** WARNING C322 IN LINE 797 OF Lib\Int.c: unknown identifier
+*** WARNING C322 IN LINE 797 OF Lib\Int.c: unknown identifier
+                          if ((ucMHLConnState == MHL_DISCOVERY_RDY) && (bCBUSAbort == 0)) 
+                              {
+                      //George (Compiler use this)
+                              if ((usTimerTick_1ms - usTimerTickMHL) > SET_HPD_TIMER) //SET_HPD_TIMER
+                                      {
+                                  if (!((MHL_GetMSCCmd() || MHL_GetDDCCmd()))) 
+                                              {
+                                      SC_ADC_ZERO_POWER_CTRL |= (BIT7|BIT1);
+                          //            MHLCbusTx(TX_DDC_CMD, CBUS_SET_HPD); //this is using 1
+                                      MHL_WaitCBusReady();
+                                      bTranCMD = 0;
+                                      ucCmdIndex = 0;//index to cMSCCmd
+                                      bCheckTimeout = 0;
+                                      SC_CBUS_MSC_CMD = CBUS_SET_HPD;
+                                      ucCBusState = CBUS_SETHPD;
+                                      ucMHLConnState = MHL_SET_HPD;
+                                      bWaitACK = 1;
+                                      usCBUSTimeoutACK = usTimerTick_1ms;
+              
+                                              #if 1//def E_DEBUG
+                                              if (bCBusArbFailFlag == TRUE) 
+                                                              {
+                                                  bCBusArbFailFlag = FALSE;
+                                                  SC_CBUS_MSC_CMD = CBUS_SET_HPD;
+                                              }
+                                              #endif
+                                  }
+                              }
+                          }
+                      #endif
+ 828   1      
+ 829   1      }//End void IntTimer0()
+ 830          
+ 831          
+ 832          
+ 833          
+ 834          
+ 835          
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 18  
+
+ 836          #if ENABLE_SERIAL_INT == ON
+*** WARNING C322 IN LINE 836 OF Lib\Int.c: unknown identifier
+              void IntUART(void) interrupt 4 using 1
+              {
+              
+                      #if (XRS232 == ADS_RS232)
+                              UCHAR buf=0;
+                      
+                              if(RI)
+                              {
+                                      RI=0;
+                                      buf = SBUF;
+                      
+                                      if( (buf !=0xAA) && (ucUARTRxIn == ucUARTRxOut) && (ucIsRecivCMDSS == 0) ) { 
+                                              ucCntCmdLen = 0;
+                                      }
+                                      else if( (buf == 0xAA) && (ucCntCmdLen == 0) )  //george 20160219
+                                      {
+                                              ucUARTRxIn = ucUARTRxOut = 0;
+                                              ucIsRecivCMDSS = 1;                                     // (1)_ACK      
+                                              SBUF = 0xA0;                                            //send ACK
+                                              TI=1;
+                                      }else if(ucCntCmdLen < CMD_LEN)                 // Command length set: 4
+                                      {                       
+                                              ucUARTRxBuffer[ucUARTRxIn] = buf;
+                                              ucCntCmdLen++;  
+                                          if (++ucUARTRxIn > UART_RX_BUFFER_SIZE-1)
+                                              ucUARTRxIn = 0;
+                      
+                                              if(ucCntCmdLen == CMD_LEN)
+                                                      ucIsRecivCMDSS = 2;                             // (2)_CMD Len Finish !
+                                      } 
+                              }
+                      
+                          if (TI == 1) 
+                              {
+                              TI = 0;
+                              if (ucUARTTxIn != ucUARTTxOut) 
+                                      {
+                                              SBUF = ucUARTTxBuffer[ucUARTTxOut];
+                                  
+                                              if (++ucUARTTxOut > UART_TX_BUFFER_SIZE-1)
+                                      ucUARTTxOut = 0;
+                                      }
+                              else 
+                                      {
+                                              ucIsTransDisabled = 1;
+                                      }
+                              }                       
+                      #elif (XRS232 == LWO_RS232)
+                              if(RI)//!_testbit_(TI)) // check translate interrupt
+                              {
+                                      RI = 0; // clear recieve interrupt
+                                      
+                                      g_UartCommand.Buffer[g_UartCommand.Index] = SBUF; // recieve byte
+                                      // check command buffer index
+                      /*
+                                      if(g_UartCommand.Index==0)              // Test for 'U'
+                                              {
+                                              if(g_UartCommand.Buffer[g_UartCommand.Index]==UART_CMD_START)
+                                                      sPutChar(UART_CMD_ACK); // Return Ack
+                                              else 
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 19  
+
+                                              {
+                                                      sPutChar(UART_CMD_NAK);                                                         
+                                              }
+                                      }
+                                                        
+                      
+                      */              
+                                      if (g_UartCommand.Index < UART_CMD_LENGTH) // still read command
+                                              {       
+                              //              if(g_UartCommand.Buffer[0]==UART_CMD_START)
+                                                      if(g_UartCommand.Buffer[_UART_CMD_START_]=='5')
+                                                      g_UartCommand.Index++; // next index of command buffer
+                                              }
+                                      if (g_UartCommand.Index == UART_CMD_LENGTH) // read command ok
+                                              {
+                                      //       sPutChar('G');
+                                              if(g_UartCommand.Buffer[_UART_CMD_INDEX4_]==0x0d)
+                                              gbUartDetected = TRUE; // command  buffer recieve ok
+                                              
+                                              g_UartCommand.Index = 0; // reset index of command buffer
+                                      }        
+                                      
+                              }                       
+                      #endif //#if (XRS232 == ENABLE)         
+              
+              }//End IntUART(void) interrupt 4 using 1
+              
+              
+              
+                      #if (XRS232 == ADS_RS232)
+                              UCHAR UART_Getchar(UCHAR *ptr)
+                              {
+                                      UCHAR  i=0;
+                              
+                                      if(ucIsRecivCMDSS < 2) {return 0;       }                               // command data[] length not ready.
+                              
+                              
+                                      if(ucIsRecivCMDSS == 2 )
+                                      {
+                                              while ( ucUARTRxIn != ucUARTRxOut ) 
+                                              {       
+                                                      *ptr++ = ucUARTRxBuffer[ucUARTRxOut++];         //Start,  CMD(R/W,  Index(Item),  Value,  CRC
+                                                      
+                                                      if (ucUARTRxOut > UART_RX_BUFFER_SIZE-1)
+                                              ucUARTRxOut = 0;
+                                              }
+                                              ucCntCmdLen=0;                  // clear this is important.
+                                              ucIsRecivCMDSS = 0;
+                              
+                                              return 1;
+                                      }
+                                      return 0;
+                              }
+              
+                              /**************************************************************************//**
+                               * Put char into the TX buffer and enable UART transmission.
+                               ******************************************************************************/
+                              static char UART_Putchar(UCHAR c)
+                              {
+                                  //If the buffer is full, return an error value.
+                                  if (((ucUARTTxIn+1)%UART_TX_BUFFER_SIZE) == ucUARTTxOut) return -1;
+                              
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 20  
+
+                                  EA = 0;
+                                  ucUARTTxBuffer[ucUARTTxIn] = c;
+                                  if (++ucUARTTxIn > UART_TX_BUFFER_SIZE-1)
+                                      ucUARTTxIn = 0;
+                                  if (ucIsTransDisabled) 
+                                      {
+                                      ucIsTransDisabled = 0;
+                                      TI = 1;
+                                  }
+                                  EA = 1;
+                                  
+                                  return 0;
+                              }
+                              
+                              /**************************************************************************//**
+                               * The putchar function to replace the putchar in the standard library.
+                               * @param c Character.
+                               ******************************************************************************/
+                              char putchar(char c)
+                              {
+                                  USHRT i;
+                                  UCHAR k = 0;
+                                  while (UART_Putchar(c) != 0) 
+                                      {
+                                      for (i = 0; i < 1000; i++) {}
+                                      if (++k > 10) {
+                                          TI = 1;
+                                      }
+                                  }
+                                  ResetWDTimer();
+                                  
+                                  return (c);
+                              }                       
+                      #elif (XRS232 == LWO_RS232)
+                              BYTE sNibble2Ascii(BYTE bNibble)
+                              {
+                                  BYTE bAsciiChar;
+                              
+                                  if( bNibble <= 9 )
+                                      bAsciiChar = '0' + bNibble;
+                                  else
+                                      bAsciiChar = 'A' + (bNibble-10);
+                                  return bAsciiChar;
+                              }
+                              
+                              void sHex2Ascii(BYTE bHex, BYTE *pString)
+                              {
+                                  BYTE idata bHexTmp, bHexSize;
+                                  bHexTmp = bHex;
+                                  for( bHexSize=sizeof(bHex)*2; bHexSize > 0; --bHexSize)//Byte or WORD or DWORD
+                                  {
+                                     *(pString+bHexSize-1) = sNibble2Ascii(bHexTmp & 0x0F);
+                                     bHexTmp >>= 4;//right shift 4bit
+                                  }
+                              }
+                              
+                              void sPutChar(BYTE bTmp)
+                              {
+                              
+                                  ES = 0; // Enter Critical
+                                  SBUF = bTmp; // Put Char
+                                  while(!TI);//Wait the Transit flag be set
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 21  
+
+                                  TI = 0; 
+                                  ES = 1; // Exit Critical
+                              
+                              }
+                              
+                              void sPutStr(BYTE code *ptTmpStr)
+                              {
+                                  BYTE bTmp; // character buffer
+                              
+                                  while (1)
+                                  {
+                                       bTmp = *ptTmpStr;// Get char
+                                       if (bTmp == '\0')break;          
+                                       sPutChar(bTmp); // Put Char
+                                       ptTmpStr++; // Next char
+                                  }
+                              }
+                              
+                              void sPutByteHex(BYTE bHex)
+                              {
+                                  BYTE idata abHex[2]; // output buffer
+                                  sHex2Ascii(bHex, abHex); // hexadecimal to ASCII code
+                                  sPutChar('0');
+                                  sPutChar('x');
+                                  sPutChar(abHex[0]); // high nibble
+                                  sPutChar(abHex[1]); // low nibble
+                              }
+                              void sPutWordHex(WORD wHex)
+                              {
+                                  UCHAR  idata abHex[2]; // output buffer
+                                  tdfWB idata wValue;
+                              
+                                  wValue.w=wHex;      
+                                  sHex2Ascii(wValue.b[0], abHex); // hexadecimal to ASCII code
+                                  sPutChar('0');
+                                  sPutChar('x');
+                                  sPutChar(abHex[0]); // high nibble
+                                  sPutChar(abHex[1]); // low nibble
+                                  sHex2Ascii(wValue.b[1], abHex); // hexadecimal to ASCII code 
+                                  sPutChar(abHex[0]); // high nibble
+                                  sPutChar(abHex[1]); // low nibble
+                              }
+                              
+                              void sPutWordDec(WORD wDec)
+                              {
+                                  tdfWB idata wValue;
+                                  BYTE  idata bValue;  
+                                  BYTE  idata bIndex;
+                              
+                                  wValue.w=wDec; 
+                                  if(wValue.w >= 10000)       
+                                   bIndex=0;
+                                  else if(wValue.w >= 1000)
+                                   bIndex=1; 
+                                  else if(wValue.w >= 100)  
+                                   bIndex=2;                   
+                                  else if(wValue.w >= 10) 
+                                   bIndex=3;   
+                                  else if(wValue.w >= 1)   
+                                   bIndex=4;    
+                                  switch(bIndex)
+                                  {
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 22  
+
+                                      case 0://5 number space   
+                                             bValue = (wValue.w/10000) + 0x30;                // 10000
+                                             wValue.w%= 10000;
+                                             sPutChar(bValue); // 
+                                      case 1://4 number space
+                                             bValue = (wValue.w/1000) + 0x30;         // 1000
+                                             wValue.w %= 1000;        
+                                             sPutChar(bValue); //     
+                                      case 2://3 number space                         
+                                             bValue = (wValue.w/100) + 0x30;                 // 100
+                                             wValue.w%= 100;     
+                                             sPutChar(bValue); //     
+                                      case 3://2 number space   
+                                             bValue = (wValue.w/10) + 0x30;                  // 10
+                                             wValue.w %= 10;  
+                                             sPutChar(bValue);
+                                      case 4://1 number space  
+                                             bValue =wValue.b[1] +0x30;       
+                                             sPutChar(bValue);        
+                                             break;
+                                   }              
+                              }       
+                      #endif //#if (XRS232 == ENABLE)
+              
+              #endif
+1108          
+1109          /**************************************************************************//**
+1110           * Get the current value of timer tick.
+1111           * @return Timer ticks.
+1112           ******************************************************************************/
+1113          USHRT GetTimerTick(void)
+1114          {
+1115   1          idata USHRT timer;
+1116   1      
+1117   1          do {
+1118   2              timer = usTimerTick_1ms;
+1119   2          } while (timer != usTimerTick_1ms);
+1120   1      
+1121   1          return timer;
+1122   1      }
+1123          
+1124          /**************************************************************************//**
+1125           * Check the status of mode changed flag.
+1126           * @return TRUE if mode changed flag is TRUE else FALSE.
+1127           ******************************************************************************/
+1128          BOOL CheckModeChangeFlag(void)
+1129          {
+1130   1          return bModeChanged;
+1131   1      }
+1132          
+1133          /**************************************************************************//**
+1134           * Clear the mode changed flag.
+1135           ******************************************************************************/
+1136          void ClearModeChangeFlag(void)
+1137          {
+1138   1          bModeChanged = FALSE;
+1139   1      }
+1140          
+1141          /**************************************************************************//**
+1142           * Set mode changed flag.
+1143           * We use this function to force the system to perform the mode changed processes.
+1144           ******************************************************************************/
+C51 COMPILER V7.50   INT                                                                   11/16/2016 14:31:18 PAGE 23  
+
+1145          void SetModeChangeFlag(void)
+1146          {
+1147   1          bModeChanged = TRUE;
+1148   1      }
+1149          
+1150          
+1151          #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+*** WARNING C322 IN LINE 1151 OF Lib\Int.c: unknown identifier
+*** WARNING C322 IN LINE 1151 OF Lib\Int.c: unknown identifier
+              USHRT GetTimerTickInt() using 1
+              {
+                  return usTimerTick_1ms;
+              }
+              #endif
+1157          
+1158          
+
+C51 COMPILATION COMPLETE.  129 WARNING(S),  14 ERROR(S)

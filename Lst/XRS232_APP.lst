@@ -1,0 +1,305 @@
+C51 COMPILER V8.02   XRS232_APP                                                            08/07/2015 16:22:32 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE XRS232_APP
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\XRS232_APP.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\XRS232_APP.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OSD;.\Ap
+                    -p\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\Phy\SI
+                    -\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\XRS232_APP.
+                    -lst) OBJECT(.\Bin\ADS\AXI\104N\XRS232_APP.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                    Axiomdisplay CO,, LTD.                                  */
+   3          /*                    All Rights Reserved                                     */
+   4          /*                    XRS232 Remote Controller APP Function                   */
+   5          /******************************************************************************/
+   6          
+   7          //******************************************************************************
+   8          // I N C L U D E   F I L E S
+   9          //******************************************************************************
+  10          #include "Include.h"
+  11          
+  12          
+  13          #if (XRS232 == ENABLE)
+              //******************************************************************************
+              // M A C R O   D E F I N I T I O N S
+              //******************************************************************************
+              
+              //******************************************************************************
+              // S T A T I C   V A R I A B L E S
+              //******************************************************************************
+              
+              xdata UCHAR tmp=0;
+              //******************************************************************************
+              // G L O B A L   V A R I A B L E S
+              //******************************************************************************
+              
+              
+              //******************************************************************************
+              // S T A T I C   V A R I A B L E S
+              //******************************************************************************
+                  
+              //******************************************************************************
+              // E X T E R N A L   V A R I A B L E   P R O T O T Y P E S
+              //******************************************************************************
+              
+              //******************************************************************************
+              // S T A T I C   F U N C T I O N   P R O T O T Y P E S
+              //******************************************************************************
+              
+              //******************************************************************************
+              // E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
+              //******************************************************************************
+              
+              
+              
+              
+              void Analy_CMD(void)
+              {
+              
+                      UCHAR i=0,CkCRC=0;
+              
+                      UCHAR tmp=0, bbuf[5];
+C51 COMPILER V8.02   XRS232_APP                                                            08/07/2015 16:22:32 PAGE 2   
+
+                       
+                      if(     tmp=UART_Getchar(bbuf) )
+                      {
+              
+              //              putchar(bbuf[0]);       //CMD
+              //              putchar(bbuf[1]);       //Index
+              //              putchar(bbuf[2]);       //Value
+              //              putchar(bbuf[3]);       //CRC
+              
+              //              putchar(bbuf[4]);       
+                              CkCRC = 0x100 - bbuf[0] - bbuf[1] - bbuf[2];
+                              if(CkCRC != bbuf[3]){
+                                      return;
+                              }
+              
+                              if(bbuf[0] == 0x00) //Read -> putchar()
+                              {
+                                      switch(bbuf[1]) //Focus_Item
+                                      {                                                 //Focus_value_return;
+                                              case 0x10:      putchar(0xAA);  putchar(UserData.ucBrightness); putchar( 0x100-UserData.ucBrightness);  break
+             -;        //Brightness
+                                              case 0x11:      putchar(0xAA);  putchar(UserData.ucContrast);   putchar( 0x100-UserData.ucContrast);    break;  //
+             -Contrast
+                                              //case 0x17:    break;  //AutoTurn;      don't need Read.
+              
+                                              case 0x20:      {       if(UserData.ucColorTemp == 0)           tmp = 2;        // NT68856=0_6500k, APP=0_9300k                         //ColorTemp
+                                                                              else if(UserData.ucColorTemp == 1)      tmp = 1;        // NT68856=1_7500k, APP=1_7500k
+                                                                              else if(UserData.ucColorTemp == 2)      tmp = 0;        // NT68856=2_9300k, APP=2_6500k
+                                                                              else if(UserData.ucColorTemp == 3)      tmp = 3;        // NT68856=3_UserMode, APP=3_none.
+              
+                                                                              putchar(0xAA);  putchar(tmp);   putchar( 0x100-tmp);    
+                                                                              break;  
+                                                                      }
+              
+                                              case 0x40:      {       if(UserData.ucInputSource == 0)                 tmp = 0;        // NT68856=0_VGA,  APP=0_VGA                    //InputSource
+                                                                              else if(UserData.ucInputSource == 2)    tmp = 1;        // NT68856=2_DVI,  APP=1_DVI
+                                                                              else if(UserData.ucInputSource == 5)    tmp = 2;        // NT68856=5_HDMI, APP=x_none
+                                                                              //else if(UserData.ucInputSource == 6)  tmp = 3;        // NT68856=x_DP,   APP=x_none
+                                                                              putchar(0xAA);  putchar(tmp);   putchar( 0x100-tmp);            break; 
+                                                                      }
+               
+              
+                                              case 0x50:      {                                                                                                                                                                                               //Auto Diming
+                                                                      #if ALS_EnDis == ALSMODE
+                                                                              putchar(0xAA);  putchar( (UserData.ucALSMode >0) ?1 :0);        putchar( 0x100 - ((UserData.ucALSMode >0) 
+             -?1 :0) );                
+                                                                      #elif ALS_EnDis == ALSOffSET    
+                                                                              putchar(0xAA);  putchar(UserData.bALSOnOff);                            putchar( 0x100 - UserData.bALSOnOff);
+                                                                      #elif ALS_EnDis == ALSRange
+                                                                              putchar(0xAA);  putchar(UserData.bALSOnOff);                            putchar( 0x100 - UserData.bALSOnOff);
+                                                                      #else   //Normal
+                                                                              putchar(0xAA);  putchar(0xFF);  putchar(0x01);                                                                                          //Disable ALS
+                                                                      #endif  //#if ALS_EnDis == ENABLE
+                                                                              break;  
+                                                                      }
+              
+                                              case 0x51:      putchar(0xAA);  putchar(0xFF);  putchar(0x01);                  break;                                                                  //PIR, "Disable"
+                                              case 0x52:      putchar(0xAA);  putchar(0xFF);  putchar(0x01);                  break;                                                                  //Video-Disable(Detect) (0x52
+             -), "Disable"
+                                              case 0xE1:      putchar(0xAA);  putchar(UserData.bPowerStatus); putchar( 0x100-UserData.bPowerStatus);  break
+             -;        //Power_Status
+              
+C51 COMPILER V8.02   XRS232_APP                                                            08/07/2015 16:22:32 PAGE 3   
+
+                                      #if ALS_EnDis == ALSRange 
+                                              case 0x12:      putchar(0xAA);  putchar(UserData.ucALSBrigMAX); putchar(0x100-UserData.ucALSBrigMAX);   break;
+             -        //Bright_MAX (0x12), set "100%"
+                                              case 0x13:      putchar(0xAA);  putchar(UserData.ucALSBrigMIN); putchar(0x100-UserData.ucALSBrigMIN);   break;
+             -        //Bright_MIN (0x13), set "0%"
+                                      #else   //Normal: Disable ALS
+                                              case 0x12:      putchar(0xAA);  putchar(100);   putchar(0x100-100);                     break;  //test Disable: ALSBirgMAX=100
+                                              case 0x13:      putchar(0xAA);  putchar(0);             putchar(0x100-0);                       break;  //test Disable: ALSBirgMIN=0
+                                      #endif
+              
+                                              default:
+                                                      //gg ucUARTRxIn=0; ucIsRecivCMDSS=0; return;
+                                                      break;
+                                      }//End switch(bbuf[1])
+                              }
+              
+                              else if (bbuf[0] == 0x01) //Write -> set UserData.
+                              {                                                 // *ref.  (at EventHandle.c -> EventHandler()): Rule => ....if(IsAPPUpdUsr())  -> NvramWriteUse
+             -rData(&UserData);
+                                      switch(bbuf[1]) //Focus_Item
+                                      {
+                                              
+                                              case 0x10:                                                              //Brightness
+                                                      UserData.ucBrightness = bbuf[2];
+                                                      UserSetBrightness();        
+                                                      NvramWriteUserData(&UserData);  //UART_NvRamUpdate();   //can't find: SetOSDUpdUsrFlag();
+                                                      break;
+                                              case 0x11:                                                              //Contrast
+                                                      UserData.ucContrast = bbuf[2];
+                                                      UserSetContrast();          
+                                                      NvramWriteUserData(&UserData);  //can't find: SetOSDUpdUsrFlag();
+                                                      break;
+                                              case 0x17:                                                              //Autotune Active (0x17),  when "VGA-Input" used.
+                                                      UserPerformAutoTune();
+                                                      break;
+              
+                                              case 0x20:      {                                                       //ColorTemp
+                                                                              if(bbuf[2] == 0)                tmp = 2;        // NT68856=0_6500k, APP=0_9300k                                                                 
+                                                                              else if(bbuf[2] == 1)   tmp = 1;        // NT68856=1_7500k, APP=1_7500k
+                                                                              else if(bbuf[2] == 2)   tmp = 0;        // NT68856=2_9300k, APP=2_6500k
+                                                                              //else if(bbuf[2] == 3) tmp = 3;        // NT68856=3_UserMode, APP=3_none.
+              
+                                                                              UserData.ucColorTemp = tmp;
+                                                                              UserSetColorTemp();
+                                                                              NvramWriteUserData(&UserData);          //can't find: SetOSDUpdUsrFlag();
+                                                                              break;  
+                                                                      }
+              
+                                              //case 0x40:                                                    //InputSource (0x40)
+              
+                                                              //UserData.ucInputSource = GetInputPortName((GetInputPortIndex(UserData.ucInputSource)+1)%NUM_INPUT_
+             -SC);
+                                              //UserSetInputSource();
+                                              //      no need write.
+                                              //      break;
+                                                                                                                                                                                                                                              
+                                              case 0x50:      {                                                       //Auto-Dimming (0x50)
+                                                                      #if ALS_EnDis == ALSMODE                                
+                                                                              if(bbuf[2] == 0x00)     { UserData.ucALSMode = ALS_OFF;  /* SetOSDUpdUsrFlag(); */      UserSetBrightness()
+             -; NvramWriteUserData(&UserData); }
+                                                                              if(bbuf[2] == 0x01)     { UserData.ucALSMode = INDOOR;   /* SetOSDUpdUsrFlag(); */      CM3218_ALSOnInit();
+             -  NvramWriteUserData(&UserData); }    // set Default: INDOOR mode
+C51 COMPILER V8.02   XRS232_APP                                                            08/07/2015 16:22:32 PAGE 4   
+
+                                                                              if(bbuf[2] == 0xFF)     {   break; }    // don't need do something                                      
+                                                                      #elif ALS_EnDis == ALSOffSET    
+                                                                              if(bbuf[2] == 0x00)     { UserData.bALSOnOff = OFF;  /* SetOSDUpdUsrFlag(); */  UserSetBrightness(); Nv
+             -ramWriteUserData(&UserData); }
+                                                                              if(bbuf[2] == 0x01)     { UserData.bALSOnOff = ON;   /* SetOSDUpdUsrFlag(); */  CM3218_ALSOnInit();  Nv
+             -ramWriteUserData(&UserData); }        
+                                                                              if(bbuf[2] == 0xFF)     {   break; }    // don't need do something                                      
+                                                                      #elif ALS_EnDis == ALSRange
+                                                                              if(bbuf[2] == 0x00)     { UserData.bALSOnOff = OFF;  /* SetOSDUpdUsrFlag(); */  UserSetBrightness(); Nv
+             -ramWriteUserData(&UserData); }
+                                                                              if(bbuf[2] == 0x01)     { UserData.bALSOnOff = ON;   /* SetOSDUpdUsrFlag(); */  LS3101_ALSOnInit();  Nv
+             -ramWriteUserData(&UserData); }        
+                                                                              if(bbuf[2] == 0xFF)     {   break; }    // don't need do something                                      
+                                                                      #else   //Normal
+                                                      
+                                                                      #endif  //#if ALS_EnDis == ENABLE
+                                                                      }
+                                                                              break;
+              
+                                              case 0x51:                                                              //PIR (0x51)
+                                                      break;
+              
+                                              case 0x52:                                                              //Video-Disable(Detect) (0x52)
+                                                      break; 
+              
+                                              case 0xE1:                                                              //Power_Status
+                                              //putchar(0xAA);        putchar(UserData.bPowerStatus); putchar( 0x100-UserData.bPowerStatus);  
+                                                      if(bbuf[2]== 0x01)      //UserData.bPowerStatus == ON)
+                                                      {
+                                                  //can't find: APPSetSystemPowerState(APPSTATE_PWR_ON);
+                                                  //can't find: SetGlobalTimer(GLOBAL_TMR_DATA_UPDATE, GBTM_DATA_UPDATE);
+                                                  //can't find: SetAPPUpdUsrFlag(); 
+                                                                         
+                                                              UserData.bPowerStatus = ON;
+                                              SYSAPI_SetPowerOn();
+                                              UserSetInputSource();
+                                              //APPEnterPowerOnLogo();
+                                                      }else if(bbuf[2]== 0x00)        //else if (UserData.bPowerStatus == OFF)
+                                                      {
+                                                  //can't find: APPSetSystemPowerState(APPSTATE_PWR_OFF);
+                                                  //can't find: SetGlobalTimer(GLOBAL_TMR_DATA_UPDATE, GBTM_DATA_UPDATE);
+                                                  //can't find: SetAPPUpdUsrFlag();                                   
+                                                              //if (IsAPPLogo()) 
+                                                              {
+                                                  //    APPEscapePowerOnLogo();
+                                                              }
+                                                  UserData.bPowerStatus = OFF;
+                                                  SYSAPI_SetPowerOff();
+                                                      }
+                                                      break;
+              
+                                      #if ALS_EnDis == ALSRange
+                                              case 0x12:                                                              //Bright_MAX (0x12)
+                                                      UserData.ucALSBrigMAX = bbuf[2]; 
+                                                  NvramWriteUserData(&UserData);              //can't find: SetOSDUpdUsrFlag();
+                                                      break;
+              
+                                              case 0x13:                                                              //Bright_MIN (0x13)
+                                                      UserData.ucALSBrigMIN = bbuf[2]; 
+                                                      NvramWriteUserData(&UserData);          //can't find: SetOSDUpdUsrFlag();
+                                                      break;
+                                      #else   //Normal: Disable ALS
+C51 COMPILER V8.02   XRS232_APP                                                            08/07/2015 16:22:32 PAGE 5   
+
+                                              case 0x12: break;
+                                              case 0x13: break;
+                                      #endif 
+              
+                                              default:
+                                                      //gg ucUARTRxIn=0; ucIsRecivCMDSS=0; return;
+                                                      break;
+                                      }// End switch()
+                              }
+                      }//End tmp=UART_Getchar(bbuf) == TRUE
+              
+              }
+              
+              
+              
+              
+              
+              void DBG_Print(void)
+              {
+              //      UCHAR ckDevice=0;       //, tmp=0;
+              //      static UCHAR i=0;
+              //       printf("AlsSens_tmp= %4x, AlsSens_buf= %4x, NowAlsSens= %4x, NowAlsBright=%d, div_ALSBaseVal= %d%\n", 
+             -AlsSens_tmp, AlsSens_buf, NowAlsSens, (USHRT)NowAlsBright, (USHRT)(div_ALSBaseVal) ); 
+                      
+              //      ckDevice = NvramCheckDevice(0x90);
+              
+              //      printf("Ck_Dvi= %d, AlsSens_tmp= %4x, NowAlsSens= %4x, %5u, NowAlsBright=%d \n", (USHRT)ckDevice, AlsSe
+             -ns_tmp, (USHRT)NowAlsSens, NowAlsSens, (USHRT)NowAlsBright ); 
+              //      putchar('2');
+              }
+              
+              
+              #endif //#if ALS_EnDis == ENABLE
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

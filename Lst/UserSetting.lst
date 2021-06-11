@@ -1,0 +1,1541 @@
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE USERSETTING
+OBJECT MODULE PLACED IN .\Bin\ADS\AXI\104N\UserSetting.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE App\User\UserSetting.c LARGE OPTIMIZE(9,SPEED) BROWSE INCDIR(.\App;.\App\OS
+                    -D;.\App\User;.\Lib;.\Lib\NT68655_770_850 Series;.\Lib\ScalerCfg;.\Phy\Panel;.\Phy\SI\NVT\Board;.\Phy\SI\NVT\Component;.\
+                    -Phy\SI\NVT\Keypad;.\Sys;.\Sys\SI\NVT) DEFINE(SCALER_TYPE=NT68857,NT68857_DEMO,FLASH_BANK=4,X_ADS,X215) PRINT(.\Lst\UserS
+                    -etting.lst) OBJECT(.\Bin\ADS\AXI\104N\UserSetting.obj)
+
+line level    source
+
+   1          /******************************************************************************/
+   2          /*                       Novatek MicroElectronics Corp.                       */
+   3          /*       6F, No. 1-2, Innovation Road I, Science-Based Industrial Park,       */
+   4          /*                         HsinChu 300, Taiwan, R.O.C.                        */
+   5          /*                 TEL:886-3-567-0889       FAX:886-3-577-0132                */
+   6          /*                            All Rights Reserved                             */
+   7          /******************************************************************************/
+   8          
+   9          //******************************************************************************
+  10          // I N C L U D E   F I L E S
+  11          //******************************************************************************
+  12          #include "Include.h"
+  13          
+  14          //******************************************************************************
+  15          // G L O B A L   D E F I N I T I O N S
+  16          //******************************************************************************
+  17          #define CheckMaxRange(a,b) {if (a > b) a = b;}
+  18          
+  19          #define PHASE_SCOPE   (MAXIMUM_PHASE-MINIMUM_PHASE)
+  20          #define CLOCK_SCOPE   (InputTiming.usHTotalMax-InputTiming.usHTotalMin)
+  21          #define HPOSN_SCOPE   (InputTiming.usHStartMax-InputTiming.usHStartMin)
+  22          #define VPOSN_SCOPE   (InputTiming.usVStartMax-InputTiming.usVStartMin)
+  23          
+  24          //******************************************************************************
+  25          // S T A T I C   V A R I A B L E S
+  26          //******************************************************************************
+  27          static code tINPUTPORT ucInputPortTable[] = {
+  28              //ucInputPort,            ucPortName;
+  29          #if (MODEL_INPUT_VGA0 != INPUT_SC_NULL)    
+  30              ANALOG_SEP_INPUT0,    MODEL_INPUT_VGA0,
+  31          #endif
+  32          #if (MODEL_INPUT_VGA1 != INPUT_SC_NULL)    
+                  ANALOG_SEP_INPUT1,    MODEL_INPUT_VGA1,
+              #endif
+  35          #if (MODEL_INPUT_DIG0 != INPUT_SC_NULL)    
+  36              DIGITAL_INPUT0,       MODEL_INPUT_DIG0,
+  37          #endif
+  38          #if (MODEL_INPUT_DIG1 != INPUT_SC_NULL)    
+  39              DIGITAL_INPUT1,       MODEL_INPUT_DIG1,
+  40          #endif
+  41          
+  42          #if OSD_DP_SHOW == ENABLE               //ggg
+                      #if (MODEL_INPUT_DIG2 != INPUT_SC_NULL)    
+                          DISPLAY_PORT_INPUT,   MODEL_INPUT_DIG2,
+                      #endif
+              #else
+  47                  
+  48          #endif
+  49          
+  50          #if (MODEL_INPUT_YPbPr0 != INPUT_SC_NULL)    
+                  ANALOG_YPBPR_INPUT0,  MODEL_INPUT_YPbPr0,
+              #endif
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 2   
+
+  53          #if (MODEL_INPUT_YPbPr1 != INPUT_SC_NULL)    
+                  ANALOG_YPBPR_INPUT1,  MODEL_INPUT_YPbPr1,
+              #endif
+  56          };
+  57          
+  58          //******************************************************************************
+  59          // Prototype: 
+  60          //  UCHAR GetPortTabIntertface(UCHAR PortName)
+  61          // Parameters:
+  62          //  None
+  63          // Return:
+  64          //  None
+  65          // Purpose:
+  66          //  None
+  67          // Notes:
+  68          //  None
+  69          //******************************************************************************
+  70          UCHAR GetPortTabIntertface(UCHAR PortName)
+  71          {
+  72   1          UCHAR i;
+  73   1          for (i = 0; i < (sizeof(ucInputPortTable) / sizeof(tINPUTPORT)); i++) {
+  74   2             if (ucInputPortTable[i].ucPortName == PortName) {
+  75   3                return ucInputPortTable[i].ucInputPort;
+  76   3             }
+  77   2          }
+  78   1          
+  79   1          UserData.ucInputSource = ucInputPortTable[0].ucPortName;
+  80   1          return ucInputPortTable[0].ucInputPort;
+  81   1      }
+  82          
+  83          //******************************************************************************
+  84          // Prototype: 
+  85          //  
+  86          // Parameters:
+  87          //  None
+  88          // Return:
+  89          //  None
+  90          // Purpose:
+  91          //  None
+  92          // Notes:
+  93          //  None
+  94          //******************************************************************************
+  95          void UserSetBrightness(void)
+  96          {
+  97   1          CheckMaxRange(UserData.ucBrightness,MAXIMUM_BRIGHTNESS);
+  98   1          SetBrightness(GetBrightness1023());
+  99   1      }
+ 100          
+ 101          //******************************************************************************
+ 102          // Prototype: 
+ 103          //  
+ 104          // Parameters:
+ 105          //  None
+ 106          // Return:
+ 107          //  None
+ 108          // Purpose:
+ 109          //  None
+ 110          // Notes:
+ 111          //  None
+ 112          //******************************************************************************
+ 113          void UserSetContrast(void)
+ 114          {
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 3   
+
+ 115   1          CheckMaxRange(UserData.ucContrast,MAXIMUM_CONTRAST);
+ 116   1          MTXAPI_SetContrast(GetContrast255());
+ 117   1      }
+ 118          
+ 119          //******************************************************************************
+ 120          // Prototype: 
+ 121          //  
+ 122          // Parameters:
+ 123          //  None
+ 124          // Return:
+ 125          //  None
+ 126          // Purpose:
+ 127          //  None
+ 128          // Notes:
+ 129          //  None
+ 130          //******************************************************************************
+ 131          void UserSetPhase(void)
+ 132          {
+ 133   1          CheckMaxRange(InputTiming.ucPhase,MAXIMUM_PHASE);
+ 134   1          SetADCPhase(InputTiming.ucPhase);
+ 135   1      #if ENABLE_ESD_PROTECT == ON
+                  ReadESDCheckSum();
+              #endif
+ 138   1      }
+ 139          
+ 140          //******************************************************************************
+ 141          // Prototype: 
+ 142          //  void UserSetPhase100(UCHAR value)
+ 143          // Parameters:
+ 144          //  None
+ 145          // Return:
+ 146          //  None
+ 147          // Purpose:
+ 148          //  None
+ 149          // Notes:
+ 150          //  None
+ 151          //******************************************************************************
+ 152          void UserSetPhase100(UCHAR value)
+ 153          {
+ 154   1          if (value > 100) value = 100;
+ 155   1          InputTiming.ucPhase = (USHRT)value*MAXIMUM_PHASE/100;
+ 156   1          UserSetPhase();    
+ 157   1      }
+ 158          
+ 159          //******************************************************************************
+ 160          // Prototype: 
+ 161          //  
+ 162          // Parameters:
+ 163          //  None
+ 164          // Return:
+ 165          //  None
+ 166          // Purpose:
+ 167          //  None
+ 168          // Notes:
+ 169          //  None
+ 170          //******************************************************************************
+ 171          void UserSetClock(void)
+ 172          {
+ 173   1          //CheckMaxRange(InputTiming.usHTotal,InputTiming.usHTotalMax);
+ 174   1          SetADCPLL2(InputTiming.usHTotal);
+ 175   1      #if ENABLE_ESD_PROTECT == ON
+                  ReadESDCheckSum();
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 4   
+
+              #endif
+ 178   1      }
+ 179          
+ 180          //******************************************************************************
+ 181          // Prototype: 
+ 182          //  void UserSetClock100(UCHAR value)
+ 183          // Parameters:
+ 184          //  None
+ 185          // Return:
+ 186          //  None
+ 187          // Purpose:
+ 188          //  None
+ 189          // Notes:
+ 190          //  None
+ 191          //******************************************************************************
+ 192          void UserSetClock100(UCHAR value)
+ 193          {
+ 194   1          if (value > 100) value = 100;
+ 195   1          InputTiming.usHTotal = (USHRT)value*CLOCK_SCOPE/100+InputTiming.usHTotalMin;
+ 196   1          UserSetClock();
+ 197   1      }
+ 198          
+ 199          //******************************************************************************
+ 200          // Prototype: 
+ 201          //  
+ 202          // Parameters:
+ 203          //  None
+ 204          // Return:
+ 205          //  None
+ 206          // Purpose:
+ 207          //  None
+ 208          // Notes:
+ 209          //  None
+ 210          //******************************************************************************
+ 211          void UserSetHPosition(void)
+ 212          {
+ 213   1          //CheckMaxRange(InputTiming.usHStart,InputTiming.usHStartMax);
+ 214   1          SetHP(InputTiming.usHStart);
+ 215   1      }
+ 216          
+ 217          //******************************************************************************
+ 218          // Prototype: 
+ 219          //  void UserSetHPosn100(UCHAR value)
+ 220          // Parameters:
+ 221          //  None
+ 222          // Return:
+ 223          //  None
+ 224          // Purpose:
+ 225          //  None
+ 226          // Notes:
+ 227          //  None
+ 228          //******************************************************************************
+ 229          void UserSetHPosn100(UCHAR value)
+ 230          {
+ 231   1          if (value > 100) value = 100;
+ 232   1          value = 100-value;
+ 233   1          InputTiming.usHStart = (USHRT)value*HPOSN_SCOPE/100+InputTiming.usHStartMin;
+ 234   1          UserSetHPosition();    
+ 235   1      }
+ 236          
+ 237          //******************************************************************************
+ 238          // Prototype: 
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 5   
+
+ 239          //  
+ 240          // Parameters:
+ 241          //  None
+ 242          // Return:
+ 243          //  None
+ 244          // Purpose:
+ 245          //  None
+ 246          // Notes:
+ 247          //  None
+ 248          //******************************************************************************
+ 249          void UserSetVPosition(void)
+ 250          {
+ 251   1          //CheckMaxRange(InputTiming.usVStart,InputTiming.usVStartMax);
+ 252   1          SetVP(InputTiming.usVStart);
+ 253   1      }
+ 254          
+ 255          //******************************************************************************
+ 256          // Prototype: 
+ 257          //  void UserSetVPosn100(UCHAR value)
+ 258          // Parameters:
+ 259          //  None
+ 260          // Return:
+ 261          //  None
+ 262          // Purpose:
+ 263          //  None
+ 264          // Notes:
+ 265          //  None
+ 266          //******************************************************************************
+ 267          void UserSetVPosn100(UCHAR value)
+ 268          {
+ 269   1          if (value > 100) value = 100;
+ 270   1          InputTiming.usVStart = (USHRT)value*VPOSN_SCOPE/100+InputTiming.usVStartMin;
+ 271   1          UserSetVPosition();    
+ 272   1      }
+ 273          
+ 274          //******************************************************************************
+ 275          // Prototype: 
+ 276          //  void UserSetADCGainOffset(void)
+ 277          // Parameters:
+ 278          //  None
+ 279          // Return:
+ 280          //  None
+ 281          // Purpose:
+ 282          //  Set ADC gain/offset
+ 283          // Notes:
+ 284          //  None
+ 285          //******************************************************************************
+ 286          void UserSetADCGainOffset(void)
+ 287          {
+ 288   1          SetADCRGain(CalibData.ucADCRGain);
+ 289   1          SetADCGGain(CalibData.ucADCGGain);
+ 290   1          SetADCBGain(CalibData.ucADCBGain);
+ 291   1          SetADCROffset(CalibData.ucADCROffset);
+ 292   1          SetADCGOffset(CalibData.ucADCGOffset);
+ 293   1          SetADCBOffset(CalibData.ucADCBOffset);
+ 294   1      }
+ 295          
+ 296          //******************************************************************************
+ 297          // Prototype: 
+ 298          //  
+ 299          // Parameters:
+ 300          //  None
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 6   
+
+ 301          // Return:
+ 302          //  None
+ 303          // Purpose:
+ 304          //  None
+ 305          // Notes:
+ 306          //  None
+ 307          //******************************************************************************
+ 308          void UserSetColorTemp(void)
+ 309          {
+ 310   1          CheckMaxRange(UserData.ucColorTemp,MAXIMUM_CLR_TEMP);
+ 311   1          SetColorTemperature(UserData.ucColorTemp);
+ 312   1      
+ 313   1      }
+ 314          
+ 315          //******************************************************************************
+ 316          // Prototype: 
+ 317          //  
+ 318          // Parameters:
+ 319          //  None
+ 320          // Return:
+ 321          //  None
+ 322          // Purpose:
+ 323          //  None
+ 324          // Notes:
+ 325          //  None
+ 326          //******************************************************************************
+ 327          void UserSetRGain(void)
+ 328          {
+ 329   1          CheckMaxRange(UserData.ucUserRGain,MAXIMUM_USER_RGAIN);
+ 330   1          MTXAPI_SetRGain(GetRGain255()+1);
+ 331   1      }
+ 332          
+ 333          //******************************************************************************
+ 334          // Prototype: 
+ 335          //  
+ 336          // Parameters:
+ 337          //  None
+ 338          // Return:
+ 339          //  None
+ 340          // Purpose:
+ 341          //  None
+ 342          // Notes:
+ 343          //  None
+ 344          //******************************************************************************
+ 345          void UserSetGGain(void)
+ 346          {
+ 347   1          CheckMaxRange(UserData.ucUserGGain,MAXIMUM_USER_GGAIN);
+ 348   1          MTXAPI_SetGGain(GetGGain255()+1);
+ 349   1      }
+ 350          
+ 351          //******************************************************************************
+ 352          // Prototype: 
+ 353          //  
+ 354          // Parameters:
+ 355          //  None
+ 356          // Return:
+ 357          //  None
+ 358          // Purpose:
+ 359          //  None
+ 360          // Notes:
+ 361          //  None
+ 362          //******************************************************************************
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 7   
+
+ 363          void UserSetBGain(void)
+ 364          {
+ 365   1          CheckMaxRange(UserData.ucUserBGain,MAXIMUM_USER_BGAIN);
+ 366   1          MTXAPI_SetBGain(GetBGain255()+1);
+ 367   1      }
+ 368          
+ 369          //******************************************************************************
+ 370          // Prototype: 
+ 371          //  
+ 372          // Parameters:
+ 373          //  None
+ 374          // Return:
+ 375          //  None
+ 376          // Purpose:
+ 377          //  None
+ 378          // Notes:
+ 379          //  None
+ 380          //******************************************************************************
+ 381          void UserSetROffset(void)
+ 382          {
+ 383   1          CheckMaxRange(UserData.ucUserROffset,MAXIMUM_USER_ROFFSET);
+ 384   1          MTXAPI_SetROffset(GetROffset255());
+ 385   1      }
+ 386          
+ 387          //******************************************************************************
+ 388          // Prototype: 
+ 389          //  
+ 390          // Parameters:
+ 391          //  None
+ 392          // Return:
+ 393          //  None
+ 394          // Purpose:
+ 395          //  None
+ 396          // Notes:
+ 397          //  None
+ 398          //******************************************************************************
+ 399          void UserSetGOffset(void)
+ 400          {
+ 401   1          CheckMaxRange(UserData.ucUserGOffset,MAXIMUM_USER_GOFFSET);
+ 402   1          MTXAPI_SetGOffset(GetGOffset255());
+ 403   1      }
+ 404          
+ 405          //******************************************************************************
+ 406          // Prototype: 
+ 407          //  
+ 408          // Parameters:
+ 409          //  None
+ 410          // Return:
+ 411          //  None
+ 412          // Purpose:
+ 413          //  None
+ 414          // Notes:
+ 415          //  None
+ 416          //******************************************************************************
+ 417          void UserSetBOffset(void)
+ 418          {
+ 419   1          CheckMaxRange(UserData.ucUserBOffset,MAXIMUM_USER_BOFFSET);
+ 420   1          MTXAPI_SetBOffset(GetBOffset255());
+ 421   1      }
+ 422          
+ 423          //******************************************************************************
+ 424          // Prototype: 
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 8   
+
+ 425          //  
+ 426          // Parameters:
+ 427          //  None
+ 428          // Return:
+ 429          //  None
+ 430          // Purpose:
+ 431          //  None
+ 432          // Notes:
+ 433          //  None
+ 434          //******************************************************************************
+ 435          void UserSetOSDH(void)
+ 436          {
+ 437   1          CheckMaxRange(UserData.ucOSDX,MAXIMUM_OSD_HPOS);
+ 438   1          CheckMaxRange(UserData.ucOSDY,MAXIMUM_OSD_VPOS);
+ 439   1          OSDAPI_SetPosition(UserData.ucOSDX, UserData.ucOSDY);
+ 440   1      }
+ 441          
+ 442          //******************************************************************************
+ 443          // Prototype: 
+ 444          //  
+ 445          // Parameters:
+ 446          //  None
+ 447          // Return:
+ 448          //  None
+ 449          // Purpose:
+ 450          //  None
+ 451          // Notes:
+ 452          //  None
+ 453          //******************************************************************************
+ 454          void UserSetOSDV(void)
+ 455          {
+ 456   1          UserSetOSDH();
+ 457   1      }
+ 458          
+ 459          //******************************************************************************
+ 460          // Prototype: 
+ 461          //  
+ 462          // Parameters:
+ 463          //  None
+ 464          // Return:
+ 465          //  None
+ 466          // Purpose:
+ 467          //  None
+ 468          // Notes:
+ 469          //  None
+ 470          //******************************************************************************
+ 471          void UserSetTransparent(void)
+ 472          {
+ 473   1          OSDWindow id;
+ 474   1          CheckMaxRange(UserData.ucOSDTransparent,MAXIMUM_OSD_TRANS);
+ 475   1          OSDAPI_SetOSDFgBgTran(UserData.ucOSDTransparent);
+ 476   1          OSDAPI_SetOSDSpecialBgTran(0xFF);
+ 477   1          for (id = OSD_WINDOW1; id <= OSD_WINDOW8; id++) {
+ 478   2              OSDAPI_SelOSDWin(id);
+ 479   2              OSDAPI_SetOSDWinTran(UserData.ucOSDTransparent);
+ 480   2          }
+ 481   1      }
+ 482          
+ 483          //******************************************************************************
+ 484          // Prototype: 
+ 485          //  
+ 486          // Parameters:
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 9   
+
+ 487          //  None
+ 488          // Return:
+ 489          //  None
+ 490          // Purpose:
+ 491          //  None
+ 492          // Notes:
+ 493          //  None
+ 494          //******************************************************************************
+ 495          void UserSetTimeout(void)
+ 496          {
+ 497   1          OSDConfigTimeout((USHRT)UserData.ucOSDTimer*1000);
+ 498   1      }
+ 499          
+ 500          //******************************************************************************
+ 501          // Prototype: 
+ 502          //  
+ 503          // Parameters:
+ 504          //  None
+ 505          // Return:
+ 506          //  None
+ 507          // Purpose:
+ 508          //  None
+ 509          // Notes:
+ 510          //  None
+ 511          //******************************************************************************
+ 512          void UserSetOSDRotation(void)
+ 513          {
+ 514   1          if (UserData.bOSDRotation) {
+ 515   2              OSDAPI_RotateOSDPosition(OSD_POS_ROT_270);
+ 516   2          }
+ 517   1          else {
+ 518   2              OSDAPI_RotateOSDPosition(OSD_POS_ROT_OFF);
+ 519   2          }
+ 520   1      
+ 521   1      #if 0
+                  if (OSDAPI_IsOSDOn()) {
+                      OSDAPI_TurnOffOSD();
+                      OSDTurnOnOSD();
+                  }
+              #endif
+ 527   1      }
+ 528          
+ 529          //******************************************************************************
+ 530          // Prototype: 
+ 531          //  
+ 532          // Parameters:
+ 533          //  None
+ 534          // Return:
+ 535          //  None
+ 536          // Purpose:
+ 537          //  None
+ 538          // Notes:
+ 539          //  None
+ 540          //******************************************************************************
+ 541          void UserSetLanguage(void)
+ 542          {
+ 543   1          CheckMaxRange(UserData.ucLanguage,MAXIMUM_OSD_LANG);
+ 544   1      #if ENABLE_HW_CEC == ON
+                  APPRequestCECAct(CECATN_SET_LANGUAGE);
+              #endif
+ 547   1      }
+ 548          
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 10  
+
+ 549          //******************************************************************************
+ 550          // Prototype:
+ 551          //
+ 552          // Parameters:
+ 553          //  None
+ 554          // Return:
+ 555          //  None
+ 556          // Purpose:
+ 557          //  None
+ 558          // Notes:
+ 559          //  None
+ 560          //******************************************************************************
+ 561          void UserSetAudioMute(void)
+ 562          {       
+ 563   1      
+ 564   1          if (UserData.bAudioMute == TRUE) 
+ 565   1          {
+ 566   2              AudioMuteOn();                                  //140325 mike 
+ 567   2          }
+ 568   1          else 
+ 569   1              {   
+ 570   2                      AudioMuteOff();
+ 571   2          }
+ 572   1      }
+ 573          
+ 574          //******************************************************************************
+ 575          // Prototype: 
+ 576          //  void UserSetDCR(void)
+ 577          // Parameters:
+ 578          //  None
+ 579          // Return:
+ 580          //  None
+ 581          // Purpose:
+ 582          //  None
+ 583          // Notes:
+ 584          //  None
+ 585          //******************************************************************************
+ 586          void UserSetDCR(void)
+ 587          {
+ 588   1      #if ENABLE_DBC == ON
+                  if ( UserData.ucDCRMode == BKL_CTRL_DBC ) {
+                      DisableDCR();
+                      EnableDBC();
+                  }
+                  else if ( UserData.ucDCRMode == BKL_CTRL_DCR ) {
+                      DisableDBCSmooth(TRUE);
+                      PerformDCR(1);
+                  }
+                  else {
+                      DisableDCR();
+                      DisableDBCSmooth(TRUE);
+                  }
+              #else
+ 602   1          if ( UserData.ucDCRMode == BKL_CTRL_DCR ) {
+ 603   2              PerformDCR(1);
+ 604   2          }
+ 605   1          else {
+ 606   2              DisableDCR();
+ 607   2          }
+ 608   1      #endif
+ 609   1      }
+ 610          
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 11  
+
+ 611          //******************************************************************************
+ 612          // Prototype: 
+ 613          //  void UserSetLD(void)
+ 614          // Parameters:
+ 615          //  None
+ 616          // Return:
+ 617          //  None
+ 618          // Purpose:
+ 619          //  Set LD mode
+ 620          // Notes:
+ 621          //  None
+ 622          //******************************************************************************
+ 623          #if ENABLE_LD == ON
+              void UserSetLD(void)
+              {
+              //    SetLDMode(UserData.ucLDOnOff);
+                      SetLDMode(UserData.ucBFMode);
+              }
+              #endif
+ 630          
+ 631          //******************************************************************************
+ 632          // Prototype:
+ 633          //  void UserSetAspectRatio(void)
+ 634          // Parameters:
+ 635          //  None
+ 636          // Return:
+ 637          //  None
+ 638          // Purpose:
+ 639          //  None
+ 640          // Notes:
+ 641          //  None
+ 642          //******************************************************************************
+ 643          void UserSetAspectRatio(void)
+ 644          {
+ 645   1          SetDisplayMode(UserData.ucAspectRatio);
+ 646   1      
+ 647   1          // Resize BF window by current aspect ratio.
+ 648   1          BFAPI_SetActiveWindow(BF_WINDOW_2);
+ 649   1          BFAPI_SetWindowSize(BF_WINDOW_FULLSCREEN);
+ 650   1      #if ENABLE_ESD_PROTECT == ON
+                  ReadESDCheckSum();
+              #endif
+ 653   1      }
+ 654          
+ 655          //******************************************************************************
+ 656          // Prototype:
+ 657          //  void UserSetOverScan(void)
+ 658          // Parameters:
+ 659          //  None
+ 660          // Return:
+ 661          //  None
+ 662          // Purpose:
+ 663          //  None
+ 664          // Notes:
+ 665          //  None
+ 666          //******************************************************************************
+ 667          #if ENABLE_OVERSCAN == ON               //150114 mike
+ 668          //void UserSetOverScan(void)
+ 669          //{
+ 670          //    BacklightOff();
+ 671          //    //WaitDisVSync();
+ 672          //    //DisplayMuteImage();
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 12  
+
+ 673          //    //WaitDisVSync();
+ 674          //    WaitDisVSync();
+ 675          //    GraphicDisplayWindowDisable();
+ 676          //    CheckOverScan();
+ 677          //    SetHmask();
+ 678          //    SetupDisplayTiming(InputTiming.usHTotal50);
+ 679          //    Sleep(80);
+ 680          //    //WaitDisVSync();
+ 681          //    //DisplayNormalImage();
+ 682          //    WaitDisVSync();
+ 683          //    GraphicDisplayWindowEnable();
+ 684          //    BacklightOn();
+ 685          //}
+ 686          #endif
+ 687          
+ 688          //******************************************************************************
+ 689          // Prototype: 
+ 690          //  
+ 691          // Parameters:
+ 692          //  None
+ 693          // Return:
+ 694          //  None
+ 695          // Purpose:
+ 696          //  None
+ 697          // Notes:
+ 698          //  None
+ 699          //******************************************************************************
+ 700          void UserSetGamma(void)
+ 701          {
+ 702   1          if (UserData.bGammaOnOff == 1)
+ 703   1              GMAPI_EnableGamma();
+ 704   1          else
+ 705   1              GMAPI_DisableGamma();
+ 706   1      }
+ 707          
+ 708          
+ 709          
+ 710          #if ALS_EnDis == ALSMODE
+                      void UserSetALSMode(void)
+                      {
+                              //ref. SetSRMode(UserData.ucSRMode);
+                              SetALSMode();   //UserData.ucALSMode);
+                      }
+              #elif ALS_EnDis == ALSOffSET    
+                      void UserSetALSOnOff(void)                              //george: F_ALSOnOff_04E
+                      {
+                              // george: don't need set H/W, so don't care here.s
+                          if (UserData.bALSOnOff == ON) 
+                          {
+                              //xxxOn();                                      
+                          }
+                          else 
+                              {   
+                                      //xxxOff();
+                          }
+                      }
+              
+              //      void UserSetALSBaseVal(void)                                    // george: F_ALSBV_04E
+              //      {
+              //          CheckMaxRange(UserData.ucALSBaseVal,MAXIMUM_ALSBV);
+              //          SetBrightness(GetALSBaseValue1023());
+              //      }
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 13  
+
+              
+              #elif ALS_EnDis == ALSRange
+                      void UserSetALSOnOff(void)                              //george: F_ALSOnOff_04E
+                      {
+                              //
+                      }
+              #else   //Normal
+ 742          
+ 743          #endif  //#if ALS_EnDis == ENABLE
+ 744          
+ 745          
+ 746          
+ 747          
+ 748          #if TOUCH_EnDis == ENABLE
+              void UserSetTouch(void)                                 //george: F_Touch_04E
+              {
+                  if (UserData.bTouchOnOff == 1)
+                      TouchOnOff(ON);
+                  else
+                      TouchOnOff(OFF);
+              }
+              #endif  //#if TOUCH_EnDis == ENABLE
+ 757          
+ 758          //******************************************************************************
+ 759          // Prototype: 
+ 760          //  void UserSetOD(void)
+ 761          // Parameters:
+ 762          //  None
+ 763          // Return:
+ 764          //  None
+ 765          // Purpose:
+ 766          //  None
+ 767          // Notes:
+ 768          //  None
+ 769          //******************************************************************************
+ 770          void UserSetOD(void)
+ 771          {
+ 772   1      #if ENABLE_OD == ON
+                  if (UserData.ucODMode == ON) {
+                      SetODMode(0);
+                  }
+                  else {
+                      ODAPI_DisableOD();
+                  }
+              #endif
+ 780   1      }
+ 781          
+ 782          //******************************************************************************
+ 783          // Prototype: 
+ 784          //  void UserSetVolume(void)
+ 785          // Parameters:
+ 786          //  None
+ 787          // Return:
+ 788          //  None
+ 789          // Purpose:
+ 790          //  None
+ 791          // Notes:
+ 792          //  None
+ 793          //******************************************************************************
+ 794          void UserSetVolume(void)
+ 795          {
+ 796   1          CheckMaxRange(UserData.ucVolume,MAXIMUM_VOLUME);
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 14  
+
+ 797   1              SetVolume(UserData.ucVolume);
+ 798   1      }
+ 799          
+ 800          //******************************************************************************
+ 801          // Prototype: 
+ 802          //  void UserRecallConfiguration(void)
+ 803          // Parameters:
+ 804          //  None
+ 805          // Return:
+ 806          //  None
+ 807          // Purpose:
+ 808          //  None
+ 809          // Notes:
+ 810          //  None
+ 811          //******************************************************************************
+ 812          void UserRecallConfiguration(void)
+ 813          {
+ 814   1      printf("UserRecallConfiguration_S\n");  //150527 george
+ 815   1          UserData = UserDataDefault;        
+ 816   1          UserSetBrightness();  
+ 817   1          UserSetContrast();
+ 818   1          UserSetGamma();
+ 819   1          UserSetColorTemp(); 
+ 820   1          UserSetOSDH();
+ 821   1          UserSetOSDV();
+ 822   1          UserSetTransparent();
+ 823   1          UserSetTimeout();
+ 824   1          UserSetOSDRotation();
+ 825   1          UserSetVolume();
+ 826   1          UserSetAudioMute();
+ 827   1          UserSetDCR();
+ 828   1          UserSetAspectRatio();
+ 829   1          
+ 830   1          //UserSetOD();
+ 831   1          //UserSetBF();
+ 832   1      #if ENABLE_SR == ON
+ 833   1          //UserSetSR();
+ 834   1      #endif
+ 835   1      #if ENABLE_3D_CNV == ON
+                  //UserSet2DTo3DMode();
+                  UserSet2DTo3DAdaptive();
+                  UserSet2DTo3DDepth();
+                  UserSet2DTo3DView();
+                  UserSet3DLRSwap();
+                  UserSet3DTo2D();
+              
+              #endif    
+ 844   1            
+ 845   1          NvramClearTiming(); //To avoid previous wrong Nvram data
+ 846   1      
+ 847   1          /* We disable writing timing info to nvram in recall to avoid wrong timing info writing to nvram again
+ 848   1          //Samuel-2010-02-09: When factory reset in DVI/HDMI, the timing information should not be written into
+             - nvram.
+ 849   1          if (GetInputSyncMode() != DIG_SYNC) { 
+ 850   1              NvramWriteTimingData(&InputTiming);
+ 851   1          }
+ 852   1          */
+ 853   1      
+ 854   1          UserPerformAutoTune();  //fefanjacky for tatung user mode not autotune 
+ 855   1          
+ 856   1          //CHIU RECALL
+ 857   1          SYSAPI_SetInverterVal(CalibData.ucBacklite);
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 15  
+
+ 858   1              UserSetBrightness();  
+ 859   1      printf("UserRecallConfiguration_E\n");  //150527 george
+ 860   1      }
+ 861          
+ 862          //******************************************************************************
+ 863          // Prototype: 
+ 864          //  void UserRecallColor(void)
+ 865          // Parameters:
+ 866          //  None
+ 867          // Return:
+ 868          //  None
+ 869          // Purpose:
+ 870          //  None
+ 871          // Notes:
+ 872          //  None
+ 873          //******************************************************************************
+ 874          void UserRecallColor(void)
+ 875          {
+ 876   1          UserData.ucUserROffset = UserDataDefault.ucUserROffset;
+ 877   1          UserData.ucUserGOffset = UserDataDefault.ucUserGOffset;
+ 878   1          UserData.ucUserBOffset = UserDataDefault.ucUserBOffset;
+ 879   1          UserSetROffset();
+ 880   1          UserSetGOffset();
+ 881   1          UserSetBOffset();
+ 882   1          UserData.ucBrightness = UserDataDefault.ucBrightness;
+ 883   1          UserData.ucContrast = UserDataDefault.ucContrast;
+ 884   1          //UserSetContrast();
+ 885   1          UserData.ucUserRGain = UserDataDefault.ucUserRGain;
+ 886   1          UserData.ucUserGGain = UserDataDefault.ucUserGGain;
+ 887   1          UserData.ucUserBGain = UserDataDefault.ucUserBGain;
+ 888   1          UserData.ucColorTemp = UserDataDefault.ucColorTemp;
+ 889   1          UserSetColorTemp();
+ 890   1          UserSetBrightness();
+ 891   1      }
+ 892          
+ 893          //******************************************************************************
+ 894          // Prototype: 
+ 895          //  void UserRecallHVPosition(void)
+ 896          // Parameters:
+ 897          //  None
+ 898          // Return:
+ 899          //  None
+ 900          // Purpose:
+ 901          //  Rcall H/V position 
+ 902          // Notes:
+ 903          //  None
+ 904          //******************************************************************************
+ 905          void UserRecallHVPosition(void)
+ 906          {
+ 907   1          InputTiming.usHTotal = InputTiming.usHTotal50;
+ 908   1          InputTiming.usHStart = InputTiming.usHStart50;
+ 909   1          InputTiming.usVStart = InputTiming.usVStart50;
+ 910   1          InputTiming.ucPhase = 32;
+ 911   1          SetADCPLL2(InputTiming.usHTotal);
+ 912   1          SetHP(InputTiming.usHStart);
+ 913   1          SetVP(InputTiming.usVStart);
+ 914   1          SetADCPhase(InputTiming.ucPhase);
+ 915   1      #if ENABLE_ESD_PROTECT == ON
+                  ReadESDCheckSum();
+              #endif
+ 918   1      }
+ 919          
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 16  
+
+ 920          //******************************************************************************
+ 921          // Prototype: 
+ 922          //  void UserPerformAutoTune(void)
+ 923          // Parameters:
+ 924          //  None
+ 925          // Return:
+ 926          //  None
+ 927          // Purpose:
+ 928          //  None
+ 929          // Notes:
+ 930          //  None
+ 931          //******************************************************************************
+ 932          void UserPerformAutoTune(void)
+ 933          {
+ 934   1      #if AutoTune_Debug == ENABLE
+              printf("UserPerformAutoTune_S\n");      //150526 george
+              #endif
+ 937   1      
+ 938   1          if (IsAutoTuneValid()) 
+ 939   1              {
+ 940   2      
+ 941   2              InputTiming.ucAutoTune = AutoTune();
+ 942   2      
+ 943   2          #if ENABLE_ESD_PROTECT == ON
+                      ReadESDCheckSum();
+                  #endif
+ 946   2              if (InputTiming.ucAutoTune) 
+ 947   2                      {
+ 948   3                  InputTiming.usHTotal = GetAngInputHTotal();
+ 949   3                  InputTiming.usHStart = GetInputHStart();
+ 950   3                  InputTiming.usVStart = GetInputVStart();
+ 951   3                  InputTiming.ucPhase = GetAngInputPhase();
+ 952   3                  InputTiming.usHTotal50 = InputTiming.usHTotal;
+ 953   3                  InputTiming.usHStart50 = InputTiming.usHStart;
+ 954   3                  InputTiming.usVStart50 = InputTiming.usVStart;
+ 955   3                  SetMinMax();
+ 956   3              }
+ 957   2          }
+ 958   1      
+ 959   1      #if AutoTune_Debug == ENABLE
+              printf("UserPerformAutoTune_E\n");      //150526 george
+              #endif
+ 962   1      }
+ 963          
+ 964          //******************************************************************************
+ 965          // Prototype: 
+ 966          //  void UserSetBF(void)
+ 967          // Parameters:
+ 968          //  None
+ 969          // Return:
+ 970          //  None
+ 971          // Purpose:
+ 972          //  None
+ 973          // Notes:
+ 974          //  None
+ 975          //******************************************************************************
+ 976          void UserSetBF(void)
+ 977          {
+ 978   1          CheckMaxRange(UserData.ucBFMode,MAXIMUM_BF_MODE);
+ 979   1          SetThemeMode(UserData.ucBFMode);
+ 980   1      }
+ 981          
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 17  
+
+ 982          //******************************************************************************
+ 983          // Prototype:
+ 984          //  void UserSetSR(void)
+ 985          // Parameters:
+ 986          //  None
+ 987          // Return:
+ 988          //  None
+ 989          // Purpose:
+ 990          //  Set SR mode
+ 991          // Notes:
+ 992          //  None
+ 993          //******************************************************************************
+ 994          #if ENABLE_SR == ON
+ 995          void UserSetSR(void)
+ 996          {
+ 997   1          SetSRMode(UserData.ucSRMode);
+ 998   1      }
+ 999          #endif
+1000          
+1001          //******************************************************************************
+1002          // Prototype: 
+1003          //  void UserSet2DTo3DMode(void)
+1004          // Parameters:
+1005          //  None
+1006          // Return:
+1007          //  None
+1008          // Purpose:
+1009          //  Set 2D to 3D mode
+1010          // Notes:
+1011          //  None
+1012          //******************************************************************************
+1013          #if ENABLE_3D_CNV == ON
+              void UserSet2DTo3DMode(void)
+              {
+                  CheckMaxRange(UserData.uc2DTo3DMode, MAXIMUM_2DTO3D_MODE);
+                  Set2DTo3DMode(UserData.uc2DTo3DMode);
+              }
+              #endif
+1020          
+1021          //******************************************************************************
+1022          // Prototype: 
+1023          //  void UserSet2DTo3DAdaptive(void)
+1024          // Parameters:
+1025          //  None
+1026          // Return:
+1027          //  None
+1028          // Purpose:
+1029          //  Enable 2D to 3D adpative mode
+1030          // Notes:
+1031          //  None
+1032          //******************************************************************************
+1033          #if ENABLE_3D_CNV == ON
+              void UserSet2DTo3DAdaptive(void)
+              {
+                  if (Is2DTo3DAdaptive()) {
+                      Set2DTo3DAdaptive(TRUE);
+                  }
+                  else {
+                      Set2DTo3DAdaptive(FALSE);
+                  }
+              }
+              #endif
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 18  
+
+1044          
+1045          //******************************************************************************
+1046          // Prototype: 
+1047          //  void UserSet2DTo3DDepth(void)
+1048          // Parameters:
+1049          //  None
+1050          // Return:
+1051          //  None
+1052          // Purpose:
+1053          //  Set 2D to 3D mode
+1054          // Notes:
+1055          //  None
+1056          //******************************************************************************
+1057          #if ENABLE_3D_CNV == ON
+              void UserSet2DTo3DDepth(void)
+              {
+                  CheckMaxRange(UserData.uc2Dto3DDepth, MAXIMUM_2DTO3D_DEPTH);
+                  Set2DTo3DDepth(UserData.uc2Dto3DDepth);
+              }
+              #endif
+1064          
+1065          //******************************************************************************
+1066          // Prototype: 
+1067          //  void UserSet2DTo3DView(void)
+1068          // Parameters:
+1069          //  None
+1070          // Return:
+1071          //  None
+1072          // Purpose:
+1073          //  Set 2D to 3D mode
+1074          // Notes:
+1075          //  None
+1076          //******************************************************************************
+1077          #if ENABLE_3D_CNV == ON
+              void UserSet2DTo3DView(void)
+              {
+                  CheckMaxRange(UserData.uc2Dto3DView, MAXIMUM_2DTO3D_VIEW);
+                  Set2DTo3DView(UserData.uc2Dto3DView);
+              }
+              #endif
+1084          
+1085          //******************************************************************************
+1086          // Prototype: 
+1087          //  void UserSet3DLRSwap(void)
+1088          // Parameters:
+1089          //  None
+1090          // Return:
+1091          //  None
+1092          // Purpose:
+1093          //  Set 2D to 3D mode
+1094          // Notes:
+1095          //  None
+1096          //******************************************************************************
+1097          #if ENABLE_3D_CNV == ON
+              void UserSet3DLRSwap(void)
+              {
+                  if (Is3DLRSwap()) {
+                      Set3DLRSwap(TRUE);
+                  }
+                  else {
+                      Set3DLRSwap(FALSE);
+                  }
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 19  
+
+              }
+              #endif
+1108          
+1109          //******************************************************************************
+1110          // Prototype: 
+1111          //  void UserSet3DTo2D(void)
+1112          // Parameters:
+1113          //  None
+1114          // Return:
+1115          //  None
+1116          // Purpose:
+1117          //  Set 3D to 2D mode
+1118          // Notes:
+1119          //  None
+1120          //******************************************************************************
+1121          #if ENABLE_FUNC_OSD == ON && ENABLE_3D_CNV == ON
+              void UserSet3DTo2D(void)
+              {
+                  if (Is3DTo2DEnabled()) {
+                      Set3DTo2DMode(TRUE);
+                  }
+                  else {
+                      Set3DTo2DMode(FALSE);
+                  }
+              }
+              #endif
+1132          
+1133          //******************************************************************************
+1134          // Prototype: 
+1135          //  void UserSetInputSource(void)
+1136          // Parameters:
+1137          //  None
+1138          // Return:
+1139          //  None
+1140          // Purpose:
+1141          //  None
+1142          // Notes:
+1143          //  None
+1144          //******************************************************************************
+1145          void UserSetInputSource(void)
+1146          {
+1147   1      
+1148   1      #if (INPUT_INTERFACE&INPUT_MHL0) || (INPUT_INTERFACE&INPUT_MHL1)
+1149   1          if (MHL_IsMHLPathEnable() ) 
+1150   1           {
+1151   2              Force2Background(0, 0, 0); //Mute screen and display black pattern
+1152   2              MHLClearHPD();
+1153   2           }
+1154   1      #endif
+1155   1          AudioMuteOn();                                                              
+1156   1          SetInputInterface(GetPortTabIntertface(UserData.ucInputSource));
+1157   1      }
+1158          
+1159          //******************************************************************************
+1160          // Prototype: 
+1161          //  UCHAR UserGetInputSource(void)
+1162          // Parameters:
+1163          //  None
+1164          // Return:
+1165          //  None
+1166          // Purpose:
+1167          //  None
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 20  
+
+1168          // Notes:
+1169          //  None
+1170          //******************************************************************************
+1171          UCHAR UserGetInputSource(void)
+1172          {
+1173   1          UCHAR i;
+1174   1          UCHAR src = GetCurrInputInterface();
+1175   1          UCHAR num = sizeof(ucInputPortTable)/sizeof(tINPUTPORT);
+1176   1      
+1177   1          for (i = 0; i < num; i++) {
+1178   2              if ((src & PORT_MASK) == (ucInputPortTable[i].ucInputPort & PORT_MASK)) {
+1179   3                  break;
+1180   3              }
+1181   2          }
+1182   1          
+1183   1          if (i < num){
+1184   2              return ucInputPortTable[i].ucPortName;
+1185   2          }
+1186   1          
+1187   1          return INPUT_SC_VGA;
+1188   1      }
+1189          
+1190          //******************************************************************************
+1191          // Prototype: 
+1192          //  void UserSetAudioChannel(void)
+1193          // Parameters:
+1194          //  None
+1195          // Return:
+1196          //  None
+1197          // Purpose:
+1198          //  Set audio input/output channel
+1199          // Notes:
+1200          //  None
+1201          //******************************************************************************
+1202          void UserSetAudioChannel(void)
+1203          {
+1204   1      #if ENABLE_SCALER_AUDIO == ON
+1205   1      #if AUDIO_OUT == IIS_OUT
+                  ScalerAudioSelect(AUDIO_HDMI_IIS);
+              #else
+1208   1          #if AUDIO_LINE_IN == LINE_IN1
+1209   1          switch(UserGetInputSource()) {
+1210   2              case INPUT_SC_VGA:       // 20150519 George [VGA-Port, Ext.-Line-in]
+1211   2                  ScalerAudioSelect(AUDIO_LINEIN1_LINOUT);
+1212   2                  break;
+1213   2              case INPUT_SC_DVI:        // 20150519 George [DVI-Port, check_no-sound]
+1214   2                  //20150519 George, ScalerAudioSelect(AUDIO_HDMI_LINOUT);            printf("_DVI_Line-IN_");
+1215   2                              ScalerAudioSelect(AUDIO_LINEIN1_LINOUT);        
+1216   2                  break;
+1217   2              case INPUT_SC_DVI1:
+1218   2                  ScalerAudioSelect(AUDIO_HDMI_LINOUT);               
+1219   2                  break;
+1220   2              case INPUT_SC_HDMI:
+1221   2                  ScalerAudioSelect(AUDIO_HDMI_LINOUT);               
+1222   2                  break;
+1223   2              case INPUT_SC_HDMI1: // 20150519 George [HDMI-Port, sound on HDMI cable]
+1224   2                  ScalerAudioSelect(AUDIO_HDMI_LINOUT);               
+1225   2                  break;
+1226   2              case INPUT_SC_HDMI2:
+1227   2                  ScalerAudioSelect(AUDIO_HDMI_LINOUT);               
+1228   2                  break;
+1229   2              case INPUT_SC_YPbPr:
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 21  
+
+1230   2                  ScalerAudioSelect(AUDIO_LINEIN1_LINOUT);
+1231   2                  break;
+1232   2              case INPUT_SC_DP:
+1233   2                  ScalerAudioSelect(AUDIO_HDMI_LINOUT);               
+1234   2                  break;
+1235   2              default:
+1236   2                  break;
+1237   2          }
+1238   1          #else
+                  switch(UserGetInputSource()) {
+                      case INPUT_SC_VGA:
+                          ScalerAudioSelect(AUDIO_LINEIN2_LINOUT);
+                          break;
+                      case INPUT_SC_DVI:
+                          ScalerAudioSelect(AUDIO_HDMI_LINOUT);
+                          break;
+                      case INPUT_SC_DVI1:
+                          ScalerAudioSelect(AUDIO_HDMI_LINOUT);
+                          break;
+                      case INPUT_SC_HDMI:
+                          ScalerAudioSelect(AUDIO_HDMI_LINOUT);
+                          break;
+                      case INPUT_SC_HDMI1:
+                          ScalerAudioSelect(AUDIO_HDMI_LINOUT);
+                          break;
+                      case INPUT_SC_HDMI2:
+                          ScalerAudioSelect(AUDIO_HDMI_LINOUT);
+                          break;
+                      case INPUT_SC_YPbPr:
+                          ScalerAudioSelect(AUDIO_LINEIN2_LINOUT);
+                          break;
+                      case INPUT_SC_DP:
+                          ScalerAudioSelect(AUDIO_HDMI_LINOUT);
+                          break;
+                      default:
+                          break;
+                  }
+                  #endif
+1268   1      #endif
+1269   1      #endif
+1270   1      }
+1271          
+1272          //******************************************************************************
+1273          // Prototype:
+1274          //  UCHAR UserGetNormalPhase(void)
+1275          // Parameters:
+1276          //  None
+1277          // Return:
+1278          //  None
+1279          // Purpose:
+1280          //  None
+1281          // Notes:
+1282          //  None
+1283          //******************************************************************************
+1284          UCHAR UserGetNormalPhase(void)
+1285          {
+1286   1          //UCHAR phase;
+1287   1          //phase = (USHRT) InputTiming.ucPhase * 100 / MAXIMUM_PHASE;
+1288   1          //return phase;
+1289   1          return ucADCPhase100;
+1290   1      }
+1291          
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 22  
+
+1292          //******************************************************************************
+1293          // Prototype: 
+1294          //  UCHAR UserGetNormalClock(void)
+1295          // Parameters:
+1296          //  None
+1297          // Return:
+1298          //  None
+1299          // Purpose:
+1300          //  None
+1301          // Notes:
+1302          //  None
+1303          //******************************************************************************
+1304          UCHAR UserGetNormalClock(void)
+1305          {
+1306   1          UCHAR clock;
+1307   1          clock = ((USHRT) InputTiming.usHTotal - InputTiming.usHTotalMin) * 100 / CLOCK_SCOPE;
+1308   1          return clock;
+1309   1      }
+1310          
+1311          //******************************************************************************
+1312          // Prototype: 
+1313          //  UCHAR UserGetNormalHPosn(void)
+1314          // Parameters:
+1315          //  None
+1316          // Return:
+1317          //  None
+1318          // Purpose:
+1319          //  None
+1320          // Notes:
+1321          //  None
+1322          //******************************************************************************
+1323          UCHAR UserGetNormalHPosn(void)
+1324          {
+1325   1          UCHAR pos;
+1326   1          pos = ((USHRT) InputTiming.usHStart - InputTiming.usHStartMin) * 100 / HPOSN_SCOPE;
+1327   1          pos = 100 - pos;
+1328   1          return pos;
+1329   1      }
+1330          
+1331          //******************************************************************************
+1332          // Prototype: 
+1333          //  UCHAR UserGetNormalVPosn(void)
+1334          // Parameters:
+1335          //  None
+1336          // Return:
+1337          //  None
+1338          // Purpose:
+1339          //  None
+1340          // Notes:
+1341          //  None
+1342          //******************************************************************************
+1343          UCHAR UserGetNormalVPosn(void)
+1344          {
+1345   1          //UCHAR pos;
+1346   1          //pos = ((USHRT) InputTiming.usVStart - InputTiming.usVStartMin) * 100 / VPOSN_SCOPE;
+1347   1          //return pos;
+1348   1          return ucVstart100;
+1349   1      }
+1350          
+1351          //******************************************************************************
+1352          // Prototype: 
+1353          //  UCHAR UserGetNormal2DTo3DDpth(void)
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 23  
+
+1354          // Parameters:
+1355          //  None
+1356          // Return:
+1357          //  None
+1358          // Purpose:
+1359          //  None
+1360          // Notes:
+1361          //  None
+1362          //******************************************************************************
+1363          #if MD_ENABLE_FUNC_OSD == ON
+              UCHAR UserGetNormal2DTo3DDpth(void)
+              {
+                  UCHAR tmp;
+                  tmp = (USHRT) UserData.uc2Dto3DDepth * 100 / MAXIMUM_2DTO3D_DEPTH;
+                  return tmp;
+              }
+              #endif
+1371          
+1372          //******************************************************************************
+1373          // Prototype: 
+1374          //  UCHAR UserGetNormal2DTo3DView(void)
+1375          // Parameters:
+1376          //  None
+1377          // Return:
+1378          //  None
+1379          // Purpose:
+1380          //  None
+1381          // Notes:
+1382          //  None
+1383          //******************************************************************************
+1384          #if MD_ENABLE_FUNC_OSD == ON
+              UCHAR UserGetNormal2DTo3DView(void)
+              {
+                  UCHAR tmp;
+                  tmp = (USHRT) UserData.uc2Dto3DView * 100 / MAXIMUM_2DTO3D_VIEW;
+                  return tmp;
+              }
+              #endif
+1392          
+1393          
+1394          //******************************************************************************
+1395          // Prototype: 
+1396          //  UCHAR GetInputPortName(UCHAR PortIdex)
+1397          // Parameters:
+1398          //  None
+1399          // Return:
+1400          //  None
+1401          // Purpose:
+1402          //  None
+1403          // Notes:
+1404          //  None
+1405          //******************************************************************************
+1406          UCHAR GetInputPortName(UCHAR PortIdex)
+1407          {
+1408   1          UCHAR i,j;
+1409   1          if (PortIdex >= CheckTotalPortNum()) 
+1410   1              {
+1411   2              return NUM_INPUT_SC;
+1412   2          }
+1413   1          for (j = 0;j < NUM_INPUT_SC; j++) 
+1414   1              {
+1415   2              for (i = 0; i < (sizeof(ucInputPortTable) / sizeof(tINPUTPORT)); i++) 
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 24  
+
+1416   2                      {
+1417   3                  if (ucInputPortTable[i].ucPortName == INPUT_SC_NULL)
+1418   3                      continue;
+1419   3                  if (ucInputPortTable[i].ucPortName == j) 
+1420   3                              {
+1421   4                      if (PortIdex-- == 0)
+1422   4                          return j;
+1423   4                  }
+1424   3              }
+1425   2          }
+1426   1          
+1427   1          return 0;
+1428   1      } 
+1429          
+1430          //******************************************************************************
+1431          // Prototype: 
+1432          //  UCHAR GetInputPortIndex(UCHAR PortName)
+1433          // Parameters:
+1434          //  None
+1435          // Return:
+1436          //  None
+1437          // Purpose:
+1438          //  None
+1439          // Notes:
+1440          //  None
+1441          //******************************************************************************
+1442          UCHAR GetInputPortIndex(UCHAR PortName)
+1443          {
+1444   1          UCHAR i,j,count=0;
+1445   1          for (j = 0; j < NUM_INPUT_SC; j++) 
+1446   1              {
+1447   2              for (i = 0; i < (sizeof(ucInputPortTable)/sizeof(tINPUTPORT)); i++) 
+1448   2                      {
+1449   3                  if (ucInputPortTable[i].ucPortName == INPUT_SC_NULL) 
+1450   3                              {
+1451   4                      continue;
+1452   4                  }
+1453   3                  if (ucInputPortTable[i].ucPortName == j) 
+1454   3                              {
+1455   4                      if (j == PortName) 
+1456   4                                      {
+1457   5                          return count;
+1458   5                      }
+1459   4                      count++;
+1460   4                  }
+1461   3              }
+1462   2          }
+1463   1       
+1464   1          return 0;
+1465   1      }
+1466          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1645    ----
+   CONSTANT SIZE    =     60    ----
+   XDATA SIZE       =      6       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V8.02   USERSETTING                                                           08/07/2015 16:22:29 PAGE 25  
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
